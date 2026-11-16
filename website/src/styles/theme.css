@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@custom-variant story-scroll {
+  @media (min-width: 768px) and (min-height: 690px) and (prefers-reduced-motion: no-preference) {
+    @slot;
+  }
+}
+
+@layer base {
+  @font-face {
+    font-family: "Swiss 721 BT";
+    src: url("../assets/fonts/Swiss721BT.woff") format("woff");
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Swiss 721 BT";
+    src: url("../assets/fonts/SWISS721BLACKBT.woff") format("woff");
+    font-weight: 900;
+    font-display: swap;
+  }
+}
+
+@theme static {
+  --color-stage: #100b18;
+  --color-deep: #0d0914;
+  --color-panel: #1c1428;
+  --color-line: #ded6e3;
+  --color-foreground: #faf6fd;
+  --color-secondary: #d4c9de;
+  --color-muted: #60546c;
+  --color-brand: #c6a3ff;
+  --color-brand-light: #eddbff;
+  --color-earned: #e4c384;
+  --color-paper: #f5f1f6;
+  --color-ink: #1a1025;
+  --color-violet-ink: #5d328d;
+
+  --color-orbit-core: #7247ad;
+  --color-orbit-mid: #452a68;
+  --color-orbit-edge: #271939;
+  --color-orbit-glow: #be93ff7a;
+  --color-orbit-grid: #d4b2ff3d;
+  --color-stage-fade: #100b1899;
+  --color-earned-glow: #e4c38440;
+
+  --font-body: "Swiss 721 BT", sans-serif;
+  --font-display: "Swiss 721 BT", sans-serif;
+
+  --text-hero: clamp(2.45rem, 10.5vw, 5rem);
+  --text-hero--line-height: 0.94;
+  --text-heading: clamp(2.85rem, 5.9vw, 6.25rem);
+  --text-heading--line-height: 0.91;
+
+  --container-shell: 89rem;
+  --spacing-gutter: clamp(1.25rem, 4.6vw, 5.25rem);
+  --spacing-section: clamp(4.65rem, 8vw, 8.5rem);
+  --radius-control: 0.5rem;
+  --radius-card: 0.875rem;
+
+  --animate-copy-in: copy-in 450ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
+
+  @keyframes copy-in {
+    from {
+      opacity: 0.3;
+      transform: translateY(9px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

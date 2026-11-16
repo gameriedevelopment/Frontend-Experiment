@@ -1,0 +1,47 @@
+export const chapters = [
+  {
+    id: "identity",
+    label: "Player identity",
+    eyebrow: "The social gaming platform",
+    title: ["Every game", "leaves a mark."],
+    copy: "Bring your games, teammates, and competitive record together in a player identity that grows with you.",
+    icon: "identity",
+    record: ["Lagos, NG", "Team captain"],
+    pose: { x: 0, y: 3, rotateX: 7, rotateY: -16, roll: -9, scale: 1 },
+  },
+  {
+    id: "community",
+    label: "Find your people",
+    eyebrow: "Players and communities",
+    title: ["Find your", "kind of player."],
+    copy: "Meet people through the games you actually play. Find a regular squad or a community that fits how you like to compete.",
+    icon: "players",
+    record: ["Primary role", "Support"],
+    photo: "/media/player-community.jpg",
+    pose: { x: -13, y: 0, rotateX: -3, rotateY: 16, roll: -7, scale: 0.85 },
+  },
+  {
+    id: "teams",
+    label: "Build a team",
+    eyebrow: "Teams and rosters",
+    title: ["Give your", "roster a home."],
+    copy: "Give your team an identity, organize roles and updates, and build a competitive record together.",
+    icon: "team",
+    record: ["Current team", "Night Shift"],
+    photo: "/media/audience-team.jpg",
+    pose: { x: 15, y: -3, rotateX: 2, rotateY: -20, roll: 8, scale: 0.84 },
+  },
+  {
+    id: "competition",
+    label: "Make it count",
+    eyebrow: "Challenges and tournaments",
+    title: ["Make it", "count."],
+    copy: "Play in challenges and tournaments. Keep your results, rankings, and earned achievements connected to the teams and games behind them.",
+    icon: "competition",
+    record: ["Match result", "Won 2–1"],
+    photo: "/media/competition-stage.jpg",
+    pose: { x: 0, y: -3, rotateX: -7, rotateY: 9, roll: -3, scale: 1.04 },
+  },
+] as const;
+
+export const lastChapter = chapters.length - 1;
