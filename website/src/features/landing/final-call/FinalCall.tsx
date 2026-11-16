@@ -6,7 +6,7 @@ import { TokenField } from "./TokenField";
 
 export function FinalCall() {
   return (
-    <section className="px-gutter pb-section">
+    <section className="px-gutter pb-4 sm:pb-6">
       <div className="relative mx-auto max-w-shell overflow-hidden rounded-panel bg-ink-950 text-mist-50">
         <TokenField className="absolute inset-0" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(48%_55%_at_50%_50%,var(--color-ink-950)_25%,transparent)]" />
@@ -20,7 +20,7 @@ export function FinalCall() {
             <ButtonLink href={links.register} size="lg" icon="arrowUpRight" orb>
               Create your player ID
             </ButtonLink>
-            <ButtonLink href={links.discord} external tone="outline" size="lg" icon="chat">
+            <ButtonLink href={links.discord} external tone="outline" size="lg" icon="discord">
               Join the Discord
             </ButtonLink>
           </div>

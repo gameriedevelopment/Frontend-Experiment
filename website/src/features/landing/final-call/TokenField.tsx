@@ -2,7 +2,8 @@ import { useReducedMotion } from "motion/react";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/cn";
 
-const SPACING = 30;
+const GAP_X = 30;
+const GAP_Y = 34;
 const REACH = 190;
 const BASE = [55, 44, 72];
 const LIT = [198, 163, 255];
@@ -11,8 +12,8 @@ const SIGNAL = [212, 255, 90];
 function drawToken(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
   const radius = size * 0.18;
   context.beginPath();
-  context.arc(x, y - size * 0.34, radius, 0, Math.PI * 2);
-  context.roundRect(x - radius, y - size * 0.14, radius * 2, size * 0.5, radius);
+  context.arc(x, y - size * 0.4, radius, 0, Math.PI * 2);
+  context.roundRect(x - radius, y - size * 0.17, radius * 2, radius * 4, radius);
   context.fill();
 }
 
@@ -42,7 +43,7 @@ export function TokenField({ className }: { className?: string }) {
       canvas.width = width * ratio;
       canvas.height = height * ratio;
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      const count = Math.ceil(width / SPACING + 1) * Math.ceil(height / SPACING + 1);
+      const count = Math.ceil(width / GAP_X + 2) * Math.ceil(height / GAP_Y + 2);
       seeds = Array.from({ length: count }, () => Math.random());
       if (!visible) draw(0);
     };
@@ -50,18 +51,20 @@ export function TokenField({ className }: { className?: string }) {
     const draw = (time: number) => {
       context.clearRect(0, 0, width, height);
       const t = time / 1000;
-      const columns = Math.ceil(width / SPACING + 1);
+      const columns = Math.ceil(width / GAP_X + 2);
       let index = 0;
-      for (let y = SPACING / 2; y < height + SPACING; y += SPACING) {
+      for (let row = 0, y = GAP_Y / 2; y < height + GAP_Y; row++, y += GAP_Y) {
+        const offset = row % 2 === 0 ? 0 : GAP_X / 2;
         for (let column = 0; column < columns; column++, index++) {
-          const x = column * SPACING + SPACING / 2;
+          const x = column * GAP_X + offset;
           const near = Math.max(0, 1 - Math.hypot(x - pointer.x, y - pointer.y) / REACH);
           const wave = reducedMotion ? 0 : Math.max(0, Math.sin(x * 0.012 + y * 0.008 - t * 1.4)) ** 6 * 0.55;
           const lit = Math.min(1, near ** 1.6 + wave);
           const seed = seeds[index] ?? 0;
           const online = !reducedMotion && seed > 0.985 && Math.sin(t * 2 + seed * 40) > 0.2;
           context.fillStyle = online ? mix(BASE, SIGNAL, 0.9) : mix(BASE, LIT, lit);
-          drawToken(context, x, y, SPACING * (0.7 + lit * 0.3));
+          const jitter = (seed - 0.5) * 8;
+          drawToken(context, x, y + jitter - lit * 5, GAP_Y * (0.5 + seed * 0.16 + lit * 0.26));
         }
       }
     };

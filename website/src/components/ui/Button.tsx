@@ -75,7 +75,7 @@ function Content({ icon, orb, tone, size, children }: SharedProps) {
           turns && "group-hover/button:rotate-45",
         )}
       >
-        <Icon name={icon} className="size-4" strokeWidth={2} />
+        <Icon name={icon} className="size-4" weight="bold" />
       </span>
     </>
   );

@@ -9,6 +9,11 @@ interface ImportMetaEnv {
   readonly VITE_TIKTOK_URL?: string;
   readonly VITE_YOUTUBE_URL?: string;
   readonly VITE_LINKEDIN_URL?: string;
+  readonly VITE_SITE_URL?: string;
+  readonly VITE_SITE_INDEXABLE?: string;
+  readonly VITE_ENZUZO_ID?: string;
+  readonly VITE_GTM_ID?: string;
+  readonly VITE_GA_MEASUREMENT_ID?: string;
 }
 
 interface ImportMeta {

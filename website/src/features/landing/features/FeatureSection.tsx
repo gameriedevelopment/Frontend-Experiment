@@ -63,7 +63,7 @@ function FeatureCard({
 
 export function FeatureSection() {
   return (
-    <section id="features" className="scroll-mt-24 px-gutter pb-section pt-section">
+    <section id="features" className="scroll-mt-24 bg-paper-deep px-gutter py-section">
       <div className="mx-auto max-w-shell">
         <Reveal>
           <SectionHeader

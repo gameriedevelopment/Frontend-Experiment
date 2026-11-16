@@ -24,7 +24,7 @@ export function Eyebrow({
         aria-hidden="true"
         className={cn(
           "size-1.5 rounded-full",
-          tone === "dark" ? "bg-signal" : "bg-lavender-600",
+          tone === "dark" ? "bg-signal" : "bg-lavender-700",
         )}
       />
       {children}
@@ -49,7 +49,7 @@ export function DisplayTitle({
       <span
         className={cn(
           "block",
-          tone === "dark" ? "text-lavender-400" : "text-lavender-600",
+          tone === "dark" ? "text-lavender-400" : "text-lavender-700",
         )}
       >
         {lines[1]}

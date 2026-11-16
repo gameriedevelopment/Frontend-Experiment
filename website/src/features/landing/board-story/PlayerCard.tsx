@@ -40,7 +40,7 @@ function Unlockable({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <Icon name="lock" className="size-3" strokeWidth={2} />
+          <Icon name="lock" className="size-3" weight="bold" />
           {hint}
         </motion.span>
       )}
@@ -178,7 +178,7 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
             </Row>
             <Row label="Team" unlocked={has("team")} hint="Ch 03">
               <span className="grid size-6 place-items-center rounded-md bg-lavender-400 text-ink-950">
-                <Icon name="team" className="size-4" strokeWidth={2} />
+                <Icon name="team" className="size-4" weight="bold" />
               </span>
               <span className="text-sm font-semibold">Lagos Lions</span>
               <span className="font-mono text-xs text-mist-400">{has("roster") ? "5/5" : "4/5"}</span>
@@ -196,7 +196,7 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
                     transition={{ type: "spring", stiffness: 420, damping: 16 }}
                   >
                     <Tag tone="signal">
-                      <Icon name="verified" className="size-3.5" strokeWidth={2} />
+                      <Icon name="verified" className="size-3.5" weight="bold" />
                       Verified
                     </Tag>
                   </motion.span>

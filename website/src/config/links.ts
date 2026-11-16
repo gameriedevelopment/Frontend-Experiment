@@ -1,3 +1,5 @@
+import type { IconName } from "@/components/ui/Icon";
+
 function publicUrl(value: string | undefined) {
   if (!value?.trim()) return undefined;
   try {
@@ -27,10 +29,13 @@ export const links = {
   minors: "https://gameriedevelopment.github.io/Minors-policy/",
 };
 
-export const socialLinks = [
-  { label: "X", href: publicUrl(env.VITE_X_URL) },
-  { label: "Instagram", href: publicUrl(env.VITE_INSTAGRAM_URL) },
-  { label: "TikTok", href: publicUrl(env.VITE_TIKTOK_URL) },
-  { label: "YouTube", href: publicUrl(env.VITE_YOUTUBE_URL) },
-  { label: "LinkedIn", href: publicUrl(env.VITE_LINKEDIN_URL) },
-].filter((link): link is { label: string; href: string } => Boolean(link.href));
+export const socialLinks = (
+  [
+    { label: "Discord", icon: "discord", href: links.discord },
+    { label: "X", icon: "x", href: publicUrl(env.VITE_X_URL) },
+    { label: "Instagram", icon: "instagram", href: publicUrl(env.VITE_INSTAGRAM_URL) },
+    { label: "TikTok", icon: "tiktok", href: publicUrl(env.VITE_TIKTOK_URL) },
+    { label: "YouTube", icon: "youtube", href: publicUrl(env.VITE_YOUTUBE_URL) },
+    { label: "LinkedIn", icon: "linkedin", href: publicUrl(env.VITE_LINKEDIN_URL) },
+  ] satisfies ReadonlyArray<{ label: string; icon: IconName; href: string | undefined }>
+).filter((link): link is typeof link & { href: string } => Boolean(link.href));

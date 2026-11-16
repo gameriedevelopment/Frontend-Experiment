@@ -100,6 +100,8 @@ export class BoardScene {
 
   private readonly pointer = new Vector2();
   private readonly pointerTarget = new Vector2();
+  private readonly probe = new Vector3();
+  private heroSafeTop = 0;
   private readonly lightBase = new Vector3(-0.55, 0.85, 0.55);
   private width = 1;
   private height = 1;
@@ -162,6 +164,10 @@ export class BoardScene {
 
   setProgress(value: number) {
     this.progressTarget = clamp(value);
+  }
+
+  setHeroSafeTop(fraction: number) {
+    this.heroSafeTop = clamp(fraction);
   }
 
   setPointer(x: number, y: number) {
@@ -311,7 +317,17 @@ export class BoardScene {
     this.camera.lookAt(frame.cameraTarget);
 
     const shiftX = tall ? 0 : lerp(-0.05, 0, hero);
-    const shiftY = tall ? lerp(0.17, 0.05, hero) : lerp(0, -0.17, hero);
+    const shiftY = lerp(tall ? 0.17 : 0, this.heroShift(frame, tall), hero);
     this.camera.setViewOffset(width, height, shiftX * width, shiftY * height, width, height);
+  }
+
+  // Drops the hero token so its head clears the headline, whatever the viewport's aspect ratio.
+  private heroShift(frame: BoardFrame, tall: boolean) {
+    if (!this.heroSafeTop) return tall ? 0.05 : -0.17;
+    this.camera.clearViewOffset();
+    this.camera.updateMatrixWorld();
+    this.probe.set(0, frame.you.y + TOKEN_HEIGHT, 0).project(this.camera);
+    const headTop = (1 - this.probe.y) / 2;
+    return headTop - (this.heroSafeTop + 0.035);
   }
 }

@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useTransform, type MotionValue } from "motion/react";
+import type { RefObject } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { easeOutExpo, Marquee } from "@/components/ui/motion";
@@ -52,9 +53,11 @@ export function CopyScrim({ progress }: { progress: MotionValue<number> }) {
 export function HeroOverlay({
   progress,
   onExplore,
+  titleRef,
 }: {
   progress: MotionValue<number>;
   onExplore: () => void;
+  titleRef: RefObject<HTMLHeadingElement>;
 }) {
   const opacity = useTransform(progress, [0.012, 0.065], [1, 0]);
   const y = useTransform(progress, [0, 0.08], [0, -70]);
@@ -65,7 +68,7 @@ export function HeroOverlay({
       style={{ opacity, y, pointerEvents }}
       className="absolute inset-0 z-10 flex flex-col px-gutter pb-20 pt-28 sm:pb-24 sm:pt-32"
     >
-      <h1 className="type-display text-center text-display-xl">
+      <h1 ref={titleRef} className="type-display text-center text-display-xl">
         {heroLines.map((line, index) => (
           <span key={line} className="block overflow-hidden pb-[0.05em]">
             <motion.span
@@ -233,7 +236,7 @@ export function ChapterCopy({ active }: { active: number }) {
                 {chapter.unlocks.map((unlock) => (
                   <li key={unlock}>
                     <Tag tone="signal" size="md">
-                      <Icon name="plus" className="size-3" strokeWidth={2.4} />
+                      <Icon name="plus" className="size-3" weight="bold" />
                       {unlock}
                     </Tag>
                   </li>

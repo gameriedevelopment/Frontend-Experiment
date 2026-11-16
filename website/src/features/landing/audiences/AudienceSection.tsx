@@ -26,7 +26,7 @@ function AudiencePanel({
       onFocus={onActivate}
       aria-label={audience.label}
       className={cn(
-        "group relative isolate flex h-[27rem] overflow-hidden rounded-card bg-ink-950 text-mist-50 outline-none transition-[flex-grow] duration-700 ease-out-expo focus-visible:ring-2 focus-visible:ring-lavender-600 focus-visible:ring-offset-4 focus-visible:ring-offset-paper lg:h-auto lg:basis-0",
+        "group relative isolate flex h-[27rem] overflow-hidden rounded-card bg-ink-950 text-mist-50 outline-none transition-[flex-grow] duration-700 ease-out-expo focus-visible:ring-2 focus-visible:ring-lavender-700 focus-visible:ring-offset-4 focus-visible:ring-offset-paper lg:h-auto lg:basis-0",
         active ? "lg:grow-[3.4]" : "lg:grow",
       )}
     >
@@ -51,7 +51,7 @@ function AudiencePanel({
       <div className="flex w-full flex-col justify-between p-6 sm:p-8">
         <div className="flex items-center justify-between">
           <Tag tone="ink" size="md">
-            <Icon name={audience.icon} className="size-3.5" strokeWidth={2} />
+            <Icon name={audience.icon} className="size-3.5" weight="bold" />
             {audience.label}
           </Tag>
           <span className="type-label text-mist-300">0{index + 1}</span>

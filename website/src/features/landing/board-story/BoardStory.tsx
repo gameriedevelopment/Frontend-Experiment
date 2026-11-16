@@ -19,11 +19,12 @@ const STORY_TRAVEL_SVH = 540;
 
 export function BoardStory() {
   const sectionRef = useRef<HTMLElement>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
-  const { canvasRef, failed } = useBoardScene(scrollYProgress);
+  const { canvasRef, failed } = useBoardScene(scrollYProgress, heroTitleRef);
   const { scrollTo } = useSmoothScroll();
   const [active, setActive] = useState(-1);
   const [unlocked, setUnlocked] = useState(0);
@@ -64,7 +65,11 @@ export function BoardStory() {
         )}
 
         <CopyScrim progress={scrollYProgress} />
-        <HeroOverlay progress={scrollYProgress} onExplore={() => jumpTo(storyChapters[0])} />
+        <HeroOverlay
+          progress={scrollYProgress}
+          titleRef={heroTitleRef}
+          onExplore={() => jumpTo(storyChapters[0])}
+        />
         <ChapterCopy active={active} />
         <MilestoneHud unlocked={active >= 0 ? unlocked : 0} className="lg:hidden" />
 

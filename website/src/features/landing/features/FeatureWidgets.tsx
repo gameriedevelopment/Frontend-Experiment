@@ -86,7 +86,7 @@ export function Scoreboard() {
       <div className="type-label flex items-center justify-between text-mist-400">
         <span>Challenge · Bo1</span>
         <Tag tone="signal">
-          <Icon name="verified" className="size-3.5" strokeWidth={2} />
+          <Icon name="verified" className="size-3.5" weight="bold" />
           Verified
         </Tag>
       </div>

@@ -41,7 +41,7 @@ function FaqItem({
               open ? "rotate-45 bg-ink-950 text-lavender-300" : "bg-ink-950/6 group-hover:bg-ink-950/10",
             )}
           >
-            <Icon name="plus" className="size-4" strokeWidth={2} />
+            <Icon name="plus" className="size-4" weight="bold" />
           </span>
         </button>
       </h3>

@@ -40,8 +40,8 @@ function PerkTile({ perk }: { perk: (typeof perks)[number] }) {
           />
         </div>
         <span className="type-label flex items-center gap-1.5 text-mist-500 transition-colors group-hover:text-mist-200">
-          <Icon name="lock" className="size-3 group-hover:hidden" strokeWidth={2} />
-          <Icon name="check" className="hidden size-3 group-hover:block" strokeWidth={2.4} />
+          <Icon name="lock" className="size-3 group-hover:hidden" weight="bold" />
+          <Icon name="check" className="hidden size-3 group-hover:block" weight="bold" />
           On sign-up
         </span>
       </div>
@@ -51,7 +51,7 @@ function PerkTile({ perk }: { perk: (typeof perks)[number] }) {
 
 export function PerksSection() {
   return (
-    <section className="px-gutter">
+    <section className="px-gutter pt-section">
       <div className="relative mx-auto max-w-shell overflow-hidden rounded-panel bg-ink-950 px-6 py-14 text-mist-50 sm:px-10 sm:py-20 lg:px-16">
         <div aria-hidden="true" className="halftone absolute inset-0 text-lavender-400/10 [mask-image:radial-gradient(60%_60%_at_85%_0%,black,transparent)]" />
         <div className="relative">

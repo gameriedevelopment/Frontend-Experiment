@@ -1,8 +1,11 @@
 import { useReducedMotion, type MotionValue } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type { BoardScene } from "./BoardScene";
 
-export function useBoardScene(progress: MotionValue<number>) {
+export function useBoardScene(
+  progress: MotionValue<number>,
+  heroTitleRef: RefObject<HTMLElement>,
+) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reducedMotion = Boolean(useReducedMotion());
   const [failed, setFailed] = useState(false);
@@ -25,9 +28,14 @@ export function useBoardScene(progress: MotionValue<number>) {
           return;
         }
 
-        const resize = () => scene.resize(canvas.clientWidth, canvas.clientHeight);
+        const resize = () => {
+          const title = heroTitleRef.current;
+          if (title) scene.setHeroSafeTop((title.offsetTop + title.offsetHeight) / canvas.clientHeight);
+          scene.resize(canvas.clientWidth, canvas.clientHeight);
+        };
         const resizeObserver = new ResizeObserver(resize);
         resizeObserver.observe(canvas);
+        if (heroTitleRef.current) resizeObserver.observe(heroTitleRef.current);
         resize();
 
         scene.setProgress(progress.get());
@@ -64,7 +72,7 @@ export function useBoardScene(progress: MotionValue<number>) {
       disposed = true;
       teardown();
     };
-  }, [progress, reducedMotion]);
+  }, [progress, reducedMotion, heroTitleRef]);
 
   return { canvasRef, failed };
 }

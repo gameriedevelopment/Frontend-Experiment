@@ -35,7 +35,24 @@ A DOM Player Card levels up next to the scene, driven by the same scroll progres
 | Signal | `signal` (#D4FF5A), only for live, verified and unlock states |
 | Radii | `rounded-tile`, `rounded-card`, `rounded-panel` |
 
-Headlines are two-tone: the first line in ink or mist, the second in lavender.
+Headlines are two-tone: the first line in ink or mist, the second in lavender. On dark backgrounds the second line uses `lavender-400`; on light backgrounds it uses `lavender-700` (#6b46a8, 6:1 contrast on paper).
+
+## Icons
+
+`<Icon name="…" weight="regular | bold | …" />` is the single API. Gamerie's identity glyphs (token, identity, community, team, verified, hub) are drawn in-house on the token motif. Everything else, including brand logos (Discord, X and so on), comes from [Phosphor](https://phosphoricons.com). The custom glyphs follow Phosphor's stroke weights (regular 1.5, bold 2.25), so the two sets match. To add an icon, map a name to a Phosphor `*Icon` export in `components/ui/Icon.tsx`.
+
+## SEO, sharing and analytics
+
+`plugins/site-head.ts` builds the `<head>` and crawler files from env:
+
+| Env | Effect |
+| --- | --- |
+| `VITE_SITE_URL` | Canonical, share-image and sitemap URLs (default `https://gamerie.gg`) |
+| `VITE_SITE_INDEXABLE=true` | Production only. Indexable robots meta, `robots.txt` with sitemap, `sitemap.xml`. Otherwise `noindex` and a disallow-all `robots.txt` |
+| `VITE_ENZUZO_ID` | Enzuzo cookie banner and a footer "Cookie settings" control |
+| `VITE_GTM_ID`, `VITE_GA_MEASUREMENT_ID` | GTM and GA4, behind Google Consent Mode v2 defaults (denied until consent), same as the live site |
+
+The share image is `public/og-image.png` (1200×630), captured from the real hero.
 
 ## Layout
 

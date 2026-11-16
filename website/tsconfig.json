@@ -32,6 +32,7 @@
   },
   "include": [
     "src",
+    "plugins",
     "vite.config.ts"
   ],
   "references": []
