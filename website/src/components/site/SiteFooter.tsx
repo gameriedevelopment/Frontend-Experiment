@@ -1,77 +1,92 @@
-import { links } from "../../links";
-import { Container } from "../ui/Section";
+import { ButtonLink } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
+import { links, socialLinks } from "@/config/links";
 import { Brand } from "./Brand";
 
-const footerGroups = [
+const columns = [
   {
-    name: "Platform",
+    title: "Platform",
     items: [
-      ["Explore Gamerie", "#platform"],
-      ["Who it’s for", "#community"],
-      ["FAQ", "#faq"],
+      { label: "How it works", href: "#platform" },
+      { label: "Who it's for", href: "#audiences" },
+      { label: "Features", href: "#features" },
+      { label: "FAQ", href: "#faq" },
     ],
   },
   {
-    name: "Community",
+    title: "Community",
     items: [
-      ["Discord", links.discord],
-      ["Partners", links.partners],
-      ["Sign in", links.signIn],
+      { label: "Discord", href: links.discord, external: true },
+      { label: "Founding partners", href: links.partners, external: true },
+      ...socialLinks.map((social) => ({ ...social, external: true })),
     ],
   },
   {
-    name: "Legal",
+    title: "Legal",
     items: [
-      ["Terms", links.terms],
-      ["Privacy", links.privacy],
-      ["Cookie policy", links.cookies],
-      ["Community guidelines", links.guidelines],
-      ["Minors policy", links.minors],
+      { label: "Terms of service", href: links.terms, external: true },
+      { label: "Privacy policy", href: links.privacy, external: true },
+      { label: "Cookie policy", href: links.cookies, external: true },
+      { label: "Community guidelines", href: links.guidelines, external: true },
+      { label: "Minors policy", href: links.minors, external: true },
     ],
   },
-] as const;
+];
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/12 bg-deep">
-      <Container className="pt-10 pb-6 sm:pt-12">
-        <div className="grid gap-8 md:grid-cols-[0.95fr_2.05fr]">
-          <div>
-            <Brand />
-            <p className="mt-4 text-sm text-secondary">
-              Play. Connect. Belong.
+    <footer className="bg-paper px-gutter pb-4 text-ink-950 sm:pb-6">
+      <div className="relative mx-auto max-w-shell overflow-hidden rounded-panel bg-paper-deep px-6 pt-12 sm:px-10 lg:px-14 lg:pt-16">
+        <div className="grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <Brand className="text-ink-950 [&_svg]:text-lavender-600" />
+            <p className="mt-5 max-w-xs text-[0.95rem] leading-relaxed text-ink-700">
+              The verified platform for competitive gamers. Your game, on the record.
             </p>
+            <ButtonLink href={links.partners} external tone="ink" size="sm" icon="arrowUpRight" orb className="mt-7">
+              Esports org? Partner with us
+            </ButtonLink>
           </div>
-
-          <nav
-            aria-label="Footer navigation"
-            className="grid grid-cols-2 gap-6 sm:grid-cols-3"
-          >
-            {footerGroups.map(({ name, items }) => (
-              <div key={name}>
-                <h2 className="mb-3 text-sm font-bold text-foreground">
-                  {name}
-                </h2>
-                <ul className="flex flex-col gap-2">
-                  {items.map(([label, href]) => (
-                    <li key={href}>
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-7 lg:col-start-6">
+            {columns.map((column) => (
+              <div key={column.title}>
+                <h2 className="type-label text-ink-950/50">{column.title}</h2>
+                <ul className="mt-5 space-y-3">
+                  {column.items.map((item) => (
+                    <li key={item.label}>
                       <a
-                        href={href}
-                        className="inline-block rounded-control py-0.5 text-sm text-secondary hover:text-brand-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        href={item.href}
+                        {...("external" in item && item.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                        className="group inline-flex items-center gap-1.5 text-[0.95rem] text-ink-700 transition-colors hover:text-ink-950"
                       >
-                        {label}
+                        {item.label}
+                        {"external" in item && item.external && (
+                          <Icon
+                            name="arrowUpRight"
+                            className="size-3.5 opacity-0 transition-opacity group-hover:opacity-60"
+                          />
+                        )}
                       </a>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
-          </nav>
+          </div>
         </div>
-        <p className="mt-9 border-t border-white/12 pt-5 text-xs text-secondary">
-          © {new Date().getFullYear()} Gamerie
+
+        <div className="type-label mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-ink-950/10 py-6 text-ink-950/50">
+          <p>© {new Date().getFullYear()} Gamerie. All rights reserved.</p>
+          <p>Made for players, everywhere.</p>
+        </div>
+
+        <p
+          aria-hidden="true"
+          className="type-display pointer-events-none -mb-[0.2em] select-none text-center text-[clamp(3.5rem,14vw,13.5rem)] leading-[0.8] tracking-[-0.04em] text-lavender-300"
+        >
+          Gamerie
         </p>
-      </Container>
+      </div>
     </footer>
   );
 }
