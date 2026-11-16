@@ -39,7 +39,7 @@ Headlines are two-tone: the first line in ink or mist, the second in lavender. O
 
 ## Icons
 
-`<Icon name="…" weight="regular | bold | …" />` is the single API. Gamerie's identity glyphs (token, identity, community, team, verified, hub) are drawn in-house on the token motif. Everything else, including brand logos (Discord, X and so on), comes from [Phosphor](https://phosphoricons.com). The custom glyphs follow Phosphor's stroke weights (regular 1.5, bold 2.25), so the two sets match. To add an icon, map a name to a Phosphor `*Icon` export in `components/ui/Icon.tsx`.
+`<Icon name="…" weight="regular | bold | …" />` is the single API, and every icon is [Phosphor](https://phosphoricons.com), including brand logos (Discord, X and so on). The only custom shape is the Gamerie logo mark (`TokenMark`). To add an icon, map a name to a Phosphor `*Icon` export in `components/ui/Icon.tsx`. Don't use Lucide.
 
 ## SEO, sharing and analytics
 
@@ -84,8 +84,10 @@ npm run build
 
 Codex's previous version is archived at `.backup/codex-v1-website.tar.gz` (git-ignored).
 
-## Next
+## Next: the app
 
-- App pilot in `app/`: Player Card and challenge detail, built on the same tokens and components.
-- Real profile screenshots or recordings in the feature bento once the app screens exist.
-- Per-chapter sound (opt-in) and haptics on mobile.
+`app/` is a standalone project, like `website/`, with its own Vite, Tailwind and env setup. It copies the website's tokens and `components/ui` rather than sharing files.
+
+- **Behaviour source:** `frontend-revamp/app`. Port its non-UI code: API client, auth store, TanStack Query hooks and keys, schemas, types, route paths and deep links. Redesign the presentation in Tailwind, with Phosphor in place of Lucide.
+- **API:** the real backend-two through `VITE_API_URL`, the same as the revamp app (local backend-two on `:8000`).
+- **First slice:** the app shell (sidebar, top bar, mobile nav), sign-in, and the profile with the Player Card. Then challenge detail. Each screen gets new-player, loading, empty, error and populated states.
