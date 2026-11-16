@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Reveal } from "@/components/ui/motion";
 import { Accent, SectionHeader } from "@/components/ui/SectionHeader";
 import { cn } from "@/lib/cn";
-import { proofLevels, proofSteps } from "../content/landing-content";
+import { proofSteps, resultSources } from "../content/landing-content";
 import { ProofPips, ProofVisual } from "./ProofVisual";
 
 const STEP_MS = 5200;
@@ -36,7 +36,7 @@ export function ProofSection() {
             title={["How a result", "becomes proof."]}
             aside={
               <p>
-                Every stat, level and leaderboard place on Gamerie comes from a recorded match. <Accent>Here's how one is made.</Accent>
+                Results reach your record from challenges and tournaments on Gamerie, and from games you play anywhere else. <Accent>Here's how.</Accent>
               </p>
             }
           />
@@ -96,17 +96,17 @@ export function ProofSection() {
 
         <Reveal className="mt-20">
           <div className="flex flex-wrap items-baseline justify-between gap-3 border-t border-ink-950/10 pt-8">
-            <h3 className="text-lg font-semibold tracking-[-0.01em]">Proof levels</h3>
+            <h3 className="text-lg font-semibold tracking-[-0.01em]">Where results come from</h3>
             <p className="text-sm text-ink-700/70">Every recorded match keeps its source.</p>
           </div>
           <ul className="mt-8 grid gap-8 sm:grid-cols-3 sm:gap-10">
-            {proofLevels.map((level) => (
-              <li key={level.label} className="grid gap-3">
+            {resultSources.map((source) => (
+              <li key={source.label} className="grid gap-3">
                 <span className="flex items-center gap-3 text-lavender-700">
-                  <ProofPips strength={level.strength} />
-                  <span className="font-semibold text-ink-950">{level.label}</span>
+                  <ProofPips strength={source.strength} />
+                  <span className="font-semibold text-ink-950">{source.label}</span>
                 </span>
-                <p className="max-w-xs text-[0.95rem] leading-relaxed text-ink-700">{level.copy}</p>
+                <p className="max-w-xs text-[0.95rem] leading-relaxed text-ink-700">{source.copy}</p>
               </li>
             ))}
           </ul>

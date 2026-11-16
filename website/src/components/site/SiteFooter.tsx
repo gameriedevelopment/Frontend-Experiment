@@ -11,7 +11,7 @@ const columns = [
       { label: "How it works", href: "#platform" },
       { label: "Who it's for", href: "#audiences" },
       { label: "Features", href: "#features" },
-      { label: "How proof works", href: "#proof" },
+      { label: "How results work", href: "#proof" },
       { label: "FAQ", href: "#faq" },
     ],
   },

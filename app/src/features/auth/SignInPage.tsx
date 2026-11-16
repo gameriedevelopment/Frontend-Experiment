@@ -10,7 +10,7 @@ import { Notice } from "@/components/ui/Notice";
 import { getApiErrorMessage } from "@/lib/errors";
 import { beginSocialAuth, signIn, type SocialProvider } from "./api";
 import { getRequiredSocialProvider } from "./authError";
-import { AuthLayout } from "./components/AuthLayout";
+import { AuthHeading, AuthLayout } from "./components/AuthLayout";
 import { SocialAuthOptions } from "./components/SocialAuthOptions";
 
 const schema = z.object({
@@ -84,8 +84,7 @@ export function SignInPage() {
         </>
       }
     >
-      <h1 className="type-display text-heading">Sign in</h1>
-      <p className="mt-3 text-[0.95rem] text-mist-300">Continue to your player ID.</p>
+      <AuthHeading title="Sign in" description="Continue to your player ID." />
 
       <form className="mt-9 grid gap-5" onSubmit={onSubmit} noValidate>
         {sessionNotice && <Notice tone="info">{sessionNotice}</Notice>}

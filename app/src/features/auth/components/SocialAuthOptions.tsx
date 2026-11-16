@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Icon, type IconName } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
 import { beginSocialAuth, type SocialProvider } from "../api";
 
-const providers: Array<{ id: SocialProvider; label: string; icon: IconName; available: boolean }> = [
-  { id: "google", label: "Google", icon: "google", available: true },
-  { id: "discord", label: "Discord", icon: "discord", available: true },
-  { id: "facebook", label: "Facebook", icon: "facebook", available: true },
-  { id: "apple", label: "Apple", icon: "apple", available: false },
+const providers: Array<{ id: SocialProvider; label: string; logo: string; available: boolean }> = [
+  { id: "google", label: "Google", logo: "/social/google.png", available: true },
+  { id: "discord", label: "Discord", logo: "/social/discord.png", available: true },
+  { id: "facebook", label: "Facebook", logo: "/social/facebook.png", available: true },
+  { id: "apple", label: "Apple", logo: "/social/apple.png", available: false },
 ];
 
 export function SocialAuthOptions({
@@ -49,7 +49,7 @@ export function SocialAuthOptions({
             {activeProvider === provider.id ? (
               <Icon name="spinner" className="size-[1.1rem] animate-spin" />
             ) : (
-              <Icon name={provider.icon} className="size-[1.1rem]" weight="fill" />
+              <img src={provider.logo} alt="" className="size-[1.15rem] object-contain" />
             )}
             {provider.label}
             {!provider.available && <span className="type-label text-[0.6rem] text-mist-500">Soon</span>}

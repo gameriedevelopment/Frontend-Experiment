@@ -150,7 +150,7 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
                   exit={{ opacity: 0 }}
                   transition={{ type: "spring", stiffness: 380, damping: 18 }}
                 >
-                  <Tag tone="signal">Level up · +600 XP</Tag>
+                  <Tag tone="signal">Level up</Tag>
                 </motion.span>
               )}
             </AnimatePresence>

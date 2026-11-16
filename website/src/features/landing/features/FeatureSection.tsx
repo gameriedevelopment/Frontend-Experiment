@@ -3,7 +3,7 @@ import { cardVariants } from "@/components/ui/Card";
 import { Reveal } from "@/components/ui/motion";
 import { Accent, SectionHeader } from "@/components/ui/SectionHeader";
 import { cn } from "@/lib/cn";
-import { FeedTicker, FitGauge, HubRow, ProfileHighlights, Scoreboard } from "./FeatureWidgets";
+import { Bracket, ConnectedGames, FeedTicker, HubRow, LeaderboardPreview, Scoreboard } from "./FeatureWidgets";
 
 type Surface = "stage" | "lavender" | "paper" | "outline";
 
@@ -52,7 +52,7 @@ export function FeatureSection() {
             title={["Everything in", "one lobby."]}
             aside={
               <p>
-                Profile, squad, team, feed and competition in one place, <Accent>instead of eight apps that never talk.</Accent>
+                Profile, teams, competition and conversation in one place, <Accent>instead of a dozen apps that never talk.</Accent>
               </p>
             }
           />
@@ -62,56 +62,55 @@ export function FeatureSection() {
           <FeatureCard
             className="md:col-span-2"
             surface="stage"
-            title="A profile that keeps up"
-            copy="Gamerie reads your gaming history to surface your best achievements and playstyle, building a living resume of your potential."
+            title="Your games, connected"
+            copy="Link the accounts you already play on, and your games come with you to your profile."
           >
-            <ProfileHighlights />
+            <ConnectedGames />
           </FeatureCard>
           <FeatureCard
             surface="lavender"
-            title="Intelligent matchmaking"
-            copy="Teammates matched on skill, playstyle and ambition."
+            title="Leaderboards"
+            copy="Rank players and teams by score, wins, win rate, tournament wins, matches or challenges, overall or by game."
             delay={0.08}
           >
-            <FitGauge />
+            <LeaderboardPreview />
           </FeatureCard>
           <FeatureCard
             surface="paper"
-            title="Challenge ecosystem"
-            copy="Compete solo or with your team. Every verified result levels up your ranking."
+            title="Challenges"
+            copy="Challenge a player or a team, agree a time and play. The result goes on your record."
           >
             <Scoreboard />
           </FeatureCard>
           <FeatureCard
             surface="paper"
-            title="Live feed"
-            copy="React to the latest results and posts from the players and teams you follow."
+            title="Feed & messages"
+            copy="Follow players, teams and hubs, react to their results and posts, and message players directly."
             delay={0.08}
           >
             <FeedTicker />
           </FeatureCard>
           <FeatureCard
             surface="outline"
-            title="Career & scouting"
-            copy="Direct access to esports orgs and sponsors looking for verified talent."
+            title="Ladders"
+            copy="Season-long standings with points, groups and your own rules. Open to anyone, by approval, for your hub only, or private."
             delay={0.16}
           />
           <FeatureCard
             className="md:col-span-2"
             surface="outline"
             title="Teams & hubs"
-            copy="Give rosters and communities a real home with roles, posts, membership and a shared history."
+            copy="Teams get rosters, roles and posts. Hubs bring teams together, and players join through their team."
           >
             <HubRow />
           </FeatureCard>
           <FeatureCard
             surface="stage"
-            title="Creator earnings"
-            copy="Launch subscriptions, offer coaching and build a reliable income from your community."
+            title="Hosted tournaments"
+            copy="Single elimination, double elimination or round robin, hosted by you, your team or your hub."
             delay={0.08}
           >
-            <p className="type-display text-display-lg text-lavender-400">80%</p>
-            <p className="mt-2 text-sm text-mist-400">Yours to keep</p>
+            <Bracket />
           </FeatureCard>
         </div>
       </div>

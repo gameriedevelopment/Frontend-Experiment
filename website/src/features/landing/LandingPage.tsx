@@ -5,7 +5,7 @@ import { BoardStory } from "./board-story/BoardStory";
 import { FaqSection } from "./faq/FaqSection";
 import { FeatureSection } from "./features/FeatureSection";
 import { FinalCall } from "./final-call/FinalCall";
-import { PerksSection } from "./perks/PerksSection";
+import { ProgressionSection } from "./progression/ProgressionSection";
 import { ProofSection } from "./proof/ProofSection";
 import { StatsBand } from "./stats/StatsBand";
 
@@ -20,7 +20,7 @@ export function LandingPage() {
           <StatsBand />
           <FeatureSection />
           <ProofSection />
-          <PerksSection />
+          <ProgressionSection />
           <FaqSection />
           <FinalCall />
         </div>
