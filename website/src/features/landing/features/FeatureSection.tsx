@@ -1,20 +1,11 @@
 import type { ReactNode } from "react";
 import { cardVariants } from "@/components/ui/Card";
-import { Icon, type IconName } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/motion";
 import { Accent, SectionHeader } from "@/components/ui/SectionHeader";
-import { Tag } from "@/components/ui/Tag";
 import { cn } from "@/lib/cn";
-import { FeedTicker, FitGauge, HubRow, ProfileInsights, Scoreboard } from "./FeatureWidgets";
+import { FeedTicker, FitGauge, HubRow, ProfileHighlights, Scoreboard } from "./FeatureWidgets";
 
 type Surface = "stage" | "lavender" | "paper" | "outline";
-
-const iconTile: Record<Surface, string> = {
-  stage: "bg-lavender-400 text-ink-950",
-  lavender: "bg-ink-950 text-lavender-300",
-  paper: "bg-ink-950 text-lavender-300",
-  outline: "bg-lavender-400 text-ink-950",
-};
 
 const copyTone: Record<Surface, string> = {
   stage: "text-mist-300",
@@ -24,7 +15,6 @@ const copyTone: Record<Surface, string> = {
 };
 
 function FeatureCard({
-  icon,
   title,
   copy,
   surface,
@@ -32,7 +22,6 @@ function FeatureCard({
   delay = 0,
   children,
 }: {
-  icon: IconName;
   title: string;
   copy: string;
   surface: Surface;
@@ -42,18 +31,10 @@ function FeatureCard({
 }) {
   return (
     <Reveal delay={delay} className={cn("min-w-0", className)}>
-      <article
-        className={cn(
-          cardVariants({ surface, padding: "md", interactive: true }),
-          "flex h-full flex-col gap-7",
-        )}
-      >
+      <article className={cn(cardVariants({ surface, padding: "none" }), "flex h-full flex-col gap-10 p-7 sm:p-9")}>
         <div>
-          <span className={cn("grid size-11 place-items-center rounded-2xl", iconTile[surface])}>
-            <Icon name={icon} />
-          </span>
-          <h3 className="type-display mt-6 text-display-sm">{title}</h3>
-          <p className={cn("mt-3 max-w-md text-[0.95rem] leading-relaxed", copyTone[surface])}>{copy}</p>
+          <h3 className="text-[1.35rem] font-semibold tracking-[-0.02em]">{title}</h3>
+          <p className={cn("mt-2.5 max-w-md text-[0.95rem] leading-relaxed", copyTone[surface])}>{copy}</p>
         </div>
         {children && <div className="mt-auto">{children}</div>}
       </article>
@@ -68,7 +49,6 @@ export function FeatureSection() {
         <Reveal>
           <SectionHeader
             tone="light"
-            eyebrow="The platform"
             title={["Everything in", "one lobby."]}
             aside={
               <p>
@@ -78,19 +58,17 @@ export function FeatureSection() {
           />
         </Reveal>
 
-        <div className="mt-14 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-16 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           <FeatureCard
             className="md:col-span-2"
             surface="stage"
-            icon="spark"
             title="A profile that keeps up"
             copy="Gamerie reads your gaming history to surface your best achievements and playstyle, building a living resume of your potential."
           >
-            <ProfileInsights />
+            <ProfileHighlights />
           </FeatureCard>
           <FeatureCard
             surface="lavender"
-            icon="community"
             title="Intelligent matchmaking"
             copy="Teammates matched on skill, playstyle and ambition."
             delay={0.08}
@@ -99,7 +77,6 @@ export function FeatureSection() {
           </FeatureCard>
           <FeatureCard
             surface="paper"
-            icon="target"
             title="Challenge ecosystem"
             copy="Compete solo or with your team. Every verified result levels up your ranking."
           >
@@ -107,7 +84,6 @@ export function FeatureSection() {
           </FeatureCard>
           <FeatureCard
             surface="paper"
-            icon="feed"
             title="Live feed"
             copy="React to the latest results and posts from the players and teams you follow."
             delay={0.08}
@@ -116,21 +92,13 @@ export function FeatureSection() {
           </FeatureCard>
           <FeatureCard
             surface="outline"
-            icon="radar"
             title="Career & scouting"
             copy="Direct access to esports orgs and sponsors looking for verified talent."
             delay={0.16}
-          >
-            <div className="flex flex-wrap gap-2">
-              <Tag tone="paper" size="md">Verified talent</Tag>
-              <Tag tone="paper" size="md">Scout requests</Tag>
-              <Tag tone="paper" size="md">Trials</Tag>
-            </div>
-          </FeatureCard>
+          />
           <FeatureCard
             className="md:col-span-2"
             surface="outline"
-            icon="hub"
             title="Teams & hubs"
             copy="Give rosters and communities a real home with roles, posts, membership and a shared history."
           >
@@ -138,15 +106,12 @@ export function FeatureSection() {
           </FeatureCard>
           <FeatureCard
             surface="stage"
-            icon="coin"
             title="Creator earnings"
             copy="Launch subscriptions, offer coaching and build a reliable income from your community."
             delay={0.08}
           >
-            <p className="type-display text-display-lg text-lavender-400">
-              80%
-              <span className="type-label ml-3 align-middle text-mist-300">Yours to keep</span>
-            </p>
+            <p className="type-display text-display-lg text-lavender-400">80%</p>
+            <p className="mt-2 text-sm text-mist-400">Yours to keep</p>
           </FeatureCard>
         </div>
       </div>

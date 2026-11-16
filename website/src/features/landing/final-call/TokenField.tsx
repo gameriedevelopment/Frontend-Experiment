@@ -5,9 +5,8 @@ import { cn } from "@/lib/cn";
 const GAP_X = 30;
 const GAP_Y = 34;
 const REACH = 190;
-const BASE = [55, 44, 72];
+const BASE = [42, 33, 56];
 const LIT = [198, 163, 255];
-const SIGNAL = [212, 255, 90];
 
 function drawToken(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
   const radius = size * 0.18;
@@ -58,11 +57,10 @@ export function TokenField({ className }: { className?: string }) {
         for (let column = 0; column < columns; column++, index++) {
           const x = column * GAP_X + offset;
           const near = Math.max(0, 1 - Math.hypot(x - pointer.x, y - pointer.y) / REACH);
-          const wave = reducedMotion ? 0 : Math.max(0, Math.sin(x * 0.012 + y * 0.008 - t * 1.4)) ** 6 * 0.55;
+          const wave = reducedMotion ? 0 : Math.max(0, Math.sin(x * 0.008 + y * 0.005 - t * 0.7)) ** 8 * 0.35;
           const lit = Math.min(1, near ** 1.6 + wave);
           const seed = seeds[index] ?? 0;
-          const online = !reducedMotion && seed > 0.985 && Math.sin(t * 2 + seed * 40) > 0.2;
-          context.fillStyle = online ? mix(BASE, SIGNAL, 0.9) : mix(BASE, LIT, lit);
+          context.fillStyle = mix(BASE, LIT, lit);
           const jitter = (seed - 0.5) * 8;
           drawToken(context, x, y + jitter - lit * 5, GAP_Y * (0.5 + seed * 0.16 + lit * 0.26));
         }

@@ -6,6 +6,7 @@ import { FaqSection } from "./faq/FaqSection";
 import { FeatureSection } from "./features/FeatureSection";
 import { FinalCall } from "./final-call/FinalCall";
 import { PerksSection } from "./perks/PerksSection";
+import { ProofSection } from "./proof/ProofSection";
 import { StatsBand } from "./stats/StatsBand";
 
 export function LandingPage() {
@@ -18,6 +19,7 @@ export function LandingPage() {
           <AudienceSection />
           <StatsBand />
           <FeatureSection />
+          <ProofSection />
           <PerksSection />
           <FaqSection />
           <FinalCall />

@@ -84,10 +84,32 @@ npm run build
 
 Codex's previous version is archived at `.backup/codex-v1-website.tar.gz` (git-ignored).
 
-## Next: the app
+## App
 
-`app/` is a standalone project, like `website/`, with its own Vite, Tailwind and env setup. It copies the website's tokens and `components/ui` rather than sharing files.
+`app/` is a standalone project, like `website/`: Vite, React 18, Tailwind v4, React Router 7, TanStack Query, Zustand, react-hook-form with Zod, motion and Phosphor. It copies the website's tokens and `components/ui` rather than sharing files.
 
-- **Behaviour source:** `frontend-revamp/app`. Port its non-UI code: API client, auth store, TanStack Query hooks and keys, schemas, types, route paths and deep links. Redesign the presentation in Tailwind, with Phosphor in place of Lucide.
+- **Behaviour source:** `frontend-revamp/app`. Its non-UI code is ported unchanged: API client and interceptors, auth store, session handling, route guard, query keys, schemas and route paths. Only the presentation is new.
 - **API:** the real backend-two through `VITE_API_URL`, the same as the revamp app (local backend-two on `:8000`).
-- **First slice:** the app shell (sidebar, top bar, mobile nav), sign-in, and the profile with the Player Card. Then challenge detail. Each screen gets new-player, loading, empty, error and populated states.
+- **Tailwind only:** `npm run check:styles` runs before every build and fails on any stylesheet other than `src/styles/theme.css`, or any CSS import other than the theme and font packages.
+
+```
+app/src/
+  app/            App.tsx (routes), shell/ (sidebar, header, profile menu, mobile dock, placeholder)
+  components/ui/  Button, Card, Tag, Icon, TokenMark, Field, Notice, Avatar, Loader, PageHeader
+  config/ lib/    links, API client, errors, cn
+  features/       auth/, messages/ and notifications/ (unread counts only so far)
+  styles/         theme.css
+```
+
+```sh
+cd app
+cp .env.example .env   # point VITE_API_URL at backend-two
+npm ci
+npm run dev            # http://localhost:5179
+```
+
+### Status
+
+- **Done:** the signed-in layout (collapsible sidebar, header with search and unread counts, profile menu, mobile dock and "More" sheet) and sign-in, with validation, server and session-expired states.
+- **Hands off to the live app:** register, password reset, email and phone verification, and the social sign-in callback. Every product route exists with its real path but shows a placeholder that opens the same path in the live app until it's rebuilt.
+- **Next:** the profile and Player Card, then challenge detail. Each screen gets new-player, loading, empty, error and populated states, and is lazy-loaded the way the revamp app does it.

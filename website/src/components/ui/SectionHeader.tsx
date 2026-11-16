@@ -65,7 +65,7 @@ export function SectionHeader({
   tone = "dark",
   className,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: readonly [string, string];
   aside?: ReactNode;
   tone?: Tone;
@@ -74,8 +74,8 @@ export function SectionHeader({
   return (
     <div className={cn("grid gap-8 lg:grid-cols-12 lg:items-end", className)}>
       <div className="lg:col-span-8">
-        <Eyebrow tone={tone}>{eyebrow}</Eyebrow>
-        <DisplayTitle lines={title} tone={tone} className="mt-6" />
+        {eyebrow && <Eyebrow tone={tone}>{eyebrow}</Eyebrow>}
+        <DisplayTitle lines={title} tone={tone} className={eyebrow ? "mt-6" : undefined} />
       </div>
       {aside && (
         <div

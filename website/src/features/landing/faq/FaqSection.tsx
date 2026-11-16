@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { easeOutExpo, Reveal } from "@/components/ui/motion";
-import { DisplayTitle, Eyebrow } from "@/components/ui/SectionHeader";
+import { DisplayTitle } from "@/components/ui/SectionHeader";
 import { links } from "@/config/links";
 import { cn } from "@/lib/cn";
 import { faqs } from "../content/landing-content";
@@ -12,13 +12,11 @@ import { faqs } from "../content/landing-content";
 function FaqItem({
   question,
   answer,
-  index,
   open,
   onToggle,
 }: {
   question: string;
   answer: string;
-  index: number;
   open: boolean;
   onToggle: () => void;
 }) {
@@ -31,9 +29,8 @@ function FaqItem({
           aria-expanded={open}
           aria-controls={id}
           onClick={onToggle}
-          className="group flex w-full items-center gap-5 py-6 text-left outline-none focus-visible:text-lavender-700"
+          className="group flex w-full items-center gap-6 py-7 text-left outline-none focus-visible:text-lavender-700"
         >
-          <span className="type-label w-6 shrink-0 text-ink-950/40">0{index + 1}</span>
           <span className="flex-1 text-lg font-semibold tracking-[-0.01em] sm:text-xl">{question}</span>
           <span
             className={cn(
@@ -56,7 +53,7 @@ function FaqItem({
             transition={{ duration: 0.5, ease: easeOutExpo }}
             className="overflow-hidden"
           >
-            <p className="max-w-2xl pb-7 pl-11 text-[1.02rem] leading-relaxed text-ink-700">{answer}</p>
+            <p className="max-w-2xl pb-8 pr-14 text-[1.02rem] leading-relaxed text-ink-700">{answer}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -72,8 +69,7 @@ export function FaqSection() {
       <div className="mx-auto grid max-w-shell gap-12 lg:grid-cols-12">
         <Reveal className="lg:col-span-5">
           <div className="lg:sticky lg:top-28">
-            <Eyebrow tone="light">FAQ</Eyebrow>
-            <DisplayTitle tone="light" lines={["Questions,", "answered."]} className="mt-6" />
+            <DisplayTitle tone="light" lines={["Questions,", "answered."]} />
             <Card surface="outline" padding="sm" className="mt-10 max-w-sm">
               <p className="text-[0.95rem] leading-relaxed text-ink-700">
                 Still curious? The team and early players hang out on Discord.
@@ -90,7 +86,6 @@ export function FaqSection() {
               <FaqItem
                 key={faq.question}
                 {...faq}
-                index={index}
                 open={open === index}
                 onToggle={() => setOpen(open === index ? -1 : index)}
               />

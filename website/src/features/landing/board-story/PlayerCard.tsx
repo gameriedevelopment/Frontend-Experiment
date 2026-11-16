@@ -10,13 +10,15 @@ import { cardMilestones, type MilestoneId } from "./story-content";
 const games = ["Valorant", "League", "Chess"];
 const fits = [94, 91, 88];
 
+const emptySlot = <span className="block h-2 w-16 rounded-full bg-white/[0.08]" />;
+
 function Unlockable({
   unlocked,
-  hint,
+  placeholder = emptySlot,
   children,
 }: {
   unlocked: boolean;
-  hint: string;
+  placeholder?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -35,13 +37,13 @@ function Unlockable({
       ) : (
         <motion.span
           key="locked"
-          className="type-label inline-flex h-6 items-center gap-1.5 rounded-full border border-dashed border-white/15 px-2.5 text-mist-500"
+          aria-label="Not unlocked yet"
+          className="flex justify-end"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <Icon name="lock" className="size-3" weight="bold" />
-          {hint}
+          {placeholder}
         </motion.span>
       )}
     </AnimatePresence>
@@ -51,23 +53,21 @@ function Unlockable({
 function Row({
   label,
   unlocked,
-  hint,
   children,
 }: {
   label: string;
   unlocked: boolean;
-  hint: string;
   children: ReactNode;
 }) {
   return (
     <motion.div
       className="-mx-5 flex min-h-12 items-center justify-between gap-4 px-5 py-2"
-      animate={unlocked ? { backgroundColor: ["rgb(212 255 90 / 0.14)", "rgb(212 255 90 / 0)"] } : undefined}
+      animate={unlocked ? { backgroundColor: ["rgb(212 255 90 / 0.08)", "rgb(212 255 90 / 0)"] } : undefined}
       transition={{ duration: 1.2, ease: "easeOut" }}
     >
       <dt className="type-label text-mist-400">{label}</dt>
       <dd className="min-w-0">
-        <Unlockable unlocked={unlocked} hint={hint}>
+        <Unlockable unlocked={unlocked}>
           {children}
         </Unlockable>
       </dd>
@@ -118,7 +118,15 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
               <TokenMark className="h-9" />
             </div>
             <div className="min-w-0 pb-0.5">
-              <Unlockable unlocked={has("id")} hint="Ch 01">
+              <Unlockable
+                unlocked={has("id")}
+                placeholder={
+                  <span className="grid gap-2">
+                    <span className="block h-4 w-24 rounded-full bg-ink-950/15" />
+                    <span className="block h-2.5 w-32 rounded-full bg-ink-950/10" />
+                  </span>
+                }
+              >
                 <div className="text-left">
                   <p className="type-display text-[1.9rem] leading-none tracking-[-0.02em]">Nova</p>
                   <p className="mt-1.5 text-sm font-medium text-ink-950/70">@nova · Lagos, NG</p>
@@ -142,7 +150,7 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
                   exit={{ opacity: 0 }}
                   transition={{ type: "spring", stiffness: 380, damping: 18 }}
                 >
-                  <Tag tone="signal" dot="live">Level up · +600 XP</Tag>
+                  <Tag tone="signal">Level up · +600 XP</Tag>
                 </motion.span>
               )}
             </AnimatePresence>
@@ -156,17 +164,17 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
           </div>
 
           <dl className="mt-3 divide-y divide-white/7">
-            <Row label="Games" unlocked={has("games")} hint="Ch 01">
+            <Row label="Games" unlocked={has("games")}>
               {games.map((game) => (
                 <Tag key={game} tone="lavender">
                   {game}
                 </Tag>
               ))}
             </Row>
-            <Row label="Role" unlocked={has("role")} hint="Ch 01">
+            <Row label="Role" unlocked={has("role")}>
               <span className="text-sm font-semibold">IGL · Controller</span>
             </Row>
-            <Row label="Squad fit" unlocked={has("fit")} hint="Ch 02">
+            <Row label="Squad fit" unlocked={has("fit")}>
               <span className="flex -space-x-1.5">
                 {fits.map((fit) => (
                   <span key={fit} className="grid size-6 place-items-center rounded-full bg-lavender-200 text-ink-950 ring-2 ring-ink-900">
@@ -176,14 +184,14 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
               </span>
               <span className="font-mono text-xs text-mist-200">{fits.join(" · ")}%</span>
             </Row>
-            <Row label="Team" unlocked={has("team")} hint="Ch 03">
+            <Row label="Team" unlocked={has("team")}>
               <span className="grid size-6 place-items-center rounded-md bg-lavender-400 text-ink-950">
                 <Icon name="team" className="size-4" weight="bold" />
               </span>
               <span className="text-sm font-semibold">Lagos Lions</span>
               <span className="font-mono text-xs text-mist-400">{has("roster") ? "5/5" : "4/5"}</span>
             </Row>
-            <Row label="Last match" unlocked={has("match")} hint="Ch 04">
+            <Row label="Last match" unlocked={has("match")}>
               <span className="font-mono text-sm font-semibold">
                 <span className="text-signal">W</span> 13–9
               </span>
@@ -203,7 +211,7 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
                 )}
               </AnimatePresence>
             </Row>
-            <Row label="Record" unlocked={has("match")} hint="Ch 04">
+            <Row label="Record" unlocked={has("match")}>
               <span className="font-mono text-sm text-mist-200">
                 {leveledUp ? "28" : "27"}W · 9L
               </span>

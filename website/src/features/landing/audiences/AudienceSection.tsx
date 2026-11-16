@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/motion";
 import { Accent, SectionHeader } from "@/components/ui/SectionHeader";
-import { Tag } from "@/components/ui/Tag";
 import { cn } from "@/lib/cn";
 import { audiences } from "../content/landing-content";
 
@@ -10,12 +8,10 @@ type Audience = (typeof audiences)[number];
 
 function AudiencePanel({
   audience,
-  index,
   active,
   onActivate,
 }: {
   audience: Audience;
-  index: number;
   active: boolean;
   onActivate: () => void;
 }) {
@@ -45,18 +41,10 @@ function AudiencePanel({
           active ? "opacity-70" : "opacity-95",
         )}
       />
-      <div className="halftone absolute inset-0 -z-10 text-ink-950/45" />
+      <div className="halftone absolute inset-0 -z-10 text-ink-950/30" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/55 to-ink-950/5" />
 
-      <div className="flex w-full flex-col justify-between p-6 sm:p-8">
-        <div className="flex items-center justify-between">
-          <Tag tone="ink" size="md">
-            <Icon name={audience.icon} className="size-3.5" weight="bold" />
-            {audience.label}
-          </Tag>
-          <span className="type-label text-mist-300">0{index + 1}</span>
-        </div>
-
+      <div className="flex w-full flex-col justify-end p-6 sm:p-8">
         <span
           aria-hidden="true"
           className={cn(
@@ -73,7 +61,8 @@ function AudiencePanel({
             active ? "lg:translate-y-0 lg:opacity-100" : "lg:pointer-events-none lg:absolute lg:translate-y-6 lg:opacity-0",
           )}
         >
-          <h3 className="type-display text-display-sm text-balance">{audience.title}</h3>
+          <p className="text-sm font-medium text-lavender-200">{audience.label}</p>
+          <h3 className="type-display mt-3 text-display-sm text-balance">{audience.title}</h3>
           <p className="mt-3 text-[0.95rem] leading-relaxed text-mist-200">{audience.copy}</p>
         </div>
       </div>
@@ -90,7 +79,6 @@ export function AudienceSection() {
         <Reveal>
           <SectionHeader
             tone="light"
-            eyebrow="Who it's for"
             title={["Built for every", "side of the game."]}
             aside={
               <p>
@@ -104,7 +92,6 @@ export function AudienceSection() {
             <AudiencePanel
               key={audience.label}
               audience={audience}
-              index={index}
               active={active === index}
               onActivate={() => setActive(index)}
             />

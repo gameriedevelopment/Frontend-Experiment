@@ -2,11 +2,9 @@ export type ChapterId = "identity" | "community" | "team" | "compete";
 
 export interface StoryChapter {
   id: ChapterId;
-  index: string;
   label: string;
   title: readonly [string, string];
   copy: string;
-  unlocks: readonly string[];
   start: number;
   focus: number;
 }
@@ -16,41 +14,33 @@ export const HERO_END = 0.12;
 export const storyChapters: readonly StoryChapter[] = [
   {
     id: "identity",
-    index: "01",
     label: "Identity",
     title: ["One player.", "Every game."],
     copy: "Your games, roles, skills, milestones and teams held together as one player identity, so you never start from zero in a new lobby.",
-    unlocks: ["Player ID", "Linked games", "Role"],
     start: HERO_END,
     focus: 0.27,
   },
   {
     id: "community",
-    index: "02",
     label: "Community",
     title: ["People worth", "playing with."],
     copy: "Discover players through shared games, ambition, level and playstyle. Matches are based on fit, not follower count.",
-    unlocks: ["Squad fit"],
     start: 0.34,
     focus: 0.5,
   },
   {
     id: "team",
-    index: "03",
     label: "Teams",
     title: ["A real home", "for your roster."],
     copy: "Build teams and hubs with clear membership, roles and posts, and a history others can follow.",
-    unlocks: ["Team crest", "Full roster"],
     start: 0.55,
     focus: 0.72,
   },
   {
     id: "compete",
-    index: "04",
     label: "Competition",
     title: ["Play becomes", "proof."],
     copy: "Challenges and tournaments feed a verified record: results, rankings and achievements that teams, scouts and sponsors can trust.",
-    unlocks: ["Verified result", "Level up"],
     start: 0.76,
     focus: 0.97,
   },

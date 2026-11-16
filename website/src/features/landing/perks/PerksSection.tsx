@@ -2,48 +2,28 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/motion";
 import { Accent, SectionHeader } from "@/components/ui/SectionHeader";
-import { Tag } from "@/components/ui/Tag";
 import { links } from "@/config/links";
 import { cn } from "@/lib/cn";
 import { perks, type Rarity } from "../content/landing-content";
 
-const rarityTone = {
-  Legendary: { tag: "signal", frame: "ring-signal/50 text-signal", fill: "bg-signal" },
-  Epic: { tag: "lavender", frame: "ring-lavender-400/45 text-lavender-300", fill: "bg-lavender-400" },
-  Rare: { tag: "muted", frame: "ring-white/20 text-mist-200", fill: "bg-mist-200" },
-} as const satisfies Record<Rarity, { tag: "signal" | "lavender" | "muted"; frame: string; fill: string }>;
+const rarityText = {
+  Legendary: "text-signal",
+  Epic: "text-lavender-300",
+  Rare: "text-mist-400",
+} as const satisfies Record<Rarity, string>;
 
 function PerkTile({ perk }: { perk: (typeof perks)[number] }) {
-  const tone = rarityTone[perk.rarity];
   return (
-    <li className="group relative flex flex-col rounded-card bg-white/[0.03] p-6 ring-1 ring-inset ring-white/8 transition-[background-color,box-shadow,translate] duration-500 ease-out-expo hover:-translate-y-1 hover:bg-white/[0.055] hover:ring-white/15 sm:p-7">
+    <li className="flex flex-col gap-6 rounded-card bg-white/[0.03] p-7 ring-1 ring-inset ring-white/6 transition-colors duration-500 hover:bg-white/[0.05]">
       <div className="flex items-start justify-between">
-        <span
-          className={cn(
-            "grid size-12 rotate-45 place-items-center rounded-[0.8rem] bg-ink-900 ring-1 transition-transform duration-700 ease-out-expo group-hover:rotate-[225deg]",
-            tone.frame,
-          )}
-        >
-          <Icon name={perk.icon} className="size-5 -rotate-45" />
+        <span className="grid size-12 place-items-center rounded-2xl bg-white/[0.05] text-lavender-300">
+          <Icon name={perk.icon} className="size-6" weight="duotone" />
         </span>
-        <Tag tone={tone.tag}>{perk.rarity}</Tag>
+        <span className={cn("text-xs font-medium", rarityText[perk.rarity])}>{perk.rarity}</span>
       </div>
-      <h3 className="type-display mt-7 text-[1.15rem] leading-tight">{perk.title}</h3>
-      <p className="mt-2 text-[0.95rem] leading-relaxed text-mist-400">{perk.copy}</p>
-      <div className="mt-6 flex items-center gap-3">
-        <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/8">
-          <div
-            className={cn(
-              "h-full w-1/5 rounded-full transition-[width] duration-700 ease-out-expo group-hover:w-full",
-              tone.fill,
-            )}
-          />
-        </div>
-        <span className="type-label flex items-center gap-1.5 text-mist-500 transition-colors group-hover:text-mist-200">
-          <Icon name="lock" className="size-3 group-hover:hidden" weight="bold" />
-          <Icon name="check" className="hidden size-3 group-hover:block" weight="bold" />
-          On sign-up
-        </span>
+      <div>
+        <h3 className="text-lg font-semibold tracking-[-0.01em]">{perk.title}</h3>
+        <p className="mt-1.5 text-[0.95rem] leading-relaxed text-mist-400">{perk.copy}</p>
       </div>
     </li>
   );
@@ -53,11 +33,10 @@ export function PerksSection() {
   return (
     <section className="px-gutter pt-section">
       <div className="relative mx-auto max-w-shell overflow-hidden rounded-panel bg-ink-950 px-6 py-14 text-mist-50 sm:px-10 sm:py-20 lg:px-16">
-        <div aria-hidden="true" className="halftone absolute inset-0 text-lavender-400/10 [mask-image:radial-gradient(60%_60%_at_85%_0%,black,transparent)]" />
+        <div aria-hidden="true" className="halftone absolute inset-0 text-lavender-400/[0.06] mask-[radial-gradient(55%_55%_at_85%_0%,black,transparent)]" />
         <div className="relative">
           <Reveal>
             <SectionHeader
-              eyebrow="Early access"
               title={["Early players", "get the loot."]}
               aside={
                 <div className="space-y-6">

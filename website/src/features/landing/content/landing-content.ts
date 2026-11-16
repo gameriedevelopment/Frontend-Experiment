@@ -3,7 +3,6 @@ import type { IconName } from "@/components/ui/Icon";
 export const audiences = [
   {
     label: "Players",
-    icon: "identity",
     title: "Make every game part of your story.",
     copy: "Carry your identity between games, meet better teammates, and let your progress speak before you enter the lobby.",
     image: "/media/audience-player.jpg",
@@ -11,7 +10,6 @@ export const audiences = [
   },
   {
     label: "Teams",
-    icon: "team",
     title: "Build beyond the group chat.",
     copy: "Give your roster a proper identity, recruit verified talent, and create a history sponsors and rivals can trust.",
     image: "/media/audience-team.jpg",
@@ -19,7 +17,6 @@ export const audiences = [
   },
   {
     label: "Communities",
-    icon: "hub",
     title: "Give belonging somewhere to live.",
     copy: "Bring players and teams into a shared hub with a clear culture, useful conversations, and discoverable activity.",
     image: "/media/audience-community.jpg",
@@ -27,19 +24,39 @@ export const audiences = [
   },
   {
     label: "Organizers",
-    icon: "trophy",
     title: "Run competition with context.",
     copy: "Connect tournaments, schedules, rankings, participants, and outcomes to the player network around them.",
     image: "/media/audience-organizer.jpg",
     imageAlt: "A competition organizer reviewing performance dashboards",
   },
-] as const satisfies ReadonlyArray<{ icon: IconName } & Record<string, string>>;
+] as const;
 
 export const industryStats = [
   { value: "$70M", label: "Esports World Cup prize pool" },
   { value: "$2M", label: "The International (Dota 2) prize pool" },
   { value: "550M", label: "Esports viewers worldwide" },
   { value: "$3.1B", label: "Projected esports market" },
+];
+
+export const proofSteps = [
+  {
+    title: "Upload the result screen",
+    copy: "Snap the end-of-match screen. Gamerie reads the result, the score and who played, starting with EA FC, Mobile Legends and BGMI.",
+  },
+  {
+    title: "Confirm what Gamerie read",
+    copy: "Check the details and confirm. You can fix a score, but you can't turn a loss into a win.",
+  },
+  {
+    title: "It's on the record",
+    copy: "The match joins your record, and your GP, level and streak update from it. The screenshot stays private.",
+  },
+];
+
+export const proofLevels = [
+  { label: "Screenshot", copy: "Read by Gamerie from your result screen, then confirmed by you.", strength: 2 },
+  { label: "Challenge", copy: "Played as a Gamerie challenge, so both sides are already on the platform.", strength: 3 },
+  { label: "Tournament", copy: "Declared by one side and accepted by the other, or settled by the organiser.", strength: 3 },
 ];
 
 export const perks = [

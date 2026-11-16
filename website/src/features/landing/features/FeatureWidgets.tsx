@@ -1,53 +1,25 @@
-import { motion, useInView, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
-import { Icon, type IconName } from "@/components/ui/Icon";
+import { motion, useInView } from "motion/react";
+import { useRef, type CSSProperties } from "react";
+import { Icon } from "@/components/ui/Icon";
 import { easeOutExpo } from "@/components/ui/motion";
-import { Tag } from "@/components/ui/Tag";
 import { TokenMark } from "@/components/ui/TokenMark";
-import { cn } from "@/lib/cn";
 
-const insights: ReadonlyArray<{ icon: IconName; text: string; tag: string }> = [
-  { icon: "trophy", text: "Top 8% Controller in Valorant", tag: "Rank" },
-  { icon: "bolt", text: "Clutch rate up 12% this month", tag: "Trend" },
-  { icon: "spark", text: "Strongest on defence, map Ascent", tag: "Insight" },
-  { icon: "verified", text: "27 verified wins across 3 games", tag: "Record" },
+const highlights = [
+  { value: "Top 8%", label: "Controller rank in Valorant" },
+  { value: "+12%", label: "Clutch rate this month" },
+  { value: "27", label: "Verified wins across 3 games" },
 ];
 
-export function ProfileInsights() {
-  const ref = useRef<HTMLUListElement>(null);
-  const inView = useInView(ref, { amount: 0.4 });
-  const reducedMotion = useReducedMotion();
-  const [focus, setFocus] = useState(0);
-
-  useEffect(() => {
-    if (!inView || reducedMotion) return;
-    const id = window.setInterval(() => setFocus((value) => (value + 1) % insights.length), 2200);
-    return () => window.clearInterval(id);
-  }, [inView, reducedMotion]);
-
+export function ProfileHighlights() {
   return (
-    <ul ref={ref} className="grid gap-2">
-      {insights.map((insight, index) => (
-        <li
-          key={insight.text}
-          className={cn(
-            "flex items-center gap-3 rounded-2xl px-3.5 py-3 transition-colors duration-500",
-            focus === index ? "bg-white/8 text-mist-50" : "text-mist-400",
-          )}
-        >
-          <span
-            className={cn(
-              "grid size-8 shrink-0 place-items-center rounded-xl transition-colors duration-500",
-              focus === index ? "bg-lavender-400 text-ink-950" : "bg-white/6",
-            )}
-          >
-            <Icon name={insight.icon} className="size-4" />
-          </span>
-          <span className="min-w-0 flex-1 truncate text-sm font-medium">{insight.text}</span>
-          <Tag tone={focus === index ? "signal" : "muted"}>{insight.tag}</Tag>
-        </li>
+    <dl className="grid gap-7 border-t border-white/8 pt-7 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-white/8">
+      {highlights.map((highlight) => (
+        <div key={highlight.label} className="flex flex-col gap-3 sm:px-7 sm:first:pl-0 sm:last:pr-0">
+          <dt className="order-last text-sm leading-snug text-mist-400">{highlight.label}</dt>
+          <dd className="type-display text-[2rem] leading-none">{highlight.value}</dd>
+        </div>
       ))}
-    </ul>
+    </dl>
   );
 }
 
@@ -58,23 +30,23 @@ export function FitGauge({ value = 94 }: { value?: number }) {
   return (
     <div className="relative mx-auto grid size-44 place-items-center">
       <svg ref={ref} viewBox="0 0 120 120" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">
-        <circle cx="60" cy="60" r="52" fill="none" strokeWidth="9" className="stroke-ink-950/10" />
+        <circle cx="60" cy="60" r="54" fill="none" strokeWidth="5" className="stroke-ink-950/10" />
         <motion.circle
           cx="60"
           cy="60"
-          r="52"
+          r="54"
           fill="none"
-          strokeWidth="9"
+          strokeWidth="5"
           strokeLinecap="round"
           className="stroke-ink-950"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: inView ? value / 100 : 0 }}
-          transition={{ duration: 1.6, ease: easeOutExpo }}
+          transition={{ duration: 2, ease: easeOutExpo }}
         />
       </svg>
       <div className="text-center">
         <p className="type-display text-[2.6rem] leading-none">{value}%</p>
-        <p className="type-label mt-2 text-ink-950/60">Squad fit</p>
+        <p className="mt-2 text-sm text-ink-950/60">Squad fit</p>
       </div>
     </div>
   );
@@ -82,32 +54,25 @@ export function FitGauge({ value = 94 }: { value?: number }) {
 
 export function Scoreboard() {
   return (
-    <div className="rounded-2xl bg-ink-950 p-4 text-mist-50">
-      <div className="type-label flex items-center justify-between text-mist-400">
-        <span>Challenge · Bo1</span>
-        <Tag tone="signal">
-          <Icon name="verified" className="size-3.5" weight="bold" />
-          Verified
-        </Tag>
-      </div>
-      <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="grid size-8 place-items-center rounded-lg bg-lavender-400 text-ink-950">
-            <TokenMark className="h-5" />
-          </span>
+    <div className="rounded-2xl bg-ink-950 p-5 text-mist-50">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <TokenMark className="h-6 shrink-0 text-lavender-400" />
           <span className="truncate text-sm font-semibold">Lagos Lions</span>
         </div>
         <p className="type-display text-[1.75rem] leading-none">
           13<span className="mx-1.5 text-mist-500">:</span>
-          <span className="text-mist-400">9</span>
+          <span className="text-mist-500">9</span>
         </p>
-        <div className="flex items-center justify-end gap-2">
-          <span className="truncate text-right text-sm font-semibold text-mist-400">Northside</span>
-          <span className="grid size-8 place-items-center rounded-lg bg-white/8 text-mist-400">
-            <TokenMark className="h-5" />
-          </span>
+        <div className="flex min-w-0 items-center justify-end gap-2.5">
+          <span className="truncate text-sm font-semibold text-mist-400">Northside</span>
+          <TokenMark className="h-6 shrink-0 text-white/20" />
         </div>
       </div>
+      <p className="mt-4 flex items-center gap-1.5 border-t border-white/8 pt-4 text-sm text-signal">
+        <Icon name="verified" className="size-4" weight="duotone" />
+        Result verified
+      </p>
     </div>
   );
 }
@@ -122,13 +87,14 @@ const feedItems = [
 
 export function FeedTicker() {
   return (
-    <div className="h-44 overflow-hidden [mask-image:linear-gradient(transparent,black_18%,black_82%,transparent)]">
-      <div className="flex animate-marquee-y flex-col motion-reduce:animate-none">
+    <div className="h-44 overflow-hidden mask-[linear-gradient(transparent,black_20%,black_80%,transparent)]">
+      <div
+        className="flex animate-marquee-y flex-col motion-reduce:animate-none"
+        style={{ "--marquee-duration": "48s" } as CSSProperties}
+      >
         {[...feedItems, ...feedItems].map((item, index) => (
-          <div key={index} aria-hidden={index >= feedItems.length} className="flex items-center gap-3 py-2">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-lavender-200 text-lavender-700">
-              <TokenMark className="h-4.5" />
-            </span>
+          <div key={index} aria-hidden={index >= feedItems.length} className="flex items-center gap-3 py-2.5">
+            <TokenMark className="h-5 shrink-0 text-lavender-300" />
             <p className="text-sm leading-snug text-ink-700">
               <span className="font-semibold text-ink-950">{item.who}</span> {item.what}
             </p>
@@ -148,19 +114,11 @@ const hubs = [
 
 export function HubRow() {
   return (
-    <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      {hubs.map((hub, index) => (
-        <li key={hub.name} className="min-w-0 rounded-2xl bg-ink-950/4 p-3.5 ring-1 ring-inset ring-ink-950/8">
-          <span
-            className={cn(
-              "grid size-9 place-items-center rounded-xl",
-              index % 2 === 0 ? "bg-ink-950 text-lavender-400" : "bg-lavender-400 text-ink-950",
-            )}
-          >
-            <Icon name={index % 2 === 0 ? "team" : "hub"} className="size-4.5" />
-          </span>
-          <p className="mt-3 truncate text-sm font-semibold">{hub.name}</p>
-          <p className="type-label mt-1.5 text-ink-950/50">{hub.members} members</p>
+    <ul className="grid grid-cols-2 gap-y-5 border-t border-ink-950/10 pt-6 sm:grid-cols-4 sm:divide-x sm:divide-ink-950/10">
+      {hubs.map((hub) => (
+        <li key={hub.name} className="min-w-0 sm:px-5 sm:first:pl-0">
+          <p className="truncate text-sm font-semibold">{hub.name}</p>
+          <p className="mt-1 text-sm text-ink-700/70">{hub.members} members</p>
         </li>
       ))}
     </ul>
