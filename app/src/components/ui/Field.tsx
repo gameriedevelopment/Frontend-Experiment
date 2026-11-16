@@ -1,9 +1,9 @@
-import { forwardRef, useState, type InputHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useState, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 import { Icon } from "./Icon";
 
-const inputClasses =
-  "h-12 w-full rounded-2xl bg-white/[0.04] px-4 text-[0.95rem] text-mist-50 outline-none ring-1 ring-inset ring-white/10 transition-[background-color,box-shadow] duration-200 placeholder:text-mist-500 hover:ring-white/18 focus:bg-white/[0.06] focus:ring-2 focus:ring-lavender-400 aria-[invalid=true]:ring-danger/70";
+export const inputClasses =
+  "h-12 w-full rounded-2xl bg-white/4 px-4 text-[0.95rem] text-mist-50 outline-none ring-1 ring-inset ring-white/10 transition-[background-color,box-shadow] duration-200 placeholder:text-mist-500 hover:ring-white/18 focus:bg-white/6 focus:ring-2 focus:ring-lavender-400 aria-[invalid=true]:ring-danger/70";
 
 type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   id: string;
@@ -12,7 +12,7 @@ type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   labelAction?: ReactNode;
 };
 
-function FieldFrame({
+export function FieldFrame({
   id,
   label,
   error,
@@ -97,5 +97,45 @@ export const Checkbox = forwardRef<
       </span>
       {label}
     </label>
+  );
+});
+
+type TextAreaFieldProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  id: string;
+  label: string;
+  error?: string;
+  labelAction?: ReactNode;
+};
+
+export const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProps>(function TextAreaField(
+  { id, label, error, labelAction, className, maxLength, value, ...props },
+  ref,
+) {
+  const length = typeof value === "string" ? value.length : 0;
+  return (
+    <FieldFrame
+      id={id}
+      label={label}
+      error={error}
+      labelAction={
+        labelAction ??
+        (maxLength ? (
+          <span className="text-xs tabular-nums text-mist-500">
+            {length} / {maxLength}
+          </span>
+        ) : undefined)
+      }
+    >
+      <textarea
+        ref={ref}
+        id={id}
+        value={value}
+        maxLength={maxLength}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
+        className={cn(inputClasses, "h-auto min-h-28 resize-y py-3 leading-relaxed", className)}
+        {...props}
+      />
+    </FieldFrame>
   );
 });

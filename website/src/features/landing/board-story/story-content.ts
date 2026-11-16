@@ -52,9 +52,9 @@ export const cardMilestones = [
   { id: "role", at: 0.25, hud: "Role set · IGL" },
   { id: "level", at: 0.29, hud: "Level 12 reached" },
   { id: "fit", at: 0.47, hud: "3 strong fits found" },
-  { id: "team", at: 0.66, hud: "Joined Lagos Lions" },
+  { id: "team", at: 0.66, hud: "Joined Denver Drift" },
   { id: "roster", at: 0.71, hud: "Roster complete · 5/5" },
-  { id: "match", at: 0.87, hud: "Won 13–9 vs Northside" },
+  { id: "match", at: 0.87, hud: "Won 13–9 vs Chicago Halo" },
   { id: "verified", at: 0.92, hud: "Result verified" },
   { id: "record", at: 0.96, hud: "Level up · 13" },
 ] as const;

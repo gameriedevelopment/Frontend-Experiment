@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
+import { Link, type LinkProps } from "react-router-dom";
 import { cn } from "@/lib/cn";
 import { Icon, type IconName } from "./Icon";
 
@@ -132,5 +133,17 @@ export function Button({
         {children}
       </Content>
     </button>
+  );
+}
+
+type LinkButtonProps = SharedProps & Omit<LinkProps, "children">;
+
+export function LinkButton({ tone, size, icon, orb = false, className, children, ...props }: LinkButtonProps) {
+  return (
+    <Link className={cn(buttonVariants({ tone, size, withOrb: orb && Boolean(icon) }), className)} {...props}>
+      <Content icon={icon} orb={orb} tone={tone} size={size}>
+        {children}
+      </Content>
+    </Link>
   );
 }

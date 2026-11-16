@@ -11,7 +11,7 @@ import { AppNavLink } from "./AppNavLink";
 import { mobileMoreNavigation, mobileNavigation, type NavigationItem } from "./navigation";
 
 const sheetLink =
-  "flex flex-col items-center gap-2 rounded-2xl bg-white/[0.04] px-2 py-3.5 text-xs font-medium text-mist-200 ring-1 ring-inset ring-white/6 transition-colors hover:bg-white/[0.08]";
+  "flex flex-col items-center gap-2 rounded-2xl bg-white/4 px-2 py-3.5 text-xs font-medium text-mist-200 ring-1 ring-inset ring-white/6 transition-colors hover:bg-white/8";
 
 function DockLink({ item, unread }: { item: NavigationItem; unread: number }) {
   const showUnread = item.href === "/messages" && unread > 0;
@@ -143,7 +143,7 @@ export function MobileNavigation() {
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close"
-                  className="grid size-10 place-items-center rounded-full text-mist-300 hover:bg-white/[0.06]"
+                  className="grid size-10 place-items-center rounded-full text-mist-300 hover:bg-white/6"
                 >
                   <Icon name="close" className="size-5" />
                 </button>

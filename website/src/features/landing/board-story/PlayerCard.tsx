@@ -129,7 +129,7 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
               >
                 <div className="text-left">
                   <p className="type-display text-[1.9rem] leading-none tracking-[-0.02em]">Nova</p>
-                  <p className="mt-1.5 text-sm font-medium text-ink-950/70">@nova · Lagos, NG</p>
+                  <p className="mt-1.5 text-sm font-medium text-ink-950/70">@nova · Denver, US</p>
                 </div>
               </Unlockable>
             </div>
@@ -188,7 +188,7 @@ export function PlayerCard({ unlocked, className }: { unlocked: number; classNam
               <span className="grid size-6 place-items-center rounded-md bg-lavender-400 text-ink-950">
                 <Icon name="team" className="size-4" weight="bold" />
               </span>
-              <span className="text-sm font-semibold">Lagos Lions</span>
+              <span className="text-sm font-semibold">Denver Drift</span>
               <span className="font-mono text-xs text-mist-400">{has("roster") ? "5/5" : "4/5"}</span>
             </Row>
             <Row label="Last match" unlocked={has("match")}>

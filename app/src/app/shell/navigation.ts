@@ -7,6 +7,7 @@ export interface NavigationItem {
 }
 
 export const primaryNavigation: NavigationItem[] = [
+  { label: "Home", href: "/home", icon: "home" },
   { label: "Feed", href: "/feed", icon: "feed" },
   { label: "Discover", href: "/users", icon: "discover" },
   { label: "Games", href: "/games", icon: "games" },
@@ -25,19 +26,21 @@ export const secondaryNavigation: NavigationItem[] = [
 ];
 
 export const mobileNavigation: NavigationItem[] = [
-  { label: "Home", href: "/feed", icon: "feed" },
+  { label: "Home", href: "/home", icon: "home" },
+  { label: "Feed", href: "/feed", icon: "feed" },
   { label: "Discover", href: "/users", icon: "discover" },
-  { label: "Teams", href: "/teams", icon: "team" },
   { label: "Messages", href: "/messages", icon: "messages" },
 ];
 
 export const mobileMoreNavigation: NavigationItem[] = [
+  { label: "Teams", href: "/teams", icon: "team" },
   { label: "Games", href: "/games", icon: "games" },
   { label: "Hubs", href: "/hubs", icon: "hub" },
   ...secondaryNavigation.filter((item) => item.href !== "/messages"),
 ];
 
 export const pageTitles: Record<string, string> = {
+  "/home": "Home",
   "/feed": "Feed",
   "/users": "Discover players",
   "/games": "Games",

@@ -8,7 +8,7 @@ import { signOut } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/authStore";
 
 const menuItem =
-  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-mist-200 transition-colors hover:bg-white/[0.06] hover:text-mist-50";
+  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-mist-200 transition-colors hover:bg-white/6 hover:text-mist-50";
 
 export function ProfileMenu() {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ export function ProfileMenu() {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-2.5 rounded-full p-1 pr-1 transition-colors hover:bg-white/[0.05] sm:pr-3"
+        className="flex items-center gap-2.5 rounded-full p-1 pr-1 transition-colors hover:bg-white/5 sm:pr-3"
       >
         <Avatar src={user?.profileImage} name={user?.username ?? user?.email} online={user?.isOnline} size="sm" />
         <span className="hidden max-w-36 truncate text-sm font-semibold sm:block">{user?.username ?? "Player"}</span>

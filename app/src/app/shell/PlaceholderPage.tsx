@@ -22,7 +22,7 @@ export function PlaceholderPage() {
       <section className="relative isolate grid min-h-[24rem] place-items-center overflow-hidden rounded-panel bg-ink-900 px-6 py-16 text-center ring-1 ring-inset ring-white/6">
         <div
           aria-hidden="true"
-          className="halftone absolute inset-0 -z-10 text-lavender-400/[0.08] [mask-image:radial-gradient(60%_60%_at_50%_40%,black,transparent)]"
+          className="halftone absolute inset-0 -z-10 text-lavender-400/8 [mask-image:radial-gradient(60%_60%_at_50%_40%,black,transparent)]"
         />
         <div className="grid max-w-md justify-items-center gap-6">
           <span className="grid size-16 place-items-center rounded-2xl bg-ink-950 ring-1 ring-white/10">

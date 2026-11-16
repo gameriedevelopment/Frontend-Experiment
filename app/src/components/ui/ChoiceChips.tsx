@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 import { Icon } from "./Icon";
 
 const chipClasses =
-  "flex min-h-11 cursor-pointer select-none items-center justify-center gap-2 rounded-2xl bg-white/[0.04] px-4 py-2.5 text-center text-sm font-medium text-mist-300 ring-1 ring-inset ring-white/10 transition-[background-color,color,box-shadow] duration-200 hover:bg-white/[0.07] hover:text-mist-50 peer-checked:bg-lavender-400/12 peer-checked:text-mist-50 peer-checked:ring-lavender-400/70 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-lavender-400";
+  "flex min-h-11 cursor-pointer select-none items-center justify-center gap-2 rounded-2xl bg-white/4 px-4 py-2.5 text-center text-sm font-medium text-mist-300 ring-1 ring-inset ring-white/10 transition-[background-color,color,box-shadow] duration-200 hover:bg-white/7 hover:text-mist-50 peer-checked:bg-lavender-400/12 peer-checked:text-mist-50 peer-checked:ring-lavender-400/70 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-lavender-400";
 
 type ChipInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
   label: ReactNode;
@@ -42,7 +42,7 @@ export function ChoiceGroup({
   legend: string;
   hint?: string;
   error?: string;
-  columns?: 2 | 3 | 5;
+  columns?: 2 | 3 | 4 | 5;
   children: ReactNode;
 }) {
   return (
@@ -56,6 +56,7 @@ export function ChoiceGroup({
           "grid gap-2",
           columns === 2 && "grid-cols-2",
           columns === 3 && "grid-cols-2 sm:grid-cols-3",
+          columns === 4 && "grid-cols-2 sm:grid-cols-4",
           columns === 5 && "grid-cols-3 sm:grid-cols-5",
         )}
       >

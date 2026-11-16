@@ -33,13 +33,13 @@ function MatchCard({ step }: { step: number }) {
   return (
     <div className="rounded-2xl bg-[linear-gradient(140deg,var(--color-ink-700),var(--color-ink-900))] p-5 ring-1 ring-white/10 sm:p-7">
       <div className="flex items-center justify-between text-sm">
-        <span className="text-mist-400">Lagos Cup · Semi-final</span>
+        <span className="text-mist-400">Mile High Cup · Semi-final</span>
         <span className="text-mist-500">Valorant</span>
       </div>
       <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <TokenMark className="h-8 shrink-0 text-lavender-400" />
-          <span className="truncate font-semibold">Lagos Lions</span>
+          <span className="truncate font-semibold">Denver Drift</span>
         </div>
         <AnimatePresence mode="wait" initial={false}>
           <motion.p
@@ -61,7 +61,7 @@ function MatchCard({ step }: { step: number }) {
           </motion.p>
         </AnimatePresence>
         <div className="flex min-w-0 items-center justify-end gap-3">
-          <span className="truncate font-semibold text-mist-300">Northside</span>
+          <span className="truncate font-semibold text-mist-300">Chicago Halo</span>
           <TokenMark className="h-8 shrink-0 text-white/25" />
         </div>
       </div>
@@ -86,8 +86,8 @@ function ReadyPanel() {
 
 function ReportPanel() {
   const rows = [
-    { label: "Score declared by Lagos Lions", delay: 0.2 },
-    { label: "Accepted by Northside", delay: 1.1 },
+    { label: "Score declared by Denver Drift", delay: 0.2 },
+    { label: "Accepted by Chicago Halo", delay: 1.1 },
   ];
   return (
     <motion.div key="report" {...panel} className="rounded-2xl bg-white/4 p-2 ring-1 ring-inset ring-white/8">
@@ -116,7 +116,7 @@ function RecordPanel() {
         <div>
           <p className="text-sm text-mist-400">Valorant · Tournament</p>
           <p className="mt-1 text-lg font-semibold">
-            Victory 13–9 <span className="font-normal text-mist-400">vs Northside</span>
+            Victory 13–9 <span className="font-normal text-mist-400">vs Chicago Halo</span>
           </p>
         </div>
         <span className="flex items-center gap-2 text-sm text-signal">

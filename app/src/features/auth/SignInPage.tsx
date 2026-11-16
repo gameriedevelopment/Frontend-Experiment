@@ -62,7 +62,7 @@ export function SignInPage() {
         | undefined;
       const returnTo = previous?.pathname
         ? `${previous.pathname}${previous.search ?? ""}${previous.hash ?? ""}`
-        : "/feed";
+        : "/home";
       navigate(result.next === "verify-phone" ? "/verify-phone" : returnTo, { replace: true });
     } catch (error) {
       setRequiredProvider(getRequiredSocialProvider(error));

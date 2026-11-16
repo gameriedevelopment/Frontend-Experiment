@@ -33,7 +33,7 @@ function NavigationGroup({
               cn(
                 "relative flex h-10 items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-200",
                 collapsed ? "justify-center" : "px-3",
-                isActive ? "bg-white/[0.07] text-mist-50" : "text-mist-400 hover:bg-white/[0.04] hover:text-mist-50",
+                isActive ? "bg-white/7 text-mist-50" : "text-mist-400 hover:bg-white/4 hover:text-mist-50",
               )
             }
           >
@@ -73,8 +73,8 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
       )}
     >
       <AppNavLink
-        to="/feed"
-        aria-label="Gamerie feed"
+        to="/home"
+        aria-label="Gamerie home"
         className={cn("flex h-16 shrink-0 items-center gap-2.5", collapsed ? "justify-center" : "px-6")}
       >
         <TokenMark className="h-6 text-lavender-400" />
@@ -91,7 +91,7 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
           to={profileHref}
           title={collapsed ? "Your profile" : undefined}
           className={cn(
-            "flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-white/[0.05]",
+            "flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-white/5",
             collapsed && "justify-center",
           )}
         >
@@ -109,7 +109,7 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className={cn(
-            "flex h-9 items-center gap-3 rounded-xl text-[0.8rem] text-mist-500 transition-colors hover:bg-white/[0.04] hover:text-mist-200",
+            "flex h-9 items-center gap-3 rounded-xl text-[0.8rem] text-mist-500 transition-colors hover:bg-white/4 hover:text-mist-200",
             collapsed ? "justify-center" : "px-3",
           )}
         >

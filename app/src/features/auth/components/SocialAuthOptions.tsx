@@ -42,7 +42,7 @@ export function SocialAuthOptions({
             aria-label={`${verb} with ${provider.label}${provider.available ? "" : ", unavailable"}`}
             title={provider.available ? undefined : "Apple sign in is not available yet"}
             className={cn(
-              "flex h-11 items-center justify-center gap-2.5 rounded-2xl bg-white/[0.04] text-sm font-medium text-mist-50 ring-1 ring-inset ring-white/10 transition-[background-color,box-shadow] duration-200 hover:bg-white/[0.08] hover:ring-white/20 disabled:cursor-not-allowed",
+              "flex h-11 items-center justify-center gap-2.5 rounded-2xl bg-white/4 text-sm font-medium text-mist-50 ring-1 ring-inset ring-white/10 transition-[background-color,box-shadow] duration-200 hover:bg-white/8 hover:ring-white/20 disabled:cursor-not-allowed",
               !provider.available && "opacity-45",
             )}
           >

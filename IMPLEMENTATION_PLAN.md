@@ -97,7 +97,8 @@ app/src/
   app/            App.tsx (routes), shell/ (sidebar, header, profile menu, mobile dock, placeholder)
   components/ui/  Button, Card, Tag, Icon, TokenMark, Field, Notice, Avatar, Loader, PageHeader
   config/ lib/    links, API client, errors, cn
-  features/       auth/, messages/ and notifications/ (unread counts only so far)
+  features/       auth/, home/, profile/, challenges/, plus data-only progression/, calendar/,
+                  communities/, discovery/, games/, tournaments/, messages/, notifications/
   styles/         theme.css
 ```
 
@@ -110,6 +111,14 @@ npm run dev            # http://localhost:5179
 
 ### Status
 
-- **Done:** the signed-in layout (collapsible sidebar, header with search and unread counts, profile menu, mobile dock and "More" sheet) and sign-in, with validation, server and session-expired states.
-- **Hands off to the live app:** register, password reset, email and phone verification, and the social sign-in callback. Every product route exists with its real path but shows a placeholder that opens the same path in the live app until it's rebuilt.
-- **Next:** the profile and Player Card, then challenge detail. Each screen gets new-player, loading, empty, error and populated states, and is lazy-loaded the way the revamp app does it.
+- **Done:**
+  - **Home** (`/home`), where players land after sign-in, sign-up and the root URL. A new player gets a six-step setup (main game, linked game account, photo, follow three players, team, first challenge). Each step shows the GP the backend's live rules award for it, and is marked done from real data. The setup can be hidden, and finished steps fold away. Returning players get "Needs you" (incoming challenges, team and hub invites with accept/decline), "Up next" from their calendar, a level and GP card with a "Ways to earn GP" guide, players to follow, and their teams. Feed stays its own page. Home also has a "Start something" row (challenge, tournament, log a match, team) and an "Open for entry" list of hosted tournaments, and a hidden setup list can be brought back from the level card.
+  - **Challenges** (`/challenges`, `/challenges/:id`). The inbox has For you, Team and History tabs, search, and direction/status filters. For you is grouped into Needs you, Coming up and Waiting on others. Each challenge is a ticket with one-tap accept/decline. The detail page shows a versus stage (with the score once played), a Sent → Accepted → Played → Result timeline, the terms, team lineups with a picker, and a "next step" panel. That panel covers accept/decline, submitting the score on a scoreboard, proposing or answering a new time, sending an expired challenge again, cancel/delete, reporting a result, and messaging the opponent. The composer (`?compose=user|team&target=…`) searches opponents and games, suggests your own games, and has a day-and-time picker in your time zone. Behaviour matches the revamp's lifecycle rules.
+  - The signed-in layout (collapsible sidebar, header with search and unread counts, profile menu, mobile dock and "More" sheet).
+  - Sign-in, three-step sign-up (live password checklist, chips, segmented date-of-birth field), and verify-email.
+  - **Profile** (`/profile/:username`): cover and identity header, follow/message/challenge, followers and following dialog, completion meter, and URL-backed tabs (Overview with skill endorsements, Games and rankings, recorded Matches with their source, Achievements with reward claiming). The Player Card is pinned beside it on large screens.
+  - **Public Player Card** (`/card/:username`, `/s/:username`) with copy link and share.
+- **Hands off to the live app:** password reset, phone verification, the social sign-in callback, the profile Career and Posts tabs, game management, and every product route not yet rebuilt.
+- **Fixed during the port:** match rows label tournament results as "Tournament result". The revamp labelled anything that wasn't a challenge or organiser result as "Screenshot verified".
+- **Shared UI added:** Tabs, Segmented, Combobox, ScheduleField, TextAreaField, ConfirmDialog, and Dialog sizes and footers.
+- **Next:** tournaments (browse, detail, register), then profile Career and Posts, and a PNG export for the new Player Card design.

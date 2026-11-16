@@ -50,14 +50,14 @@ export function Scoreboard() {
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <TokenMark className="h-6 shrink-0 text-lavender-400" />
-          <span className="truncate text-sm font-semibold">Lagos Lions</span>
+          <span className="truncate text-sm font-semibold">Denver Drift</span>
         </div>
         <p className="type-display text-[1.75rem] leading-none">
           13<span className="mx-1.5 text-mist-500">:</span>
           <span className="text-mist-500">9</span>
         </p>
         <div className="flex min-w-0 items-center justify-end gap-2.5">
-          <span className="truncate text-sm font-semibold text-mist-400">Northside</span>
+          <span className="truncate text-sm font-semibold text-mist-400">Chicago Halo</span>
           <TokenMark className="h-6 shrink-0 text-white/20" />
         </div>
       </div>
@@ -70,11 +70,11 @@ export function Scoreboard() {
 }
 
 const feedItems = [
-  { who: "Lagos Lions", what: "won a Valorant challenge 13–9" },
-  { who: "@kemi.gg", what: "reached Level 20" },
-  { who: "Naija Chess Club", what: "opened a rapid tournament" },
-  { who: "@tobi", what: "joined Lagos Lions" },
-  { who: "Abuja Aces", what: "posted a new ladder fixture" },
+  { who: "Denver Drift", what: "won a Valorant challenge 13–9" },
+  { who: "@kai.gg", what: "reached Level 20" },
+  { who: "Bay Area Chess Club", what: "opened a rapid tournament" },
+  { who: "@jordan", what: "joined Denver Drift" },
+  { who: "Brooklyn Static", what: "posted a new ladder fixture" },
 ];
 
 export function FeedTicker() {
@@ -98,9 +98,9 @@ export function FeedTicker() {
 }
 
 const hubs = [
-  { name: "Lagos Lions", members: "48" },
-  { name: "Naija Chess Club", members: "1.2k" },
-  { name: "Valorant NG", members: "3.4k" },
+  { name: "Denver Drift", members: "48" },
+  { name: "Bay Area Chess Club", members: "1.2k" },
+  { name: "Valorant West", members: "3.4k" },
   { name: "Weekend League", members: "620" },
 ];
 
@@ -140,13 +140,13 @@ export function Bracket() {
   return (
     <div aria-hidden="true" className="flex items-center">
       <div className="grid min-w-0 flex-1 gap-3">
-        <BracketMatch sides={["Lagos Lions", "Northside"]} winner={0} />
-        <BracketMatch sides={["Abuja Aces", "Kings XI"]} winner={0} />
+        <BracketMatch sides={["Denver Drift", "Chicago Halo"]} winner={0} />
+        <BracketMatch sides={["Brooklyn Static", "Austin Ember"]} winner={0} />
       </div>
       <span className="h-21 w-4 shrink-0 rounded-r-lg border-y border-r border-white/15" />
       <span className="h-px w-3 shrink-0 bg-white/15" />
       <div className="min-w-0 flex-1">
-        <BracketMatch sides={["Lagos Lions", "Abuja Aces"]} winner={0} />
+        <BracketMatch sides={["Denver Drift", "Brooklyn Static"]} winner={0} />
       </div>
     </div>
   );

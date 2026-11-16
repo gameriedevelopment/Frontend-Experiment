@@ -29,7 +29,7 @@ export function VerifyEmailPage() {
   const turnstileBlocking = turnstileRequired && !turnstileToken && !turnstileFailed;
 
   useEffect(() => {
-    if (user?.emailVerified) navigate("/feed", { replace: true });
+    if (user?.emailVerified) navigate("/home", { replace: true });
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
     };

@@ -10,7 +10,7 @@ import { AppNavLink } from "./AppNavLink";
 import { ProfileMenu } from "./ProfileMenu";
 
 const iconButton =
-  "relative grid size-10 place-items-center rounded-full text-mist-300 transition-colors hover:bg-white/[0.06] hover:text-mist-50";
+  "relative grid size-10 place-items-center rounded-full text-mist-300 transition-colors hover:bg-white/6 hover:text-mist-50";
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -29,7 +29,7 @@ function CountLink({ to, icon, label, count }: { to: string; icon: IconName; lab
     <AppNavLink
       to={to}
       aria-label={count ? `${label}, ${count} unread` : label}
-      className={({ isActive }) => cn(iconButton, isActive && "bg-white/[0.07] text-mist-50")}
+      className={({ isActive }) => cn(iconButton, isActive && "bg-white/7 text-mist-50")}
     >
       <Icon name={icon} className="size-[1.2rem]" />
       <CountBadge count={count} />
@@ -59,14 +59,14 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-white/6 bg-ink-950/75 px-4 backdrop-blur-xl sm:px-6 lg:px-10">
-      <AppNavLink to="/feed" aria-label="Gamerie feed" className="flex items-center gap-2.5 lg:hidden">
+      <AppNavLink to="/home" aria-label="Gamerie home" className="flex items-center gap-2.5 lg:hidden">
         <TokenMark className="h-6 text-lavender-400" />
         <span className="type-display text-[1rem] tracking-[0.04em]">Gamerie</span>
       </AppNavLink>
 
       <Link
         to="/search"
-        className="hidden h-10 w-full max-w-md items-center gap-3 rounded-full bg-white/[0.04] px-4 text-sm text-mist-400 ring-1 ring-inset ring-white/8 transition-colors hover:bg-white/[0.07] hover:text-mist-200 sm:flex"
+        className="hidden h-10 w-full max-w-md items-center gap-3 rounded-full bg-white/4 px-4 text-sm text-mist-400 ring-1 ring-inset ring-white/8 transition-colors hover:bg-white/7 hover:text-mist-200 sm:flex"
       >
         <Icon name="search" className="size-4" />
         Search players, teams and games

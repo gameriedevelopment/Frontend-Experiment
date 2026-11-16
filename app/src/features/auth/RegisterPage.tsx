@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/Button";
 import { ChoiceChip, ChoiceGroup } from "@/components/ui/ChoiceChips";
+import { DateField } from "@/components/ui/DateField";
 import { Checkbox, PasswordField, TextField } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { easeOutExpo } from "@/components/ui/motion";
@@ -168,6 +169,7 @@ export function RegisterPage() {
     trigger,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<RegistrationFields>({
     resolver: zodResolver(registrationSchema),
@@ -298,14 +300,19 @@ export function RegisterPage() {
                   error={errors.email?.message}
                   {...register("email")}
                 />
-                <TextField
-                  id="date-of-birth"
-                  label="Date of birth"
-                  type="date"
-                  autoComplete="bday"
-                  max={new Date().toISOString().split("T")[0]}
-                  error={errors.dateOfBirth?.message}
-                  {...register("dateOfBirth")}
+                <Controller
+                  name="dateOfBirth"
+                  control={control}
+                  render={({ field }) => (
+                    <DateField
+                      id="date-of-birth"
+                      label="Date of birth"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      error={errors.dateOfBirth?.message}
+                    />
+                  )}
                 />
               </>
             )}
