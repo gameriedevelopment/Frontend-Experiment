@@ -64,7 +64,7 @@ export function Menu({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -4, scale: 0.98 }}
               transition={{ duration: 0.15 }}
-              className="z-60 max-h-80 min-w-44 overflow-y-auto rounded-2xl bg-ink-800 p-1.5 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] ring-1 ring-white/10 scrollbar-thin scrollbar-thumb-white/12 scrollbar-track-transparent"
+              className="z-60 max-h-80 min-w-44 overflow-y-auto overscroll-contain rounded-2xl bg-ink-800 p-1.5 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] ring-1 ring-white/10 scrollbar-thin scrollbar-thumb-white/12 scrollbar-track-transparent"
             >
               {items.map((item) => (
                 <li key={item.label} role="none">

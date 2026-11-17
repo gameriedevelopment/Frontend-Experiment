@@ -81,7 +81,7 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
         {!collapsed && <span className="type-display text-[1.05rem] tracking-[0.04em]">Gamerie</span>}
       </AppNavLink>
 
-      <div className="flex flex-1 flex-col gap-7 overflow-y-auto px-3 py-5 scrollbar-none">
+      <div className="flex flex-1 flex-col gap-7 overflow-y-auto overscroll-contain px-3 py-5 scrollbar-none">
         <NavigationGroup label="Network" items={primaryNavigation} collapsed={collapsed} />
         <NavigationGroup label="Your space" items={secondaryNavigation} collapsed={collapsed} />
       </div>

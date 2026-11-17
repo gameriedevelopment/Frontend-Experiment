@@ -171,7 +171,7 @@ export function DangerZone({ kind, item }: { kind: CommunityKind; item: Communit
             {dialog === "transfer" && (
               <fieldset className="grid min-w-0 gap-2">
                 <legend className="mb-2 text-sm font-medium">New owner</legend>
-                <div className="grid max-h-60 gap-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/12">
+                <div className="grid max-h-60 gap-1.5 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-white/12">
                   {candidates.map((member) => (
                     <label
                       key={memberUserId(member)}

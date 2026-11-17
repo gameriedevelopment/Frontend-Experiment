@@ -57,7 +57,7 @@ export function NotificationsPopover({ trigger, className }: { trigger: ReactNod
                 Mark all read
               </button>
             </header>
-            <div className="max-h-[min(28rem,70vh)] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-white/12">
+            <div className="max-h-[min(28rem,70vh)] overflow-y-auto overscroll-contain p-1.5 scrollbar-thin scrollbar-thumb-white/12">
               {query.isLoading ? (
                 <div aria-hidden="true" className="grid gap-1.5 p-1.5">
                   {Array.from({ length: 4 }, (_, index) => (

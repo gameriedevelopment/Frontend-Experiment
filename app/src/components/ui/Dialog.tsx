@@ -161,7 +161,7 @@ export function Dialog({
             {children && (
               <div
                 className={cn(
-                  "relative min-h-0 flex-1 overflow-y-auto border-t border-white/6 px-6 py-5 scrollbar-thumb-white/12 scrollbar-track-transparent scrollbar-thin",
+                  "relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain border-t border-white/6 px-6 py-5 scrollbar-thumb-white/12 scrollbar-track-transparent scrollbar-thin",
                   bodyClassName,
                 )}
               >

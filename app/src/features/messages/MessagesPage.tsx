@@ -46,9 +46,9 @@ export function MessagesPage() {
   const back = () => setParams({ tab }, { replace: true });
 
   return (
-    <div className="-mx-4 -mb-32 -mt-8 h-[calc(100svh-4rem)] sm:-mx-6 lg:-mx-10 lg:-mb-16 lg:-mt-10">
+    <div className="-mx-4 -mb-[calc(8rem+env(safe-area-inset-bottom))] -mt-8 h-[calc(100svh-4rem)] sm:-mx-6 lg:-mx-10 lg:-mb-16 lg:-mt-10">
       <div className="grid h-full grid-cols-[minmax(0,1fr)] lg:grid-cols-[22rem_minmax(0,1fr)]">
-        <aside className={cn("min-h-0 border-white/6 pb-24 lg:border-r lg:pb-0", selectedId && "hidden lg:block")}>
+        <aside className={cn("min-h-0 border-white/6 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:border-r lg:pb-0", selectedId && "hidden lg:block")}>
           <ConversationList
             tab={tab}
             onTab={(next) => {

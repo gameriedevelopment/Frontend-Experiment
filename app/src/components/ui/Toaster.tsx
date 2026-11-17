@@ -17,7 +17,7 @@ export function Toaster() {
   return createPortal(
     <div
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-4 bottom-28 z-60 flex flex-col items-center gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:items-end lg:bottom-8 lg:right-8"
+      className="pointer-events-none fixed inset-x-4 bottom-[calc(7rem+env(safe-area-inset-bottom))] z-60 flex flex-col items-center gap-2 sm:inset-x-auto sm:right-6 sm:items-end lg:bottom-8 lg:right-8"
     >
       <AnimatePresence initial={false}>
         {toasts.map((item) => {

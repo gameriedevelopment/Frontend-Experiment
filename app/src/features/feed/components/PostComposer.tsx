@@ -155,7 +155,7 @@ export function PostComposer({
             }}
             placeholder={placeholder}
             className={cn(
-              "field-sizing-content block w-full resize-none bg-transparent py-2 text-[0.95rem] leading-relaxed outline-none placeholder:text-mist-500",
+              "field-sizing-content block w-full resize-none bg-transparent py-2 text-[0.95rem] leading-relaxed outline-none placeholder:text-mist-500 pointer-coarse:text-base",
               expanded ? "min-h-24" : "min-h-10",
             )}
           />

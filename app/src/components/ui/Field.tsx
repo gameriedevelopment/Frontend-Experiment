@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 import { Icon } from "./Icon";
 
 export const inputClasses =
-  "h-12 w-full rounded-2xl bg-white/4 px-4 text-[0.95rem] text-mist-50 outline-none ring-1 ring-inset ring-white/10 transition-[background-color,box-shadow] duration-200 placeholder:text-mist-500 hover:ring-white/18 focus:bg-white/6 focus:ring-2 focus:ring-lavender-400 aria-[invalid=true]:ring-danger/70";
+  "h-12 w-full min-w-0 appearance-none rounded-2xl bg-white/4 px-4 text-[0.95rem] text-mist-50 outline-none pointer-coarse:text-base [&::-webkit-date-and-time-value]:text-left ring-1 ring-inset ring-white/10 transition-[background-color,box-shadow] duration-200 placeholder:text-mist-500 hover:ring-white/18 focus:bg-white/6 focus:ring-2 focus:ring-lavender-400 aria-[invalid=true]:ring-danger/70";
 
 type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   id: string;

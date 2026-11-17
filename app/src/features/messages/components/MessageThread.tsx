@@ -211,7 +211,7 @@ function Composer({
               if (event.key === "Escape" && context) onCancelContext();
             }}
             placeholder={announcement ? "Write an announcement for the team" : "Write a message"}
-            className="field-sizing-content block max-h-40 min-h-9 w-full resize-none bg-transparent py-1.5 text-[0.95rem] outline-none placeholder:text-mist-500"
+            className="field-sizing-content block max-h-40 min-h-9 w-full resize-none bg-transparent py-1.5 text-[0.95rem] outline-none pointer-coarse:text-base placeholder:text-mist-500"
           />
         </label>
         <EmojiButton onPick={(emoji) => setContent((current) => insertAtCursor(ref.current, current, emoji, 4000))} />
@@ -462,7 +462,7 @@ export function MessageThread({
         {menu.length > 0 && <Menu label="Conversation options" items={menu} />}
       </header>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-white/12 scrollbar-track-transparent sm:px-6">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 scrollbar-thin scrollbar-thumb-white/12 scrollbar-track-transparent sm:px-6">
         {loading ? (
           <div aria-hidden="true" className="grid gap-3">
             <Skeleton className="h-10 w-2/3 rounded-2xl" />

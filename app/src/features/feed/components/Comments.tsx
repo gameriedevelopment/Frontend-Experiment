@@ -98,7 +98,7 @@ function CommentRow({
                         save();
                       }
                     }}
-                    className="field-sizing-content block max-h-40 min-h-10 w-full resize-none rounded-xl bg-ink-950/60 px-3 py-2 text-sm outline-none ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-lavender-400"
+                    className="field-sizing-content block max-h-40 min-h-10 w-full resize-none rounded-xl bg-ink-950/60 px-3 py-2 text-sm outline-none pointer-coarse:text-base ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-lavender-400"
                   />
                 </label>
                 <div className="flex items-center justify-end gap-3 text-xs font-medium">
@@ -257,7 +257,7 @@ export function Comments({ post, type }: { post: FeedPost; type: PostOwnerType }
                 }
               }}
               placeholder="Write a comment"
-              className="field-sizing-content block max-h-40 min-h-11 w-full resize-none rounded-2xl bg-white/4 py-2.5 pl-4 pr-20 text-sm outline-none ring-1 ring-inset ring-white/10 placeholder:text-mist-500 focus:ring-2 focus:ring-lavender-400"
+              className="field-sizing-content block max-h-40 min-h-11 w-full resize-none rounded-2xl bg-white/4 py-2.5 pl-4 pr-20 text-sm outline-none pointer-coarse:text-base ring-1 ring-inset ring-white/10 placeholder:text-mist-500 focus:ring-2 focus:ring-lavender-400"
             />
             <EmojiButton
               onPick={(emoji) => setContent((current) => insertAtCursor(inputRef.current, current, emoji, 2000))}

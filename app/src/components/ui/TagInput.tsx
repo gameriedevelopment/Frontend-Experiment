@@ -47,7 +47,7 @@ export function TagInput({
             }
           }}
           placeholder={placeholder}
-          className="h-11 min-w-0 flex-1 rounded-2xl bg-white/4 px-4 text-sm outline-none ring-1 ring-inset ring-white/10 placeholder:text-mist-500 focus:ring-2 focus:ring-lavender-400"
+          className="h-11 min-w-0 flex-1 rounded-2xl bg-white/4 px-4 text-sm outline-none pointer-coarse:text-base ring-1 ring-inset ring-white/10 placeholder:text-mist-500 focus:ring-2 focus:ring-lavender-400"
         />
         <Button tone="outline" size="sm" icon="plus" className="h-11" disabled={!draft.trim() || values.length >= max} onClick={add}>
           Add

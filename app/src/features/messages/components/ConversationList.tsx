@@ -73,7 +73,7 @@ export function ConversationList({
         </label>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 scrollbar-thin scrollbar-thumb-white/12 scrollbar-track-transparent">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-3 scrollbar-thin scrollbar-thumb-white/12 scrollbar-track-transparent">
         {loading ? (
           <div aria-hidden="true" className="grid gap-1 px-2">
             {Array.from({ length: 6 }, (_, index) => (

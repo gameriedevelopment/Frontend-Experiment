@@ -40,7 +40,7 @@ export function SaveBar({ dirty, saving, onDiscard, onSave }: { dirty: boolean; 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}
           transition={{ duration: 0.18 }}
-          className="sticky bottom-24 z-30 lg:bottom-6"
+          className="sticky bottom-[calc(6rem+env(safe-area-inset-bottom))] z-30 lg:bottom-6"
         >
           <div role="region" aria-label="Unsaved changes" className="flex items-center gap-2 rounded-2xl bg-ink-800/95 p-2 pl-4 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] ring-1 ring-white/10 backdrop-blur">
             <p className="min-w-0 flex-1 truncate text-sm text-mist-200">Unsaved changes</p>

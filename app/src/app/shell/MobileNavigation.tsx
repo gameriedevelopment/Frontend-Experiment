@@ -99,7 +99,7 @@ export function MobileNavigation() {
     <>
       <nav
         aria-label="Primary navigation"
-        className="fixed inset-x-3 bottom-3 z-40 flex items-stretch rounded-[1.4rem] bg-ink-900/85 px-1.5 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1 shadow-[0_20px_60px_-15px_rgb(0_0_0/0.8)] ring-1 ring-white/10 backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex items-stretch rounded-[1.4rem] bg-ink-900/85 px-1.5 py-1 shadow-[0_20px_60px_-15px_rgb(0_0_0/0.8)] ring-1 ring-white/10 backdrop-blur-xl lg:hidden"
       >
         {mobileNavigation.map((item) => (
           <DockLink key={item.href} item={item} unread={unread} />
@@ -129,7 +129,7 @@ export function MobileNavigation() {
             />
             <m.section
               ref={sheetRef}
-              className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto rounded-t-panel bg-ink-900 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3 ring-1 ring-white/10"
+              className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto overscroll-contain rounded-t-panel bg-ink-900 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3 ring-1 ring-white/10"
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}

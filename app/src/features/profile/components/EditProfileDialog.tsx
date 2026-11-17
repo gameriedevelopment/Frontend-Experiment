@@ -235,7 +235,7 @@ export function EditProfileDialog({ profile, section, onSection, onClose }: { pr
         )
       }
     >
-      <div className="grid min-h-0 sm:grid-cols-[13rem_minmax(0,1fr)]">
+      <div className="grid min-h-0 grid-cols-[minmax(0,1fr)] sm:grid-cols-[13rem_minmax(0,1fr)]">
         <nav aria-label="Profile sections" className="border-b border-white/6 p-3 sm:border-b-0 sm:border-r">
           <ul className="relative flex gap-1 overflow-x-auto scrollbar-none sm:grid">
             {sections.map((item) => (
@@ -357,7 +357,7 @@ export function EditProfileDialog({ profile, section, onSection, onClose }: { pr
                         }
                       }}
                       placeholder="Shotcalling, entry fragging, 2v2 rotations…"
-                      className="h-11 w-full rounded-2xl bg-white/4 px-4 text-sm outline-none ring-1 ring-inset ring-white/10 placeholder:text-mist-500 focus:ring-2 focus:ring-lavender-400"
+                      className="h-11 w-full rounded-2xl bg-white/4 px-4 text-sm outline-none pointer-coarse:text-base ring-1 ring-inset ring-white/10 placeholder:text-mist-500 focus:ring-2 focus:ring-lavender-400"
                     />
                   </label>
                   <Button tone="outline" size="sm" icon="plus" className="h-11" disabled={!skillDraft.trim() || skills.fields.length >= 20} onClick={addSkill}>

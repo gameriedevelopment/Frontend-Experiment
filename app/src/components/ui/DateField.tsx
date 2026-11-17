@@ -159,7 +159,7 @@ export function DateField({
               onPaste={onPaste}
               onFocus={(event) => event.currentTarget.select()}
               className={cn(
-                "bg-transparent text-center text-[0.95rem] tabular-nums text-mist-50 outline-none placeholder:text-mist-500",
+                "bg-transparent text-center text-[0.95rem] tabular-nums pointer-coarse:text-base text-mist-50 outline-none placeholder:text-mist-500",
                 partMeta[part].width,
               )}
             />

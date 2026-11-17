@@ -145,7 +145,7 @@ export function ScheduleStep({ form, update, errors }: StepProps) {
                         onChange={(event) =>
                           setSplit(s.split.map((item, i) => (i === index ? { ...item, amount: event.target.value.replace(/[^\d.]/g, "") } : item)))
                         }
-                        className="h-10 rounded-xl bg-white/4 px-3 text-sm tabular-nums outline-none ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-lavender-400"
+                        className="h-10 rounded-xl bg-white/4 px-3 text-sm tabular-nums outline-none pointer-coarse:text-base ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-lavender-400"
                       />
                       <button
                         type="button"

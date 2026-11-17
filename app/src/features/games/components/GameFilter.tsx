@@ -51,10 +51,10 @@ export function GameFilter({ value, onChange }: { value: string; onChange: (name
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search games"
-                className="h-10 w-full rounded-xl bg-white/5 pl-9 pr-3 text-sm outline-none ring-1 ring-inset ring-white/8 placeholder:text-mist-500 focus:ring-lavender-400/60"
+                className="h-10 w-full rounded-xl bg-white/5 pl-9 pr-3 text-sm outline-none pointer-coarse:text-base ring-1 ring-inset ring-white/8 placeholder:text-mist-500 focus:ring-lavender-400/60"
               />
             </label>
-            <ul role="listbox" aria-label="Games" className="mt-1.5 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/12">
+            <ul role="listbox" aria-label="Games" className="mt-1.5 max-h-72 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-white/12">
               {!query.trim() && (
                 <li role="presentation" className="type-label px-3 pb-1 pt-2 text-mist-500">
                   Popular games

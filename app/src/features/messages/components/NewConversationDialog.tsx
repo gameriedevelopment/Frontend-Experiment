@@ -66,7 +66,7 @@ export function NewConversationDialog({ open, onClose, onCreated }: { open: bool
           <Icon name="search" className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-mist-500" />
           <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={type === "user" ? "Search players by username" : "Search teams by name"} className={cn(inputClasses, "pl-11")} />
         </label>
-        <ul className="-mx-2 grid max-h-80 min-h-40 content-start overflow-y-auto scrollbar-thin scrollbar-thumb-white/12">
+        <ul className="-mx-2 grid max-h-80 min-h-40 content-start overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-white/12">
           {term.length < 2 ? (
             <li className="px-4 py-10 text-center text-sm text-mist-500">Type at least two letters to search.</li>
           ) : results.isLoading ? (

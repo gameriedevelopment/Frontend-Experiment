@@ -166,7 +166,7 @@ export function Combobox({
           <ul
             id={listId}
             role="listbox"
-            className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-20 max-h-72 overflow-y-auto rounded-2xl bg-ink-800 p-1.5 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] ring-1 ring-white/10"
+            className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-20 max-h-72 overflow-y-auto overscroll-contain rounded-2xl bg-ink-800 p-1.5 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] ring-1 ring-white/10"
           >
             {browsing && browseLabel && options.length > 0 && (
               <li role="presentation" className="type-label px-3 pb-1.5 pt-2 text-mist-500">
