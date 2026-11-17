@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { trackPageView } from "@/lib/analytics";
 import { pageTitles } from "./navigation";
 
 function titleFor(pathname: string) {
@@ -8,12 +9,13 @@ function titleFor(pathname: string) {
   return pageTitles[pathname] ?? pageTitles[`/${pathname.split("/")[1] ?? ""}`];
 }
 
-/** Names the browser tab after the section, so history, bookmarks and tabs stay readable. */
+/** Names the browser tab after the section and reports the view to analytics. */
 export function RouteTitle() {
   const { pathname } = useLocation();
   useEffect(() => {
     const title = titleFor(pathname);
     document.title = title ? `${title} · Gamerie` : "Gamerie";
+    trackPageView(pathname);
   }, [pathname]);
   return null;
 }

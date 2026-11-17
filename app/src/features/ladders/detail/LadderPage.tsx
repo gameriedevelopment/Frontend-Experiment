@@ -13,6 +13,7 @@ import { cn, titleSize } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { LadderStatusBadge } from "../components/LadderBits";
 import { useLadder, useLadderAction, useLadderAnnouncements, useLadderParticipants, useLadderStandings } from "../hooks";
 import type { LadderChallenge, LadderDetail, LadderParticipant } from "../types";
@@ -265,6 +266,7 @@ export function LadderPage() {
   const [reporting, setReporting] = useState<LadderChallenge | null>(null);
   const [withdrawing, setWithdrawing] = useState(false);
   const ladder = query.data;
+  useDocumentTitle(ladder?.name);
   const tabs = useMemo(() => (ladder?.viewer.isOrganizer ? [...baseTabs, { id: "manage" as const, label: "Manage" }] : baseTabs), [ladder?.viewer.isOrganizer]);
   const requested = params.get("tab") as Tab | null;
   const tab: Tab = tabs.some((item) => item.id === requested) ? requested! : "overview";

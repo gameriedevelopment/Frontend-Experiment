@@ -1,24 +1,37 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RealtimeBridge } from "@/features/messages/RealtimeBridge";
 import { cn } from "@/lib/cn";
 import { AppHeader } from "./AppHeader";
 import { AppSidebar } from "./AppSidebar";
 import { MobileNavigation } from "./MobileNavigation";
 import { RouteScrollManager } from "./RouteScrollManager";
-import { RouteTitle } from "./RouteTitle";
 import { useHeartbeat } from "./useHeartbeat";
 
 const collapsedKey = "Gamerie_sidebar_collapsed";
 
+function readCollapsed() {
+  try {
+    return localStorage.getItem(collapsedKey) === "true";
+  } catch {
+    return false;
+  }
+}
+
 export function AppShell() {
   useHeartbeat();
-  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(collapsedKey) === "true");
+  const { pathname } = useLocation();
+  const [collapsed, setCollapsed] = useState(readCollapsed);
 
   const toggleSidebar = () => {
     setCollapsed((current) => {
       const next = !current;
-      localStorage.setItem(collapsedKey, String(next));
+      try {
+        localStorage.setItem(collapsedKey, String(next));
+      } catch {
+        // The preference just won't persist.
+      }
       return next;
     });
   };
@@ -26,7 +39,6 @@ export function AppShell() {
   return (
     <div className="relative min-h-svh bg-ink-950 text-mist-50">
       <RouteScrollManager />
-      <RouteTitle />
       <RealtimeBridge />
       <div
         aria-hidden="true"
@@ -46,7 +58,9 @@ export function AppShell() {
           tabIndex={-1}
           className="mx-auto w-full max-w-[84rem] px-4 pb-32 pt-8 outline-none sm:px-6 lg:px-10 lg:pb-16 lg:pt-10"
         >
-          <Outlet />
+          <ErrorBoundary resetKey={pathname} withinApp>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
       <MobileNavigation />

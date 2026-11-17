@@ -18,6 +18,7 @@ import { useOpenTournaments } from "@/features/tournaments/hooks";
 import { cn, titleSize } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { GAME_PROVIDERS } from "./connections/registry";
 import { useActiveGameTeams, useActiveGameUsers, useGame, useGameConnections, useGameStats, useGridSeries } from "./hooks";
 import type { ActiveGameTeam, ActiveGameUser, Game, GridGameKey, GridSeries } from "./types";
@@ -488,6 +489,7 @@ export function GameDetailPage() {
   const { gameId = "" } = useParams();
   const [params, setParams] = useSearchParams();
   const game = useGame(gameId);
+  useDocumentTitle(game.data?.name);
   const stats = useGameStats(gameId);
   const open = useOpenTournaments(3, game.data?.name, Boolean(game.data));
 

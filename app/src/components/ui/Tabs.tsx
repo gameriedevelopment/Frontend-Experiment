@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { cn } from "@/lib/cn";
 
 export interface TabItem<T extends string> {
@@ -45,7 +45,7 @@ export function Tabs<T extends string>({
                 </span>
               ) : null}
               {value === item.id && (
-                <motion.span
+                <m.span
                   layoutId={indicatorId}
                   className="absolute inset-x-3.5 -bottom-px h-0.5 rounded-full bg-lavender-400"
                   transition={{ type: "spring", stiffness: 500, damping: 40 }}

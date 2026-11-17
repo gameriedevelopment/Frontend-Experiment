@@ -73,7 +73,7 @@ function deadlineOf(match: LadderChallenge) {
 }
 
 export function LadderMatches({ ladder, onReport }: { ladder: LadderDetail; onReport: (match: LadderChallenge) => void }) {
-  const query = useLadderMatches(ladder.id);
+  const query = useLadderMatches(ladder.id, ladder.status === "in_progress");
   const actions = useLadderAction(ladder.id);
   const me = ladder.viewer.participant;
   const matches = query.data?.data ?? [];

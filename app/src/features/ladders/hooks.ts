@@ -54,12 +54,14 @@ export function useLadderStandings(id?: string) {
   });
 }
 
-export function useLadderMatches(id?: string) {
+/** Matches refresh on a timer only while the ladder is running; finished ladders don't change. */
+export function useLadderMatches(id?: string, live = true) {
   return useQuery({
     queryKey: ladderKeys.matches(id ?? ""),
     queryFn: () => laddersApi.getLadderMatches(id!),
     enabled: Boolean(id),
-    refetchInterval: 15_000,
+    staleTime: 15_000,
+    refetchInterval: live ? 15_000 : false,
   });
 }
 

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/ui/Icon";
@@ -118,7 +118,7 @@ export function MobileNavigation() {
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="More navigation">
-            <motion.button
+            <m.button
               type="button"
               aria-label="Close more menu"
               onClick={() => setOpen(false)}
@@ -127,7 +127,7 @@ export function MobileNavigation() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             />
-            <motion.section
+            <m.section
               ref={sheetRef}
               className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto rounded-t-panel bg-ink-900 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3 ring-1 ring-white/10"
               initial={{ y: "100%" }}
@@ -178,7 +178,7 @@ export function MobileNavigation() {
                   Sign out
                 </button>
               </nav>
-            </motion.section>
+            </m.section>
           </div>
         )}
       </AnimatePresence>

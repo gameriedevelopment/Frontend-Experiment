@@ -17,9 +17,9 @@ import type { NotificationFilter } from "./types";
 const filters: Array<{ id: NotificationFilter; label: string }> = [
   { id: "all", label: "All" },
   { id: "social", label: "Social" },
-  { id: "teams", label: "Teams" },
-  { id: "competitive", label: "Matches" },
-  { id: "wallet", label: "Wallet" },
+  { id: "teams", label: "Teams and hubs" },
+  { id: "matches", label: "Matches" },
+  { id: "tournaments", label: "Tournaments" },
   { id: "updates", label: "Updates" },
 ];
 

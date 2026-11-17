@@ -1,4 +1,4 @@
-import { motion, useReducedMotion, useSpring } from "motion/react";
+import { m, useReducedMotion, useSpring } from "motion/react";
 import type { PointerEvent } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
@@ -39,7 +39,7 @@ export function PlayerCard({
 
   return (
     <div className={cn("[perspective:1400px]", className)}>
-      <motion.article
+      <m.article
         aria-label={`${model.username}'s Gamerie player card`}
         style={interactive ? { rotateX, rotateY } : undefined}
         onPointerMove={onPointerMove}
@@ -121,7 +121,7 @@ export function PlayerCard({
           </span>
           <span>Player card</span>
         </footer>
-      </motion.article>
+      </m.article>
     </div>
   );
 }

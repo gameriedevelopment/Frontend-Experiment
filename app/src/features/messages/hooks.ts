@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { AuthUser } from "@/features/auth/types";
+import { fallbackInterval, useRealtimeConnected } from "./realtimeStatus";
 import {
   connectMessagingSocket,
   createConversation,
@@ -91,10 +92,11 @@ export function useConversationSearch(search: string) {
 }
 
 export function useTotalUnread() {
+  const live = useRealtimeConnected();
   return useQuery({
     queryKey: ["total-unread-counts"],
     queryFn: getTotalUnread,
-    refetchInterval: 30_000,
+    refetchInterval: fallbackInterval(live),
     staleTime: 10_000,
   });
 }

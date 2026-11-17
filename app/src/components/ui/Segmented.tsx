@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useId } from "react";
 import { cn } from "@/lib/cn";
 
@@ -33,7 +33,7 @@ export function Segmented<T extends string>({
               className="peer sr-only"
             />
             {active && (
-              <motion.span
+              <m.span
                 layoutId={`${name}-thumb`}
                 className="absolute inset-0 rounded-full bg-white/10 ring-1 ring-inset ring-white/10"
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}

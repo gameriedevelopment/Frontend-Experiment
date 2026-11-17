@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
@@ -80,9 +80,9 @@ function Action({
         active ? activeClass : "text-mist-400 hover:text-mist-100",
       )}
     >
-      <motion.span key={String(active)} initial={active ? { scale: 0.6 } : false} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 15 }}>
+      <m.span key={String(active)} initial={active ? { scale: 0.6 } : false} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 15 }}>
         <Icon name={icon} weight={active ? "fill" : "regular"} className="size-[1.15rem]" />
-      </motion.span>
+      </m.span>
       {count ? compact(count) : null}
     </button>
   );

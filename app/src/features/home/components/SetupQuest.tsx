@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useState } from "react";
 import { LinkButton } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -137,7 +137,7 @@ export function SetupQuest({
               </button>
               <AnimatePresence initial={false}>
                 {active && (
-                  <motion.div
+                  <m.div
                     id={`setup-step-${step.id}`}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -158,7 +158,7 @@ export function SetupQuest({
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </li>

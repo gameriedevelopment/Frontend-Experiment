@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 import type { CalendarEvent } from "../types";
-import { eventTypeLabels } from "../utils";
+import { daysSpanned, eventTypeLabel } from "../utils";
 
 const sourceBars: Record<string, string> = {
   challenge: "bg-lavender-400",
@@ -25,12 +25,16 @@ function StatusPill({ status }: { status: CalendarEvent["status"] }) {
 export function EventRow({ event, timeZone, onOpen }: { event: CalendarEvent; timeZone: string; onOpen: () => void }) {
   const time = new Intl.DateTimeFormat(undefined, { timeZone, hour: "numeric", minute: "2-digit" });
   const cancelled = event.status === "cancelled";
-  const meta = [eventTypeLabels[event.type] ?? event.type, event.game, event.team, event.location].filter(Boolean).join(" · ");
+  const later = daysSpanned(event, timeZone);
+  const meta = [eventTypeLabel(event.type), event.game, event.team, event.location].filter(Boolean).join(" · ");
   return (
     <button type="button" onClick={onOpen} className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-white/4 sm:gap-4">
       <span className="w-16 shrink-0 tabular-nums">
         <span className={cn("block text-sm font-semibold", cancelled && "text-mist-500")}>{time.format(new Date(event.startTime))}</span>
-        <span className="block text-xs text-mist-500">{time.format(new Date(event.endTime))}</span>
+        <span className="block text-xs text-mist-500">
+          {time.format(new Date(event.endTime))}
+          {later > 0 && <sup className="ml-0.5 text-[0.6rem] text-mist-400">+{later}</sup>}
+        </span>
       </span>
       <span aria-hidden="true" className={cn("h-10 w-1 shrink-0 rounded-full", cancelled ? "bg-white/10" : (sourceBars[event.sourceType ?? "manual"] ?? sourceBars.manual))} />
       <span className="min-w-0 flex-1">

@@ -8,6 +8,7 @@ import { Tabs } from "@/components/ui/Tabs";
 import { cn, titleSize } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { checkInEntrant } from "../api";
 import { EntrantMark } from "../components/EntrantMark";
 import { PhaseBadge, phaseOf } from "../components/PhaseBadge";
@@ -161,6 +162,7 @@ export function TournamentPage() {
   const { tournamentId = "" } = useParams();
   const [params, setParams] = useSearchParams();
   const query = useHostedTournament(tournamentId);
+  useDocumentTitle(query.data?.name);
   const now = useNow();
   const [register, setRegister] = useState<RegisterMode | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);

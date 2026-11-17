@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
@@ -35,7 +35,7 @@ export function SaveBar({ dirty, saving, onDiscard, onSave }: { dirty: boolean; 
   return (
     <AnimatePresence>
       {dirty && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}
@@ -51,7 +51,7 @@ export function SaveBar({ dirty, saving, onDiscard, onSave }: { dirty: boolean; 
               {saving ? "Saving…" : "Save"}
             </Button>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

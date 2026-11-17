@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -17,18 +17,9 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { registerAccount } from "./api";
 import { AuthHeading, AuthLayout } from "./components/AuthLayout";
 import { SocialAuthOptions } from "./components/SocialAuthOptions";
+import { PasswordChecklist } from "./components/PasswordChecklist";
 import { Turnstile } from "./components/Turnstile";
-
-const titles = ["Player", "Streamer", "Spectator", "Coach", "Trainer", "Analyst"] as const;
-const levels = ["Hobbyist", "Amateur", "Advanced", "Competitor", "Pro"] as const;
-const platforms = ["PC", "XBOX", "PS5", "Switch", "Mobile"] as const;
-const platformLabels: Record<(typeof platforms)[number], string> = {
-  PC: "PC",
-  XBOX: "Xbox",
-  PS5: "PS5",
-  Switch: "Switch",
-  Mobile: "Mobile",
-};
+import { levels, platformLabels, platforms, titles } from "./profileOptions";
 
 const registrationSchema = z
   .object({
@@ -90,14 +81,6 @@ const stepCopy: Record<RegistrationStep, { label: string; title: string; descrip
   3: { label: "Your game", title: "Tell us how you play", description: "This sets up your player profile. You can change it any time." },
 };
 
-const passwordRules = [
-  { label: "8+ characters", test: (value: string) => value.length >= 8 },
-  { label: "Uppercase letter", test: (value: string) => /[A-Z]/.test(value) },
-  { label: "Lowercase letter", test: (value: string) => /[a-z]/.test(value) },
-  { label: "Number", test: (value: string) => /[0-9]/.test(value) },
-  { label: "Symbol", test: (value: string) => /[^A-Za-z0-9]/.test(value) },
-];
-
 function StepIndicator({ step }: { step: RegistrationStep }) {
   return (
     <ol aria-label="Sign-up progress" className="mb-9 grid grid-cols-3 gap-2">
@@ -120,36 +103,6 @@ function StepIndicator({ step }: { step: RegistrationStep }) {
         </li>
       ))}
     </ol>
-  );
-}
-
-function PasswordChecklist({ value }: { value: string }) {
-  return (
-    <ul aria-label="Password requirements" className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-      {passwordRules.map((rule) => {
-        const met = rule.test(value);
-        return (
-          <li
-            key={rule.label}
-            className={cn(
-              "flex items-center gap-2 text-[0.8rem] transition-colors duration-300",
-              met ? "text-mist-200" : "text-mist-500",
-            )}
-          >
-            <span
-              className={cn(
-                "grid size-4 place-items-center rounded-full transition-colors duration-300",
-                met ? "bg-lavender-400 text-ink-950" : "ring-1 ring-inset ring-white/15",
-              )}
-            >
-              {met && <Icon name="check" className="size-2.5" weight="bold" />}
-            </span>
-            {rule.label}
-            <span className="sr-only">{met ? "met" : "not met"}</span>
-          </li>
-        );
-      })}
-    </ul>
   );
 }
 
@@ -254,7 +207,7 @@ export function RegisterPage() {
       <StepIndicator step={step} />
 
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div
+        <m.div
           key={step}
           initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
@@ -262,7 +215,7 @@ export function RegisterPage() {
           transition={{ duration: 0.45, ease: easeOutExpo }}
         >
           <AuthHeading title={stepCopy[step].title} description={stepCopy[step].description} />
-        </motion.div>
+        </m.div>
       </AnimatePresence>
 
       <form className="mt-8 grid gap-5" onSubmit={onSubmit} noValidate>
@@ -273,7 +226,7 @@ export function RegisterPage() {
         )}
 
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+          <m.div
             key={step}
             className="grid gap-5"
             initial={{ opacity: 0, x: 16 }}
@@ -407,7 +360,7 @@ export function RegisterPage() {
                 <Turnstile onVerify={onTurnstileVerify} onExpire={onTurnstileExpire} onError={onTurnstileError} />
               </>
             )}
-          </motion.div>
+          </m.div>
         </AnimatePresence>
 
         <div className="mt-2 flex gap-3">

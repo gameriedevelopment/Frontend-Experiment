@@ -1,4 +1,4 @@
-import { animate, motion, useInView } from "motion/react";
+import { animate, m, useInView } from "motion/react";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
@@ -14,7 +14,7 @@ export function Reveal({
   className?: string;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={{ opacity: 0, y: 28, filter: "blur(8px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -22,7 +22,7 @@ export function Reveal({
       transition={{ duration: 0.9, delay, ease: easeOutExpo }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 

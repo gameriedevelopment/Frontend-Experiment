@@ -13,10 +13,9 @@ import type { NotificationPreferences } from "../types";
 import { SaveBar, SettingsCard, SettingsRows } from "./SettingsParts";
 
 const categories: Array<{ key: keyof NotificationPreferences["categories"]; label: string; description: string }> = [
-  { key: "competitive", label: "Matches", description: "Challenges, results, tournaments and ladders." },
+  { key: "competitive", label: "Matches and tournaments", description: "Challenges, results, tournaments and ladders." },
   { key: "teams", label: "Teams and hubs", description: "Activity and announcements from your teams and hubs." },
   { key: "social", label: "Social", description: "Follows, likes, comments and endorsements." },
-  { key: "wallet", label: "Wallet and rewards", description: "Balance changes and rewards." },
   { key: "updates", label: "Gamerie updates", description: "Achievements, news and suggestions." },
 ];
 
@@ -61,7 +60,7 @@ export function NotificationSettings({ preferences, timezone, userId }: { prefer
             />
           ))}
         </SettingsRows>
-        <Notice className="mt-5">Invitations, join requests, wallet transfers, match reminders and ownership changes always come through.</Notice>
+        <Notice className="mt-5">Invitations, join requests, match reminders and ownership changes always come through.</Notice>
       </SettingsCard>
 
       <SettingsCard title="Quiet hours">

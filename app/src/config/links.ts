@@ -11,7 +11,6 @@ export const publicLinks = {
     import.meta.env.VITE_WEBSITE_URL,
     import.meta.env.DEV ? "http://localhost:5178" : "https://gamerie.gg",
   ),
-  liveApp: normalizePublicUrl(import.meta.env.VITE_LIVE_APP_URL, "https://app.gamerie.gg"),
   terms: normalizePublicUrl(
     import.meta.env.VITE_TERMS_OF_SERVICE,
     "https://gameriedevelopment.github.io/Terms-of-service/",

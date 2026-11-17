@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
@@ -63,7 +63,7 @@ export function ProfileMenu() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             role="menu"
             initial={{ opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -97,7 +97,7 @@ export function ProfileMenu() {
                 </p>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

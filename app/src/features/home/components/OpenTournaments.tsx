@@ -35,7 +35,7 @@ function TournamentRow({ tournament }: { tournament: Tournament }) {
         className="group flex items-center gap-4 rounded-2xl px-3 py-3 transition-colors hover:bg-white/3"
       >
         {tournament.image ? (
-          <img src={tournament.image} alt="" className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-white/8" />
+          <img src={tournament.image} alt="" loading="lazy" decoding="async" className="size-12 shrink-0 rounded-xl object-cover ring-1 ring-white/8" />
         ) : (
           <span
             aria-hidden="true"

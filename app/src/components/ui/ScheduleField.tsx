@@ -89,15 +89,40 @@ export function ScheduleField({
       }).format(chosen)
     : null;
   const custom = Boolean(time) && !presetTimes.includes(time);
+  const lastStripDay = dayKey(days[days.length - 1]);
+  const afterStrip = (() => {
+    const next = new Date(days[days.length - 1]);
+    next.setDate(next.getDate() + 1);
+    return dayKey(next);
+  })();
+  const later = day > lastStripDay ? day : "";
 
   return (
     <fieldset className="grid min-w-0 gap-3" disabled={disabled} aria-describedby={error ? `${name}-error` : undefined}>
       <legend className="mb-3 flex w-full items-baseline justify-between gap-3 text-sm font-medium text-mist-200">
         {label}
-        <span className="text-xs font-normal text-mist-500">Times in {timeZoneLabel()}</span>
+        <span className="flex items-center gap-3 text-xs font-normal text-mist-500">
+          {/* The strip covers the next few weeks; anything further goes through the native date picker. */}
+          <label className="relative flex cursor-pointer items-center gap-1.5 font-medium text-lavender-300 hover:text-lavender-200">
+            <Icon name="calendar" className="size-3.5" />
+            {later
+              ? new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric", month: "short" }).format(new Date(`${later}T12:00`))
+              : "Later date"}
+            <input
+              type="date"
+              min={afterStrip}
+              value={later}
+              aria-label="Pick a later date"
+              onChange={(event) => event.target.value && update(event.target.value, time)}
+              onClick={(event) => event.currentTarget.showPicker?.()}
+              className="absolute inset-0 cursor-pointer opacity-0 scheme-dark"
+            />
+          </label>
+          <span>Times in {timeZoneLabel()}</span>
+        </span>
       </legend>
 
-      <div ref={stripRef} className="relative relative -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 pr-8 scrollbar-none mask-[linear-gradient(to_right,black_85%,transparent)]">
+      <div ref={stripRef} className="relative -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 pr-8 scrollbar-none mask-[linear-gradient(to_right,black_85%,transparent)]">
         {days.map((date, index) => {
           const key = dayKey(date);
           const marker =
@@ -153,7 +178,7 @@ export function ScheduleField({
             onChange={(event) => update(day, event.target.value)}
             className={cn(
               inputClasses,
-              "h-11 px-3 text-sm [color-scheme:dark]",
+              "h-11 px-3 text-sm scheme-dark",
               custom && "bg-lavender-400/12 ring-lavender-400/70",
             )}
           />

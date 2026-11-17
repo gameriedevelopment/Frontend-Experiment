@@ -9,6 +9,7 @@ import { Tabs } from "@/components/ui/Tabs";
 import { HeroBanner } from "@/features/tournaments/components/HeroBanner";
 import { cn, titleSize } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { CommunityActions } from "./detail/CommunityActions";
 import { HubMembershipDialog, type HubMembershipAction } from "./detail/HubMembershipDialog";
 import { CommunityOverview, CommunityPosts, HubMembers, HubTeams, TeamCompetition, TeamFollowers, TeamRoster } from "./detail/CommunityTabs";
@@ -125,6 +126,7 @@ export function CommunityDetailPage({ kind }: { kind: CommunityKind }) {
   const { communitySlug } = useParams();
   const [params, setParams] = useSearchParams();
   const query = useCommunityDetail(kind, communitySlug);
+  useDocumentTitle(query.data?.name);
   const back = (
     <Link to={`/${kind}s`} className="group flex w-fit items-center gap-2 text-sm font-medium text-mist-400 transition-colors hover:text-mist-50">
       <Icon name="arrowLeft" className="size-4 transition-transform group-hover:-translate-x-0.5" />

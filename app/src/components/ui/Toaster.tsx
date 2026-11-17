@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { createPortal } from "react-dom";
 import { useToastStore, type ToastTone } from "@/lib/toast";
 import { cn } from "@/lib/cn";
@@ -23,7 +23,7 @@ export function Toaster() {
         {toasts.map((item) => {
           const tone = toneStyles[item.tone];
           return (
-            <motion.div
+            <m.div
               key={item.id}
               layout
               role={item.tone === "error" ? "alert" : "status"}
@@ -50,7 +50,7 @@ export function Toaster() {
               >
                 <Icon name="close" className="size-3.5" />
               </button>
-            </motion.div>
+            </m.div>
           );
         })}
       </AnimatePresence>

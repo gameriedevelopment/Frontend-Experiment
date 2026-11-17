@@ -29,7 +29,7 @@ export type NotificationType =
   | "tournament-match"
   | string;
 
-export type NotificationFilter = "all" | "social" | "teams" | "competitive" | "wallet" | "updates";
+export type NotificationFilter = "all" | "social" | "teams" | "matches" | "tournaments" | "updates";
 
 export interface GamerieNotification {
   id: string;

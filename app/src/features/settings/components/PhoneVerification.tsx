@@ -26,7 +26,7 @@ function guessCountry(current?: string | null): CountryCode {
 export const formatPhone = (value: string) => parsePhoneNumberFromString(value)?.formatInternational() ?? value;
 
 /** Send a code to a number and confirm it. The account's number only changes once the code checks out. */
-export function PhoneVerification({ current, onDone, onCancel }: { current?: string | null; onDone: () => void; onCancel: () => void }) {
+export function PhoneVerification({ current, onDone, onCancel, cancelLabel = "Cancel" }: { current?: string | null; onDone: () => void; onCancel: () => void; cancelLabel?: string }) {
   const countries = useMemo(countryOptions, []);
   const [country, setCountry] = useState<CountryCode>(() => guessCountry(current));
   const [countryQuery, setCountryQuery] = useState("");
@@ -122,7 +122,7 @@ export function PhoneVerification({ current, onDone, onCancel }: { current?: str
             Change number
           </Button>
           <Button type="button" tone="ghost" size="sm" disabled={pending} onClick={onCancel}>
-            Cancel
+            {cancelLabel}
           </Button>
         </div>
       </form>
@@ -159,7 +159,7 @@ export function PhoneVerification({ current, onDone, onCancel }: { current?: str
           {pending ? "Sending…" : "Send code"}
         </Button>
         <Button type="button" tone="ghost" size="sm" disabled={pending} onClick={onCancel}>
-          Cancel
+          {cancelLabel}
         </Button>
       </div>
       <Notice>Standard SMS rates may apply. Your number stays private unless you choose to show it.</Notice>

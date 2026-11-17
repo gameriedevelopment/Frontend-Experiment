@@ -8,7 +8,15 @@ export const eventTypeLabels: Record<string, string> = {
   meeting: "Team meeting",
   personal: "Personal",
   tournament: "Tournament",
+  "tournament-check-in": "Check-in",
 };
+
+/** The label for an event type, readable even for types added after this list. */
+export function eventTypeLabel(type: string): string {
+  if (eventTypeLabels[type]) return eventTypeLabels[type];
+  const words = type.replace(/[-_]+/g, " ").trim();
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : "Event";
+}
 
 export const sourceLabels: Record<CalendarEventSource, string> = {
   manual: "Personal",
@@ -111,17 +119,18 @@ export function monthCells(month: string): string[] {
 export function formatEventTime(event: CalendarEvent, timeZone: string): string {
   const start = new Date(event.startTime);
   const end = new Date(event.endTime);
-  const sameDay = dayKey(start, timeZone) === dayKey(end, timeZone);
-  const date = new Intl.DateTimeFormat(undefined, {
-    timeZone,
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).format(start);
+  const day = new Intl.DateTimeFormat(undefined, { timeZone, weekday: "short", day: "numeric", month: "short" });
   const time = new Intl.DateTimeFormat(undefined, { timeZone, hour: "numeric", minute: "2-digit" });
-  return sameDay
-    ? `${date} · ${time.format(start)}–${time.format(end)}`
-    : `${date} · ${time.format(start)}`;
+  return dayKey(start, timeZone) === dayKey(end, timeZone)
+    ? `${day.format(start)} · ${time.format(start)}–${time.format(end)}`
+    : `${day.format(start)} · ${time.format(start)} – ${day.format(end)} · ${time.format(end)}`;
+}
+
+/** Whole days between an event's start and end, for marking times that run past midnight. */
+export function daysSpanned(event: CalendarEvent, timeZone: string): number {
+  const start = dayKey(event.startTime, timeZone);
+  const end = dayKey(event.endTime, timeZone);
+  return Math.round((Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86_400_000);
 }
 
 export function eventContextPath(event: CalendarEvent): string | undefined {

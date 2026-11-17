@@ -1,13 +1,23 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { PageLoader } from "@/components/ui/Loader";
-import { AuthHandoffPage } from "@/features/auth/AuthHandoffPage";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
-import { RegisterPage } from "@/features/auth/RegisterPage";
-import { SignInPage } from "@/features/auth/SignInPage";
-import { VerifyEmailPage } from "@/features/auth/VerifyEmailPage";
-import { ConnectionCallbackPage } from "@/features/games/connections/ConnectionCallbackPage";
 import { AppShell } from "./shell/AppShell";
+import { NotFoundPage } from "./shell/NotFoundPage";
+import { RouteTitle } from "./shell/RouteTitle";
+
+// Signed-in visitors rarely need these, so their form libraries stay out of the first download.
+const SignInPage = lazy(() => import("@/features/auth/SignInPage").then((module) => ({ default: module.SignInPage })));
+const RegisterPage = lazy(() => import("@/features/auth/RegisterPage").then((module) => ({ default: module.RegisterPage })));
+const VerifyEmailPage = lazy(() => import("@/features/auth/VerifyEmailPage").then((module) => ({ default: module.VerifyEmailPage })));
+const PasswordRecoveryPage = lazy(() => import("@/features/auth/PasswordRecoveryPage").then((module) => ({ default: module.PasswordRecoveryPage })));
+const VerifyPhonePage = lazy(() => import("@/features/auth/VerifyPhonePage").then((module) => ({ default: module.VerifyPhonePage })));
+const ConfirmEmailPage = lazy(() => import("@/features/auth/ConfirmEmailPages").then((module) => ({ default: module.ConfirmEmailPage })));
+const ConfirmEmailChangePage = lazy(() => import("@/features/auth/ConfirmEmailPages").then((module) => ({ default: module.ConfirmEmailChangePage })));
+const AuthCallbackPage = lazy(() => import("@/features/auth/AuthCallbackPage").then((module) => ({ default: module.AuthCallbackPage })));
+const ConnectionCallbackPage = lazy(() =>
+  import("@/features/games/connections/ConnectionCallbackPage").then((module) => ({ default: module.ConnectionCallbackPage })),
+);
 
 const HomePage = lazy(() =>
   import("@/features/home/HomePage").then((module) => ({ default: module.HomePage })),
@@ -75,24 +85,40 @@ function Deferred({ children }: { children: ReactNode }) {
   return <Suspense fallback={<PageLoader label="Loading" />}>{children}</Suspense>;
 }
 
-const handoffRoutes = [
-  "/forgot-password",
-  "/reset-password",
-  "/verify-phone",
-  "/confirm-email/:token",
-  "/confirm-email-change/:token",
-  "/auth/callback",
-];
 
 export function App() {
   return (
     <BrowserRouter>
+      <RouteTitle />
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/signin" element={<SignInPage />} />
-        <Route path="/login" element={<SignInPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        {["/signin", "/login"].map((path) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <Deferred>
+                <SignInPage />
+              </Deferred>
+            }
+          />
+        ))}
+        <Route
+          path="/register"
+          element={
+            <Deferred>
+              <RegisterPage />
+            </Deferred>
+          }
+        />
+        <Route
+          path="/verify-email"
+          element={
+            <Deferred>
+              <VerifyEmailPage />
+            </Deferred>
+          }
+        />
         {["/card/:username", "/s/:username"].map((path) => (
           <Route
             key={path}
@@ -110,14 +136,61 @@ export function App() {
             path={`/${source}/connect/callback`}
             element={
               <ProtectedRoute>
-                <ConnectionCallbackPage source={source} />
+                <Deferred>
+                  <ConnectionCallbackPage source={source} />
+                </Deferred>
               </ProtectedRoute>
             }
           />
         ))}
-        {handoffRoutes.map((path) => (
-          <Route key={path} path={path} element={<AuthHandoffPage />} />
-        ))}
+        <Route
+          path="/forgot-password"
+          element={
+            <Deferred>
+              <PasswordRecoveryPage />
+            </Deferred>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <Deferred>
+              <PasswordRecoveryPage />
+            </Deferred>
+          }
+        />
+        <Route
+          path="/verify-phone"
+          element={
+            <Deferred>
+              <VerifyPhonePage />
+            </Deferred>
+          }
+        />
+        <Route
+          path="/confirm-email/:token"
+          element={
+            <Deferred>
+              <ConfirmEmailPage />
+            </Deferred>
+          }
+        />
+        <Route
+          path="/confirm-email-change/:token"
+          element={
+            <Deferred>
+              <ConfirmEmailChangePage />
+            </Deferred>
+          }
+        />
+        <Route
+          path="/auth/callback"
+          element={
+            <Deferred>
+              <AuthCallbackPage />
+            </Deferred>
+          }
+        />
         <Route
           element={
             <ProtectedRoute>
@@ -395,8 +468,9 @@ export function App() {
               </Deferred>
             }
           />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
-        <Route path="*" element={<Navigate to="/home" replace />} />
+
       </Routes>
     </BrowserRouter>
   );

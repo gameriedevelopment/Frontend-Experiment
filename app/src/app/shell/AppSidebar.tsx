@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icon";
 import { TokenMark } from "@/components/ui/TokenMark";
@@ -40,7 +40,7 @@ function NavigationGroup({
             {({ isActive }) => (
               <>
                 {isActive && (
-                  <motion.span
+                  <m.span
                     layoutId="sidebar-active"
                     className="absolute -left-3 inset-y-2 w-1 rounded-r-full bg-lavender-400"
                     transition={{ type: "spring", stiffness: 500, damping: 38 }}

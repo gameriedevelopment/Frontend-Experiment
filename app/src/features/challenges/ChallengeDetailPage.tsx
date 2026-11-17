@@ -11,6 +11,7 @@ import { useCreateConversation } from "@/features/messages/hooks";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { ChallengeLineups } from "./components/ChallengeLineups";
 import { ChallengeTimeline } from "./components/ChallengeTimeline";
 import { ReportDialog } from "./components/ReportDialog";
@@ -86,6 +87,7 @@ export function ChallengeDetailPage() {
 
   const challenge = query.data;
   const view = challenge ? challengePerspective(challenge, user?.id, ownedTeamIds) : null;
+  useDocumentTitle(view ? `Challenge vs ${view.opponentName}` : null);
   const ownLineup = useMemo(
     () => (challenge?.lineups ?? []).filter((member) => member.teamId === view?.ownTeamId).map((member) => member.playerId),
     [challenge?.lineups, view?.ownTeamId],

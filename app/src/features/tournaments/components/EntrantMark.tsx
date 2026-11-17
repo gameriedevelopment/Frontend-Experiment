@@ -32,7 +32,7 @@ export function EntrantMark({
       )}
     >
       {src && !failed ? (
-        <img src={src} alt="" className="size-full object-cover" onError={() => setFailed(true)} />
+        <img src={src} alt="" loading="lazy" decoding="async" className="size-full object-cover" onError={() => setFailed(true)} />
       ) : (
         initials(name)
       )}

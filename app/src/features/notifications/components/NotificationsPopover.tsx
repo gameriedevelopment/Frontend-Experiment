@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -37,7 +37,7 @@ export function NotificationsPopover({ trigger, className }: { trigger: ReactNod
       </button>
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             role="dialog"
             aria-label="Notifications"
             initial={{ opacity: 0, y: -6, scale: 0.98 }}
@@ -75,7 +75,7 @@ export function NotificationsPopover({ trigger, className }: { trigger: ReactNod
             <Link to="/notifications" className="block border-t border-white/6 px-4 py-3 text-center text-sm font-medium text-mist-200 hover:bg-white/3 hover:text-mist-50">
               See all notifications
             </Link>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

@@ -7,7 +7,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
 import { useUpdateCalendarEventStatus } from "../hooks";
 import type { CalendarEvent, CalendarEventStatus } from "../types";
-import { eventContextPath, eventTypeLabels, formatEventTime, sourceLabels, statusLabels } from "../utils";
+import { eventContextPath, eventTypeLabel, formatEventTime, sourceLabels, statusLabels } from "../utils";
 
 // Upcoming events start and finish on their own at the scheduled times.
 const doneMessages: Partial<Record<CalendarEventStatus, string>> = {
@@ -52,7 +52,7 @@ export function EventDetailDialog({ event, timeZone, onClose }: { event: Calenda
       <Dialog
         open
         title={event.title}
-        description={`${sourceLabels[event.sourceType ?? "manual"]} · ${eventTypeLabels[event.type] ?? event.type}`}
+        description={`${sourceLabels[event.sourceType ?? "manual"]} · ${eventTypeLabel(event.type)}`}
         icon={event.sourceType === "challenge" ? "challenges" : event.sourceType === "tournament" ? "trophy" : "calendar"}
         dismissible={!update.isPending}
         onClose={onClose}

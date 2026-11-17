@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/features/auth/authStore";
 import { connectMessagingSocket, disconnectMessagingSocket } from "./api";
 import { markSentSeen, patchMessage, removeMessage, touchConversation, upsertMessage } from "./realtimeCache";
+import { setRealtimeConnected } from "./realtimeStatus";
 import type { ChatMessage } from "./types";
 
 interface MessageEvent {
@@ -27,9 +28,13 @@ export function RealtimeBridge() {
   useEffect(() => {
     if (!user?.id) {
       disconnectMessagingSocket();
+      setRealtimeConnected(false);
       return;
     }
     const socket = connectMessagingSocket();
+    const onConnect = () => setRealtimeConnected(true);
+    const onDisconnect = () => setRealtimeConnected(false);
+    if (socket.connected) onConnect();
     const seen = new Set<string>();
     const once = (event: MessageEvent, name: string) => {
       const id = event.eventId ? `${event.eventId}` : `${name}:${event.messageId}:${event.conversationId}`;
@@ -85,6 +90,8 @@ export function RealtimeBridge() {
       refreshCounts();
     };
 
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
     socket.on("message.created", onMessage);
     socket.on("message.sent", onMessage);
     socket.on("message.edited", onEdited);
@@ -93,6 +100,8 @@ export function RealtimeBridge() {
     socket.on("notification.created", onNotification);
     socket.io.on("reconnect", onReconnect);
     return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
       socket.off("message.created", onMessage);
       socket.off("message.sent", onMessage);
       socket.off("message.edited", onEdited);

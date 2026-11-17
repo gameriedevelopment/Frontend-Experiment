@@ -11,6 +11,7 @@ import {
   restoreNotificationCaches,
   snapshotNotificationCaches,
 } from "./cache";
+import { fallbackInterval, useRealtimeConnected } from "@/features/messages/realtimeStatus";
 import type { NotificationFilter } from "./types";
 
 export function useNotifications(
@@ -24,6 +25,7 @@ export function useNotifications(
   } = {},
 ) {
   const { enabled = true, filter = "all", isRead, limit = 20, surface = "page" } = options;
+  const live = useRealtimeConnected();
   return useInfiniteQuery({
     queryKey: ["notifications", userId, surface, { filter, isRead, limit }],
     queryFn: ({ pageParam }) => getNotifications(userId!, pageParam, limit, isRead, filter),
@@ -31,7 +33,7 @@ export function useNotifications(
     getNextPageParam: (page) => page.nextCursor || undefined,
     enabled: Boolean(userId) && enabled,
     staleTime: 20_000,
-    refetchInterval: 30_000,
+    refetchInterval: fallbackInterval(live),
     refetchOnWindowFocus: false,
   });
 }
@@ -59,13 +61,13 @@ export function useMarkNotificationRead(userId?: string) {
 }
 
 export function useNotificationUnreadCount(userId?: string) {
+  const live = useRealtimeConnected();
   return useQuery({
     queryKey: ["notifications", userId, "unread-count"],
     queryFn: () => getNotificationUnreadCount(userId!),
     enabled: Boolean(userId),
     staleTime: 15_000,
-    refetchInterval: 30_000,
-    refetchOnWindowFocus: false,
+    refetchInterval: fallbackInterval(live),
   });
 }
 

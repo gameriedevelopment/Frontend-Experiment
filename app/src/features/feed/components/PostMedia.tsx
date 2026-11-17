@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "@/components/ui/Icon";
@@ -23,7 +23,7 @@ function Viewer({ items, index, onIndex, onClose }: { items: string[]; index: nu
   }, [index, items.length, onClose, onIndex]);
 
   return createPortal(
-    <motion.div
+    <m.div
       role="dialog"
       aria-modal="true"
       aria-label={`Image ${index + 1} of ${items.length}`}
@@ -33,7 +33,7 @@ function Viewer({ items, index, onIndex, onClose }: { items: string[]; index: nu
       className="fixed inset-0 z-50 grid place-items-center bg-ink-950/95 p-4 backdrop-blur-md"
       onClick={onClose}
     >
-      <motion.img
+      <m.img
         key={items[index]}
         src={items[index]}
         alt=""
@@ -78,7 +78,7 @@ function Viewer({ items, index, onIndex, onClose }: { items: string[]; index: nu
           </span>
         </>
       )}
-    </motion.div>,
+    </m.div>,
     document.body,
   );
 }

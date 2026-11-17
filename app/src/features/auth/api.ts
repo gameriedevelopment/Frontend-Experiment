@@ -8,6 +8,16 @@ import { endClientSession } from "./session";
 
 export type { SocialProvider } from "./authError";
 
+/** Keeps the session token in a cookie that expires with the token itself. */
+export function storeSessionToken(token: string) {
+  const decoded = jwtDecode<{ exp?: number }>(token);
+  Cookies.set("auth_token", token, {
+    secure: window.location.protocol === "https:",
+    sameSite: "Lax",
+    ...(decoded.exp ? { expires: new Date(decoded.exp * 1000) } : {}),
+  });
+}
+
 export interface RegistrationPayload {
   email: string;
   password: string;
@@ -46,14 +56,7 @@ export async function registerAccount(payload: RegistrationPayload): Promise<Aut
 
   if (!user?.id) throw new Error("The server returned an incomplete registration response.");
 
-  if (token) {
-    const decoded = jwtDecode<{ exp?: number }>(token);
-    Cookies.set("auth_token", token, {
-      secure: window.location.protocol === "https:",
-      sameSite: "Lax",
-      ...(decoded.exp ? { expires: new Date(decoded.exp * 1000) } : {}),
-    });
-  }
+  if (token) storeSessionToken(token);
 
   useAuthStore.getState().setUser(user, false);
   sessionStorage.setItem("Gamerie_pending_email", user.email ?? payload.email);
@@ -94,14 +97,7 @@ export async function confirmEmail(token: string): Promise<AuthUser> {
   const authToken = response.data.token;
   const responseUser = response.data.user;
 
-  if (authToken) {
-    const decoded = jwtDecode<{ exp?: number }>(authToken);
-    Cookies.set("auth_token", authToken, {
-      secure: window.location.protocol === "https:",
-      sameSite: "Lax",
-      ...(decoded.exp ? { expires: new Date(decoded.exp * 1000) } : {}),
-    });
-  }
+  if (authToken) storeSessionToken(authToken);
 
   if (!responseUser?.id)
     throw new Error("The server returned an incomplete confirmation response.");
@@ -203,12 +199,7 @@ export async function signIn(
   if (!token || !loginUser?.id)
     throw new Error("The server returned an incomplete sign-in response.");
 
-  const decoded = jwtDecode<{ exp?: number }>(token);
-  Cookies.set("auth_token", token, {
-    secure: window.location.protocol === "https:",
-    sameSite: "Lax",
-    ...(decoded.exp ? { expires: new Date(decoded.exp * 1000) } : {}),
-  });
+  storeSessionToken(token);
 
   try {
     const { data: profileResponse } = await api.get<ProfileEnvelope>(`/users/${loginUser.id}`);

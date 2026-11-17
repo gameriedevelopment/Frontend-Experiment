@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
@@ -98,7 +98,7 @@ export function Dialog({
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 grid items-end justify-items-center sm:items-center sm:p-6">
-          <motion.button
+          <m.button
             type="button"
             aria-label="Close dialog"
             tabIndex={-1}
@@ -109,7 +109,7 @@ export function Dialog({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           />
-          <motion.div
+          <m.div
             ref={panelRef}
             role={alert ? "alertdialog" : "dialog"}
             aria-modal="true"
@@ -173,7 +173,7 @@ export function Dialog({
                 {footer}
               </footer>
             )}
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>,
