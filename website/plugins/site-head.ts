@@ -55,7 +55,8 @@ function analyticsTags(options: SiteHeadOptions): HtmlTagDescriptor[] {
       injectTo: "head",
     });
   }
-  if (gaId) {
+  // Tag Manager carries GA itself, so loading GA as well would count every view twice.
+  if (gaId && !gtmId) {
     tags.push(
       { tag: "script", attrs: { async: true, src: `https://www.googletagmanager.com/gtag/js?id=${gaId}` }, injectTo: "head" },
       { tag: "script", children: `gtag('js',new Date());gtag('config','${gaId}');`, injectTo: "head" },

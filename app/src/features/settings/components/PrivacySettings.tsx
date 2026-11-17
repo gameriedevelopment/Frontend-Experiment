@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
 import { OptionCards } from "@/components/ui/OptionCards";
 import { Switch } from "@/components/ui/Switch";
+import { cookiePreferencesEnabled, openCookiePreferences } from "@/lib/consent";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
 import { sameSettings } from "../defaults";
@@ -71,6 +73,18 @@ export function PrivacySettings({ privacy, userId }: { privacy: Privacy; userId:
           ))}
         </SettingsRows>
       </SettingsCard>
+
+      {cookiePreferencesEnabled && (
+        <SettingsCard
+          title="Cookies"
+          description="Choose which optional cookies Gamerie can use to understand how the app is used. Essential cookies keep you signed in and can't be turned off."
+          action={
+            <Button tone="outline" size="sm" onClick={openCookiePreferences}>
+              Cookie preferences
+            </Button>
+          }
+        />
+      )}
 
       <SaveBar dirty={dirty} saving={update.isPending} onDiscard={() => setValue(privacy)} onSave={save} />
     </div>

@@ -1,11 +1,14 @@
+import { m } from "motion/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
-import { Icon } from "@/components/ui/Icon";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
 import { TokenMark } from "@/components/ui/TokenMark";
 import { publicLinks } from "@/config/links";
+import { useAuthStore } from "@/features/auth/authStore";
+import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { PlayerCard } from "./components/PlayerCard";
 import { usePublicPlayerCard } from "./hooks";
@@ -41,29 +44,48 @@ function updateMeta(name: string, content: string, property = false) {
   element.content = content;
 }
 
-const provenance = [
-  ["Competitive statistics", "Recorded by Gamerie"],
-  ["Player title and listed skills", "Player provided"],
-  ["Skill endorsements", "Community recorded"],
+const provenance: Array<{ icon: IconName; label: string; source: string }> = [
+  { icon: "trophy", label: "Stats and levels", source: "Recorded on Gamerie" },
+  { icon: "user", label: "Title and skills", source: "Added by the player" },
+  { icon: "endorse", label: "Endorsements", source: "Given by other players" },
 ];
 
+const rise = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
+
 function Frame({ children }: { children: ReactNode }) {
+  const signedIn = useAuthStore((state) => Boolean(state.user));
   return (
-    <main className="relative min-h-svh overflow-hidden bg-ink-950 px-gutter py-6 text-mist-50">
+    <main className="relative isolate min-h-svh overflow-hidden bg-ink-950 px-gutter py-6 text-mist-50">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_30%_35%,rgb(198_163_255/0.12),transparent)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(80%_38%_at_50%_22%,rgb(198_163_255/0.16),transparent_70%)] lg:bg-[radial-gradient(42%_55%_at_27%_45%,rgb(198_163_255/0.17),transparent_70%)]"
       />
-      <header className="relative mx-auto flex max-w-6xl items-center justify-between">
+      <div
+        aria-hidden="true"
+        className="halftone pointer-events-none absolute inset-0 -z-10 text-white/[0.05] [mask-image:radial-gradient(70%_32%_at_50%_22%,black,transparent)] lg:[mask-image:radial-gradient(38%_52%_at_27%_45%,black,transparent)]"
+      />
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4">
         <a href={publicLinks.website} aria-label="Gamerie website" className="flex items-center gap-2.5">
           <TokenMark className="h-6 text-lavender-400" />
           <span className="type-display text-[1.05rem] tracking-[0.04em]">Gamerie</span>
         </a>
-        <Link to="/login" className="text-sm font-medium text-mist-300 hover:text-mist-50">
-          Sign in
-        </Link>
+        {signedIn ? (
+          <Link to="/home" className="inline-flex items-center gap-1.5 text-sm font-medium text-mist-300 hover:text-mist-50">
+            Open Gamerie
+            <Icon name="arrowRight" className="size-4" />
+          </Link>
+        ) : (
+          <nav aria-label="Account" className="flex items-center gap-5">
+            <Link to="/login" className="text-sm font-medium text-mist-300 hover:text-mist-50">
+              Sign in
+            </Link>
+            <LinkButton to="/register" size="sm">
+              Join Gamerie
+            </LinkButton>
+          </nav>
+        )}
       </header>
-      <div className="relative mx-auto max-w-6xl">{children}</div>
+      <div className="mx-auto max-w-6xl">{children}</div>
     </main>
   );
 }
@@ -71,6 +93,7 @@ function Frame({ children }: { children: ReactNode }) {
 export function PlayerCardPage() {
   const { username } = useParams();
   const query = usePublicPlayerCard(username);
+  const viewer = useAuthStore((state) => state.user);
   const [copyState, setCopyState] = useState<ActionState>("idle");
   const [downloadState, setDownloadState] = useState<ActionState>("idle");
   const model = useMemo(() => (query.data?.shareable ? buildPlayerCardModel(query.data) : null), [query.data]);
@@ -141,9 +164,13 @@ export function PlayerCardPage() {
   if (query.isLoading)
     return (
       <Frame>
-        <div role="status" aria-label="Loading player card" className="grid gap-10 pt-16 lg:grid-cols-2">
-          <Skeleton className="mx-auto h-136 w-full max-w-96 rounded-card" />
-          <Skeleton className="h-64 rounded-card" />
+        <div role="status" aria-label="Loading player card" className="grid items-center gap-12 py-12 lg:grid-cols-2 lg:gap-20 lg:py-20">
+          <Skeleton className="mx-auto h-144 w-full max-w-[25rem] rounded-card" />
+          <div className="grid max-w-lg gap-5">
+            <Skeleton className="h-4 w-40 rounded-full" />
+            <Skeleton className="h-28 rounded-tile" />
+            <Skeleton className="h-12 w-3/4 rounded-full" />
+          </div>
         </div>
       </Frame>
     );
@@ -183,28 +210,59 @@ export function PlayerCardPage() {
       </Frame>
     );
 
+  const own = viewer?.username?.toLowerCase() === model.username.toLowerCase();
+  const profilePath = `/profile/${encodeURIComponent(model.username)}`;
+  const copyButton = (
+    <Button tone={own ? "lavender" : "outline"} icon={copyState === "done" ? "check" : "copy"} onClick={() => void copyLink()} className={cn(own && "col-span-2")}>
+      {copyState === "done" ? "Link copied" : "Copy link"}
+    </Button>
+  );
+
   return (
     <Frame>
-      <div className="grid items-center gap-12 py-12 lg:grid-cols-2 lg:gap-20 lg:py-20">
-        <PlayerCard model={model} tilt className="mx-auto w-full max-w-96" />
-        <div className="max-w-md">
-          <p className="type-display text-display-md">
-            <span className="block">{model.username}'s</span>
+      <div className="grid items-center gap-12 py-10 lg:grid-cols-2 lg:gap-20 lg:py-20">
+        <m.div {...rise} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="relative mx-auto w-full max-w-[25rem]">
+          <div aria-hidden="true" className="absolute inset-x-6 -bottom-6 -z-10 h-24 rounded-full bg-lavender-500/25 blur-3xl" />
+          <PlayerCard model={model} tilt />
+        </m.div>
+
+        <m.div {...rise} transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }} className="max-w-lg max-lg:mx-auto max-lg:w-full max-lg:max-w-[25rem]">
+          <p className="type-label flex items-center gap-2 text-lavender-300">
+            <Icon name="identity" weight="duotone" className="size-4" />
+            Gamerie player card
+          </p>
+          <h1 className="type-display mt-5 text-display-md">
+            <span className="block break-words">{own ? "Your" : `${model.username}'s`}</span>
             <span className="block text-lavender-400">player card.</span>
-          </p>
+          </h1>
           <p className="mt-5 text-lead text-mist-300">
-            Built from Gamerie records. It shows where every detail comes from, and never invents a statistic.
+            {own
+              ? "Share it anywhere. The link always shows your latest Gamerie record."
+              : `Built from what ${model.username} has recorded on Gamerie, with every detail labeled by where it comes from.`}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" icon={copyState === "done" ? "check" : "copy"} onClick={() => void copyLink()}>
-              {copyState === "done" ? "Link copied" : "Copy link"}
-            </Button>
-            <Button tone="outline" size="lg" icon="share" onClick={() => void share()}>
-              Share
-            </Button>
-            <Button tone="outline" size="lg" icon={downloadState === "done" ? "check" : "image"} disabled={downloadState === "working"} onClick={() => void download()}>
-              {downloadState === "working" ? "Drawing…" : downloadState === "done" ? "Saved" : "Save image"}
-            </Button>
+
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+            {own ? (
+              <>
+                {copyButton}
+                <Button tone="outline" icon="share" onClick={() => void share()}>
+                  Share
+                </Button>
+                <Button tone="outline" icon={downloadState === "done" ? "check" : "image"} disabled={downloadState === "working"} onClick={() => void download()}>
+                  {downloadState === "working" ? "Drawing…" : downloadState === "done" ? "Saved" : "Save image"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <LinkButton to={profilePath} icon="arrowRight" className="col-span-2">
+                  View profile
+                </LinkButton>
+                {copyButton}
+                <Button tone="outline" icon="share" onClick={() => void share()}>
+                  Share
+                </Button>
+              </>
+            )}
           </div>
           {downloadState === "error" && (
             <p role="alert" className="mt-3 text-sm text-danger">
@@ -216,22 +274,52 @@ export function PlayerCardPage() {
               The link couldn't be copied. Copy it from your browser's address bar instead.
             </p>
           )}
-          <dl className="mt-10 grid gap-3 border-t border-white/8 pt-6 text-sm">
-            {provenance.map(([label, source]) => (
-              <div key={label} className="flex justify-between gap-4">
-                <dt className="text-mist-400">{label}</dt>
-                <dd className="font-medium">{source}</dd>
-              </div>
-            ))}
-          </dl>
-          <Link
-            to={`/profile/${model.username}`}
-            className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-lavender-300 hover:text-lavender-200"
-          >
-            Open full profile
-            <Icon name="arrowRight" className="size-4" />
-          </Link>
-        </div>
+
+          <section aria-labelledby="card-sources" className="mt-10 border-t border-white/8 pt-6">
+            <h2 id="card-sources" className="type-label text-mist-500">
+              Where each detail comes from
+            </h2>
+            <ul className="mt-5 grid gap-4 sm:grid-cols-3">
+              {provenance.map((item) => (
+                <li key={item.label} className="flex items-center gap-3 sm:flex-col sm:items-start">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/5 text-lavender-300 ring-1 ring-inset ring-white/8">
+                    <Icon name={item.icon} weight="duotone" className="size-[1.1rem]" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold">{item.label}</span>
+                    <span className="mt-0.5 block text-sm text-mist-400">{item.source}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {own ? (
+            <Link
+              to="/settings?section=profile"
+              className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-lavender-300 hover:text-lavender-200"
+            >
+              Edit what your card shows
+              <Icon name="arrowRight" className="size-4" />
+            </Link>
+          ) : (
+            !viewer && (
+              <Link
+                to="/register"
+                className="group mt-8 flex items-center gap-4 rounded-tile bg-white/[0.04] p-4 ring-1 ring-inset ring-white/8 transition-colors hover:bg-white/[0.07]"
+              >
+                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-lavender-400 text-ink-950">
+                  <TokenMark className="h-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold">Get your own player card</span>
+                  <span className="mt-0.5 block text-sm text-mist-400">Join Gamerie and start building your record.</span>
+                </span>
+                <Icon name="arrowRight" className="size-4 shrink-0 text-mist-300 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            )
+          )}
+        </m.div>
       </div>
       <p className="sr-only" aria-live="polite">
         {copyState === "done" ? "Player card link copied." : ""}

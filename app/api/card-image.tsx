@@ -1,5 +1,5 @@
 import { ImageResponse } from "@vercel/og";
-import { buildPlayerCardModel } from "../src/features/profile/playerCard";
+import { buildPlayerCardModel, statText } from "../src/features/profile/playerCard";
 import type { PlayerProfile } from "../src/features/profile/types";
 
 export const config = { runtime: "edge" };
@@ -68,12 +68,12 @@ export default async function handler(request: Request) {
           left: 0,
           display: "flex",
           height: 6,
-          background: "#d4ff5a",
+          background: "#c6a3ff",
         }}
       />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: 30, fontWeight: 700 }}>Gamerie</span>
-        <span style={{ color: "#d4ff5a", fontSize: 15, fontWeight: 700, letterSpacing: "0.16em" }}>
+        <span style={{ color: "#c6a3ff", fontSize: 15, fontWeight: 700, letterSpacing: "0.16em" }}>
           PLAYER CARD
         </span>
       </div>
@@ -109,7 +109,7 @@ export default async function handler(request: Request) {
           <span style={{ display: "flex", fontSize: 14, fontWeight: 700, letterSpacing: "0.12em" }}>
             <span style={{ color: "#676072" }}>PLAYER IDENTITY</span>
             {model.gamerieId ? (
-              <span style={{ marginLeft: 10, color: "#d4ff5a" }}>· {model.gamerieId}</span>
+              <span style={{ marginLeft: 10, color: "#c6a3ff" }}>· {model.gamerieId}</span>
             ) : null}
           </span>
           <span style={{ marginTop: 5, fontSize: 62, fontWeight: 720, letterSpacing: "-0.055em" }}>
@@ -147,7 +147,7 @@ export default async function handler(request: Request) {
             }}
           >
             <span style={{ color: statColor(stat.tone), fontSize: 36, fontWeight: 720 }}>
-              {stat.value}
+              {statText(stat)}
             </span>
             <span style={{ marginTop: 8, fontSize: 16, fontWeight: 650 }}>{stat.label}</span>
             <span style={{ marginTop: 5, color: "#676072", fontSize: 12 }}>{stat.context}</span>
@@ -164,7 +164,7 @@ export default async function handler(request: Request) {
           justifyContent: "space-between",
         }}
       >
-        <span style={{ color: "#d4ff5a", fontSize: 20, fontWeight: 700 }}>gamerie.gg</span>
+        <span style={{ color: "#c6a3ff", fontSize: 20, fontWeight: 700 }}>gamerie.gg</span>
         <span style={{ color: "#676072", fontSize: 14 }}>Identity · community · competition</span>
       </div>
     </div>,

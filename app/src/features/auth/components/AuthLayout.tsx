@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { TokenMark } from "@/components/ui/TokenMark";
 import { publicLinks } from "@/config/links";
 import { cn } from "@/lib/cn";
+import { cookiePreferencesEnabled, openCookiePreferences } from "@/lib/consent";
 
 function Brand({ className }: { className?: string }) {
   return (
@@ -67,6 +68,14 @@ export function AuthLayout({
             Privacy Policy
           </a>
           .
+          {cookiePreferencesEnabled && (
+            <>
+              {" "}
+              <button type="button" onClick={openCookiePreferences} className="text-mist-300 underline-offset-4 hover:underline">
+                Cookie settings
+              </button>
+            </>
+          )}
         </footer>
       </section>
     </main>

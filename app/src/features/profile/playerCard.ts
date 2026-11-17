@@ -6,8 +6,15 @@ export interface PlayerCardStat {
   key: string;
   label: string;
   value: string;
+  unit?: string;
   context: string;
   tone: PlayerCardStatTone;
+}
+
+/** A stat's value with its unit, for places that show it as one string. */
+export function statText(stat: Pick<PlayerCardStat, "value" | "unit">) {
+  if (!stat.unit) return stat.value;
+  return stat.unit === "%" ? `${stat.value}%` : `${stat.value} ${stat.unit}`;
 }
 
 export interface PlayerCardStrength {
@@ -28,6 +35,8 @@ export interface PlayerCardModel {
     standing?: string;
   };
   stats: PlayerCardStat[];
+  /** Percent of the way to the next Gamerie level, when progression is known. */
+  levelProgress?: number;
   strengths: PlayerCardStrength[];
   completedAchievements: number;
 }
@@ -84,9 +93,10 @@ export function buildPlayerCardModel(profile: PlayerProfile): PlayerCardModel {
     stats.push({
       key: "gamerie-level",
       label: `Level ${Math.max(0, Number(profile.progression.level) || 0)}`,
-      value: `${Math.max(0, Number(profile.progression.totalGp) || 0).toLocaleString()} GP`,
+      value: Math.max(0, Number(profile.progression.totalGp) || 0).toLocaleString(),
+      unit: "GP",
       context: profile.progression.nextLevel
-        ? `Progressing to Level ${profile.progression.nextLevel}`
+        ? `Next: Level ${profile.progression.nextLevel}`
         : "Gamerie progression",
       tone: "brand",
     });
@@ -96,9 +106,10 @@ export function buildPlayerCardModel(profile: PlayerProfile): PlayerCardModel {
   if (currentStreak) {
     stats.push({
       key: "match-streak",
-      label: "Match-recording streak",
-      value: `${Math.round(currentStreak)} ${Math.round(currentStreak) === 1 ? "day" : "days"}`,
-      context: `Best: ${Math.max(Math.round(currentStreak), Number(profile.streak?.longestStreak) || 0)} days`,
+      label: "Match streak",
+      value: String(Math.round(currentStreak)),
+      unit: Math.round(currentStreak) === 1 ? "day" : "days",
+      context: `Best ${Math.max(Math.round(currentStreak), Number(profile.streak?.longestStreak) || 0)} days`,
       tone: "achievement",
     });
   }
@@ -108,18 +119,19 @@ export function buildPlayerCardModel(profile: PlayerProfile): PlayerCardModel {
       key: "ranking-score",
       label: profile.stats?.rankingScope
         ? `${profile.stats.rankingScope} score`
-        : "Overall ranking score",
+        : "Ranking score",
       value: Math.round(rankingScore).toLocaleString(),
-      context: profile.stats?.rankingScope ? "Primary game ranking" : "Gamerie record",
+      context: profile.stats?.rankingScope ? "Main game" : "Gamerie record",
       tone: "brand",
     });
   }
   if (winRate) {
     stats.push({
       key: "win-rate",
-      label: "Recorded win rate",
-      value: `${Math.round(winRate)}%`,
-      context: `${Math.round(matches!)} recorded matches`,
+      label: "Win rate",
+      value: String(Math.round(winRate)),
+      unit: "%",
+      context: `${Math.round(matches!).toLocaleString()} matches`,
       tone: "neutral",
     });
   }
@@ -128,7 +140,7 @@ export function buildPlayerCardModel(profile: PlayerProfile): PlayerCardModel {
       key: "tournament-wins",
       label: "Tournament wins",
       value: Math.round(tournamentWins).toLocaleString(),
-      context: "Achievement",
+      context: "Gamerie record",
       tone: "achievement",
     });
   } else if (completedAchievements) {
@@ -136,13 +148,13 @@ export function buildPlayerCardModel(profile: PlayerProfile): PlayerCardModel {
       key: "achievements",
       label: "Achievements",
       value: completedAchievements.toLocaleString(),
-      context: "Completed on Gamerie",
+      context: "Completed",
       tone: "achievement",
     });
   } else if (matches && !winRate) {
     stats.push({
       key: "matches",
-      label: "Recorded matches",
+      label: "Matches",
       value: Math.round(matches).toLocaleString(),
       context: "Gamerie record",
       tone: "neutral",
@@ -168,6 +180,9 @@ export function buildPlayerCardModel(profile: PlayerProfile): PlayerCardModel {
         }
       : undefined,
     stats: stats.slice(0, 3),
+    levelProgress: profile.progression
+      ? Math.min(100, Math.max(0, Number(profile.progression.progressPercent) || 0))
+      : undefined,
     strengths: cardStrengths(profile.skills),
     completedAchievements,
   };

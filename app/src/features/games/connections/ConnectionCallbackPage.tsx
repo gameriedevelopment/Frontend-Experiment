@@ -19,6 +19,8 @@ export function ConnectionCallbackPage({ source }: { source: "steam" | "lichess"
     started.current = true;
     const finish = async () => {
       const params = new URLSearchParams(window.location.search);
+      // The address carries a one-time proof or code; take it out before anything else can read it.
+      window.history.replaceState(null, "", window.location.pathname);
       const pending = readConnectionCallback();
       try {
         const providerError = params.get("error_description") || params.get("error");
@@ -26,10 +28,10 @@ export function ConnectionCallbackPage({ source }: { source: "steam" | "lichess"
         const returnedState = params.get("state");
         if (!returnedState || returnedState !== pending.state) throw new Error("This link couldn't be verified safely. Please try again.");
         if (source === "steam") {
-          const steamId = params.get("steamId");
-          if (!steamId || !pending.provider || !["steam", "dota-2", "cs2"].includes(pending.provider))
+          const proof = params.get("proof");
+          if (!proof || !pending.provider || !["steam", "dota-2", "cs2"].includes(pending.provider))
             throw new Error("Steam returned an incomplete connection.");
-          await connectProvider(pending.provider, { steamId });
+          await connectProvider(pending.provider, { proof });
         } else {
           const code = params.get("code");
           if (!code || !pending.verifier || pending.provider !== "lichess") throw new Error("Lichess returned an incomplete connection.");

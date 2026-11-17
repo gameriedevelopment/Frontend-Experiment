@@ -126,7 +126,7 @@ npm run dev            # http://localhost:5179
     - **Posts:** the player's posts with rich text, media viewer, likes, threaded comments, reposts and share.
     - **Achievements** with reward claiming.
     - **Edit profile** (`?edit=photos|identity|personal|skills|links`): one dialog with sections; photos upload immediately. Setup steps and the completion meter link straight to the right section.
-  - **Public Player Card** (`/card/:username`, `/s/:username`) with copy link, share and "Save image" (a 1080×1350 PNG drawn on canvas to match the card).
+  - **Public Player Card** (`/card/:username`, `/s/:username`): the card (foil header that follows the pointer, main game with standing, level with progress to the next, up to two stat tiles, top skills) on a lit stage. The owner gets Copy link, Share and "Save image" (a 1080×1350 PNG that draws the same card on a dark stage, scaled to fit). Visitors get View profile, Copy link and Share; signed-out visitors also see "Get your own player card". A "Where each detail comes from" key replaces the old provenance table. The same card sits in the profile sidebar.
   - **Leaderboard** (`/leaderboard`): players or teams, a game picker, metric tabs plus tournament points, a podium with a lime first place, ranked rows with your own row highlighted, and pagination.
   - **Ladders** (`/ladders`, `/ladders/:id`, `/ladders/create`, `/ladders/:id/edit`).
     - **Directory:** active, in progress, upcoming, completed and yours, with search and an entry filter.
@@ -183,7 +183,7 @@ npm run dev            # http://localhost:5179
 - **Shared UI added:**
   - Tabs, Segmented, Combobox, ScheduleField (with a day range, month markers, and the chosen day scrolled into view), TextAreaField.
   - OptionCards, Switch, FileDrop, Menu (action menu) and TagInput.
-  - Rich text through `@tailwindcss/typography` (`@plugin` in theme.css), with markdown-it, DOMPurify and highlight.js ported from the revamp's renderer.
+  - Rich text through `@tailwindcss/typography` (`@plugin` in theme.css), with markdown-it, DOMPurify and highlight.js ported from the revamp's renderer. Older post formats are normalised before rendering (same change in the revamp): an editor that ended every line with `\` and wrote a lone `\` for an empty line (no more stray backslashes, and a paragraph after a list no longer joins the last bullet), and legacy `<p>`, `<br>` and mention `<a>` HTML. Fenced and inline code are left as written.
   - ConfirmDialog, styled as an alert with danger styling.
   - Toaster: `toast.success`, `toast.info`, `toast.error`, with a lime check for success.
   - Dialog: sizes from sm to xl, an icon and tone mark, a bottom sheet on phones, and a spring entrance.
@@ -208,4 +208,5 @@ npm run dev            # http://localhost:5179
   - Analytics: `plugins/analytics.ts` injects Consent Mode defaults, Enzuzo and GTM/GA like the website; route views report from `RouteTitle`. Detail pages title the tab after what's open.
   - Deploy: `vercel.json` (SPA rewrite and `/s/:username` share previews) and `api/share.ts` + `api/card-image.tsx` (OG card in the v2 palette).
 - **Backend changes in the audit:** migrations `AddHotPathIndexes` (60 indexes on foreign keys and hot paths: messaging, notifications, events, profile joins, rosters, brackets, wallets), `AddSearchTrigramIndexes` (pg_trgm on every searched column), `SentenceCaseNotificationTitles`; notification list filters share the preference category rules (`notification-filters.ts`, with spec) and add `matches`/`tournaments`; the check-in shortfall notice reads naturally.
+- **Game connection ownership (backend-two):** Steam, CS2 and Dota 2 no longer accept a bare SteamID. The OpenID redirect issues a signed, 10-minute, single-use `proof` (`SteamOwnershipService`, with spec) and the link endpoints accept only that. Both frontends' Steam callbacks send it. Still claim-by-ID with no ownership proof: Lichess (trusts the posted account), Riot, Supercell, PUBG, Battle.net.
 - **Next:** an authenticated end-to-end pass against backend-two, then commit.

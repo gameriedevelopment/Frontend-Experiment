@@ -3,10 +3,10 @@ import { useEffect, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 
-export function SettingsCard({ title, description, action, children, className }: { title: string; description?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) {
+export function SettingsCard({ title, description, action, children, className }: { title: string; description?: ReactNode; action?: ReactNode; children?: ReactNode; className?: string }) {
   return (
     <section className={cn("rounded-card bg-ink-900/60 p-5 ring-1 ring-inset ring-white/6 sm:p-6", className)}>
-      <header className="mb-5 flex items-start justify-between gap-4">
+      <header className={cn("flex items-start justify-between gap-4", children && "mb-5")}>
         <div className="min-w-0">
           <h2 className="text-base font-semibold">{title}</h2>
           {description && <p className="mt-1 text-sm leading-relaxed text-mist-400">{description}</p>}

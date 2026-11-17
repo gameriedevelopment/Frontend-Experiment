@@ -6,6 +6,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { easeOutExpo } from "@/components/ui/motion";
 import { signOut } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/authStore";
+import { cn } from "@/lib/cn";
 
 const menuItem =
   "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-mist-200 transition-colors hover:bg-white/6 hover:text-mist-50";
@@ -15,6 +16,7 @@ export function ProfileMenu() {
   const user = useAuthStore((state) => state.user);
   const [open, setOpen] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,9 +37,11 @@ export function ProfileMenu() {
   const logout = async () => {
     try {
       setLogoutError(null);
+      setSigningOut(true);
       await signOut();
       navigate("/login", { replace: true });
     } catch {
+      setSigningOut(false);
       setLogoutError("Sign out failed. Please try again.");
     }
   };
@@ -87,9 +91,16 @@ export function ProfileMenu() {
               ))}
             </div>
             <div className="border-t border-white/6 pt-2">
-              <button type="button" role="menuitem" onClick={() => void logout()} className={menuItem}>
-                <Icon name="signOut" className="size-[1.1rem] text-mist-400" />
-                Sign out
+              {/* Neutral at rest; red only on hover or focus, since signing out isn't destructive. */}
+              <button
+                type="button"
+                role="menuitem"
+                disabled={signingOut}
+                onClick={() => void logout()}
+                className={cn(menuItem, "group outline-none hover:bg-danger/10 hover:text-danger focus-visible:bg-danger/10 focus-visible:text-danger disabled:opacity-60")}
+              >
+                <Icon name="signOut" className="size-[1.1rem] text-mist-400 transition-colors group-hover:text-danger group-focus-visible:text-danger" />
+                {signingOut ? "Signing out…" : "Sign out"}
               </button>
               {logoutError && (
                 <p role="alert" className="px-3 pb-1 text-xs text-danger">

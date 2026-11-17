@@ -15,8 +15,9 @@ function valid(value: string | undefined, pattern: RegExp) {
 const consentDefaults = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});`;
 
 /**
- * The same consent and analytics tags as the website, so one cookie choice covers both. The app is a
- * single page, so GA's automatic page view is off; `trackPageView` reports each route instead.
+ * The same consent and analytics tags as the website, so one cookie choice covers both. GA loads directly
+ * only when there's no Tag Manager container. The app is a single page, so GA's automatic page view is off
+ * and `trackPageView` reports each route instead.
  */
 export function analytics(options: { enzuzoId?: string; gtmId?: string; gaMeasurementId?: string }): Plugin {
   return {
@@ -34,7 +35,8 @@ export function analytics(options: { enzuzoId?: string; gtmId?: string; gaMeasur
           children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`,
           injectTo: "head",
         });
-      if (gaId)
+      // Tag Manager carries GA itself, so loading GA as well would count every view twice.
+      if (gaId && !gtmId)
         tags.push(
           { tag: "script", attrs: { async: true, src: `https://www.googletagmanager.com/gtag/js?id=${gaId}` }, injectTo: "head" },
           { tag: "script", children: `gtag('js',new Date());gtag('config','${gaId}',{send_page_view:false});`, injectTo: "head" },

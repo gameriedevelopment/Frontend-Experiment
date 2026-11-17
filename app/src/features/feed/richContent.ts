@@ -41,6 +41,15 @@ const markdown: MarkdownIt = new MarkdownIt({
   .use(sub)
   .use(sup);
 
+// A trailing "\" is a markdown line break, but at the end of a paragraph or list item there is no line
+// left to break, so markdown prints it. Drop it there. Escaped "\\" is a separate token and stays.
+markdown.core.ruler.after("inline", "trailing_break", (state) => {
+  for (const token of state.tokens) {
+    const last = token.type === "inline" ? token.children?.at(-1) : undefined;
+    if (last?.type === "text" && last.content.endsWith("\\")) last.content = last.content.slice(0, -1).trimEnd();
+  }
+});
+
 const defaultLinkOpen: RenderRule =
   markdown.renderer.rules.link_open ??
   ((tokens, index, options, _environment, renderer) =>
@@ -79,10 +88,49 @@ markdown.renderer.rules.text = (tokens, index, options, environment, renderer) =
     });
 };
 
+/** Legacy editors saved paragraphs, breaks and mentions as HTML. Rewrite those few tags as markdown. */
+function legacyHtml(text: string) {
+  return text
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<p\b[^>]*>/gi, "")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<a\b[^>]*?\bhref="([^"]*)"[^>]*>(.*?)<\/a>/gi, (_match: string, href: string, label: string) => {
+      if (label.startsWith("@")) return label;
+      return /^(https?:\/\/|\/(?!\/))/i.test(href) ? `[${label}](<${href}>)` : label;
+    });
+}
+
+/**
+ * Brings older post formats in line with markdown: one editor ended every line with "\" and wrote a lone
+ * "\" for an empty line, which would otherwise pull the next paragraph into a preceding list. Fenced
+ * code and inline code are left exactly as written.
+ */
+function normalizeSource(source: string) {
+  let fence = "";
+  return source
+    .replace(/\r\n?|\u2028|\u2029/g, "\n")
+    .split("\n")
+    .map((line) => {
+      const marker = line.match(/^ {0,3}(`{3,}|~{3,})/)?.[1];
+      if (fence) {
+        if (marker && marker[0] === fence[0] && marker.length >= fence.length && !line.trim().slice(marker.length)) fence = "";
+        return line;
+      }
+      if (marker) {
+        fence = marker;
+        return line;
+      }
+      if (/^[ \t]*\\[ \t]*$/.test(line)) return "";
+      return line
+        .split(/(`+[^`]*`+)/)
+        .map((part, index) => (index % 2 ? part : legacyHtml(part)))
+        .join("");
+    })
+    .join("\n");
+}
+
 export function renderRichContent(content: unknown) {
-  const source = String(content ?? "")
-    .replace(/\u2028|\u2029/g, "\n")
-    .trim();
+  const source = normalizeSource(String(content ?? "")).trim();
   if (!source) return "";
   return DOMPurify.sanitize(markdown.render(source), {
     ADD_ATTR: ["checked", "target"],
