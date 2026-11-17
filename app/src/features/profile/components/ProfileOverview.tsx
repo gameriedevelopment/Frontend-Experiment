@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { useToggleSkillEndorsement } from "../hooks";
 import type { PlayerProfile, ProfileSkill } from "../types";
 import { EmptyLine, ProfileSection } from "./ProfileSection";
+import { NeedsPanel, ReferralPanel } from "./OpportunityPanels";
 
 const endorsementCount = (skill: ProfileSkill) =>
   Number(skill.endorsementCount ?? (typeof skill.endorsements === "number" ? skill.endorsements : 0));
@@ -123,6 +124,8 @@ export function ProfileOverview({ own, profile }: { own: boolean; profile: Playe
         )}
       </ProfileSection>
       <SkillsPanel own={own} profile={profile} />
+      <NeedsPanel own={own} profile={profile} />
+      {own && <ReferralPanel />}
     </div>
   );
 }

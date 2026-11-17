@@ -4,6 +4,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { useTogglePlayerFollow } from "@/features/profile/hooks";
 import type { PlayerProfile } from "@/features/profile/types";
+import { getApiErrorMessage } from "@/lib/errors";
+import { toast } from "@/lib/toast";
 import { HomePanel, PanelError, RowSkeletons } from "./HomePanel";
 
 function PlayerRow({ player, currentUserId }: { player: PlayerProfile; currentUserId: string }) {
@@ -29,7 +31,11 @@ function PlayerRow({ player, currentUserId }: { player: PlayerProfile; currentUs
         icon={following ? "check" : undefined}
         disabled={follow.isPending}
         aria-label={`${following ? "Unfollow" : "Follow"} ${player.username}`}
-        onClick={() => follow.mutate()}
+        onClick={() =>
+          follow.mutate(undefined, {
+            onError: (error) => toast.error(following ? "Couldn't unfollow" : "Couldn't follow", getApiErrorMessage(error, "Try again in a moment.")),
+          })
+        }
       >
         {following ? "Following" : "Follow"}
       </Button>

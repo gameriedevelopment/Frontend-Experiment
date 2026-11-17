@@ -25,7 +25,7 @@ export function Tabs<T extends string>({
   className?: string;
 }) {
   return (
-    <nav aria-label={label} className={cn("-mx-1 overflow-x-auto [scrollbar-width:none]", className)}>
+    <nav aria-label={label} className={cn("relative -mx-1 overflow-x-auto scrollbar-none", className)}>
       <ul className="flex min-w-max gap-1 border-b border-white/6 px-1">
         {items.map((item) => (
           <li key={item.id}>

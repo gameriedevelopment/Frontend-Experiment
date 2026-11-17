@@ -90,7 +90,7 @@ export const Checkbox = forwardRef<
   Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { label: ReactNode }
 >(function Checkbox({ label, className, ...props }, ref) {
   return (
-    <label className={cn("group inline-flex cursor-pointer select-none items-center gap-3 text-sm text-mist-300", className)}>
+    <label className={cn("group relative inline-flex cursor-pointer select-none items-center gap-3 text-sm text-mist-300", className)}>
       <input ref={ref} type="checkbox" className="peer sr-only" {...props} />
       <span className="grid size-5 place-items-center rounded-md text-ink-950 ring-1 ring-inset ring-white/20 transition-colors group-hover:ring-white/35 peer-checked:bg-lavender-400 peer-checked:ring-lavender-400 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-lavender-400 [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100">
         <Icon name="check" className="size-3.5" weight="bold" />

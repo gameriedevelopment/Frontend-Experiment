@@ -74,17 +74,25 @@ export function OpenTournaments({
   tournaments,
   loading,
   className,
+  title = "Open for entry",
+  link = { label: "Tournaments", to: "/tournaments" },
+  empty = "No brackets are open right now. Anyone can host one for their friends, team or hub, and Gamerie runs the bracket and records the results.",
+  hostTo = "/tournaments/create",
 }: {
   tournaments: Tournament[];
   loading: boolean;
   className?: string;
+  title?: string;
+  link?: { label: string; to: string };
+  empty?: string;
+  hostTo?: string;
 }) {
   return (
     <HomePanel
       className={className}
-      title="Open for entry"
+      title={title}
       description={tournaments.length ? "Tournaments hosted on Gamerie that you can still join." : undefined}
-      link={{ label: "Tournaments", to: "/tournaments" }}
+      link={link}
     >
       {loading ? (
         <RowSkeletons rows={2} />
@@ -96,12 +104,9 @@ export function OpenTournaments({
         </ul>
       ) : (
         <div className="grid gap-4">
-          <p className="max-w-md text-sm leading-relaxed text-mist-400">
-            No brackets are open right now. Anyone can host one for their friends, team or hub, and Gamerie runs the
-            bracket and records the results.
-          </p>
+          <p className="max-w-md text-sm leading-relaxed text-mist-400">{empty}</p>
           <div>
-            <LinkButton to="/tournaments/create" size="sm" tone="outline" icon="plus">
+            <LinkButton to={hostTo} size="sm" tone="outline" icon="plus">
               Host a tournament
             </LinkButton>
           </div>

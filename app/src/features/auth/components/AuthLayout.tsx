@@ -56,7 +56,7 @@ export function AuthLayout({
           <Brand className="lg:invisible" />
           {aside && <div className="text-sm text-mist-400">{aside}</div>}
         </header>
-        <div className="mx-auto my-auto w-full max-w-[26rem] py-12">{children}</div>
+        <div className="mx-auto my-auto w-full max-w-104 py-12">{children}</div>
         <footer className="text-center text-xs leading-relaxed text-mist-500">
           By continuing, you agree to Gamerie's{" "}
           <a className="text-mist-300 underline-offset-4 hover:underline" href={publicLinks.terms}>

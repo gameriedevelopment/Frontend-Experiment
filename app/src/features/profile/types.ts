@@ -32,6 +32,9 @@ export interface ProfileSkill extends Record<string, unknown> {
 
 export interface PlayerProfile extends AuthUser {
   username: string;
+  /** Owner only: "local" for email and password, otherwise the social provider. */
+  signInProvider?: string;
+  phoneNumber?: string | null;
   gamerieId?: string | null;
   shareable?: boolean;
   profileVisibility?: "public" | "private" | "friends" | string;
@@ -251,4 +254,69 @@ export interface AchievementsSummary {
   completedCount: number;
   totalCount: number;
   achievements: AchievementItem[];
+}
+export interface ReferralEntry {
+  userId: string;
+  username: string;
+  profileImage?: string;
+  joinedAt: string;
+  status?: string;
+  rewardPoints?: number;
+}
+export interface ReferralPage {
+  referralCode: string;
+  totalReferrals: number;
+  referrals: ReferralEntry[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+export interface Endorser extends PlayerConnection {
+  endorsedAt?: string;
+  timestamp?: string;
+}
+export interface EndorserPage {
+  data: Endorser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface SalaryComponent {
+  factor: string;
+  rawValue: number;
+  weight: number;
+  normalizedScore: number;
+  contributionUSD: number;
+}
+export interface SalaryEstimation {
+  userId: string;
+  estimate: number;
+  min: number;
+  max: number;
+  currency: string;
+  tier: string;
+  estimatedMonthlyGLK: number;
+  confidenceScore: number;
+  factorScore: number;
+  components: SalaryComponent[];
+  benchmarks?: {
+    percentile?: number;
+    avgSalaryInTier?: number;
+    comparisonToAverage?: string;
+  };
+  improvementSuggestions: string[];
+  lastCalculated: string;
+  isVerified: boolean;
+}
+export interface SalaryHistoryItem {
+  id: string;
+  estimate: number;
+  tier: string;
+  factorScore: number;
+  calculatedAt: string;
 }

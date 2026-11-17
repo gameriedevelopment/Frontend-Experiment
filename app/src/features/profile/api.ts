@@ -1,10 +1,15 @@
 import { api, type ApiEnvelope } from "@/lib/api";
+import type { FeedPost } from "@/features/feed/types";
 import type {
   AchievementsSummary,
   ConnectionPage,
+  EndorserPage,
   GameRanking,
   MatchHistoryPage,
   PlayerProfile,
+  ReferralPage,
+  SalaryEstimation,
+  SalaryHistoryItem,
 } from "./types";
 
 export async function getPlayerProfile(identity: string): Promise<PlayerProfile> {
@@ -90,4 +95,50 @@ export async function getAchievements(userId: string): Promise<AchievementsSumma
 
 export async function claimAchievement(userId: string, achievementId: string) {
   await api.post(`/achievements/${userId}/${achievementId}/claim`);
+}
+
+export async function getSalaryEstimation(userId: string): Promise<SalaryEstimation> {
+  const { data } = await api.get<ApiEnvelope<SalaryEstimation>>(`/users/${userId}/salary-estimation`);
+  return data.data;
+}
+
+export async function recalculateSalary(userId: string): Promise<SalaryEstimation> {
+  const { data } = await api.post<ApiEnvelope<SalaryEstimation>>(`/users/${userId}/salary-estimation/recalculate`);
+  return data.data;
+}
+
+export async function getSalaryHistory(userId: string): Promise<SalaryHistoryItem[]> {
+  const { data } = await api.get<ApiEnvelope<SalaryHistoryItem[]>>(`/users/${userId}/salary-estimation/history`, {
+    params: { limit: 12 },
+  });
+  return data.data ?? [];
+}
+
+export async function updatePlayerProfile(userId: string, updates: Partial<PlayerProfile>): Promise<PlayerProfile> {
+  const { data } = await api.patch<ApiEnvelope<PlayerProfile>>(`/users/${userId}`, updates);
+  return data.data;
+}
+
+export async function uploadPlayerImage(userId: string, file: File, type: "profileImage" | "backgroundImage"): Promise<void> {
+  const body = new FormData();
+  body.append("file", file);
+  await api.post(`/users/${userId}/upload/${type}`, body, { headers: { "Content-Type": "multipart/form-data" } });
+}
+
+// This endpoint returns the referral page bare, not inside the usual envelope.
+export async function getMyReferrals(page: number): Promise<ReferralPage> {
+  const { data } = await api.get<ReferralPage>("/referrals/me", { params: { page, limit: 12 } });
+  return data;
+}
+
+export async function getPlayerPosts(userId: string): Promise<FeedPost[]> {
+  const { data } = await api.get<ApiEnvelope<FeedPost[]>>(`/newsfeed/user/${userId}`);
+  return data.data ?? [];
+}
+
+export async function getSkillEndorsers(userId: string, skillId: string, page: number): Promise<EndorserPage> {
+  const { data } = await api.get<ApiEnvelope<EndorserPage>>(`/users/skill/${skillId}/endorsements`, {
+    params: { userId, page, limit: 20 },
+  });
+  return data.data;
 }

@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 import { Icon, type IconName } from "./Icon";
 
 export const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-3 whitespace-nowrap rounded-full font-sans font-semibold uppercase tracking-[0.13em] transition-[background-color,color,box-shadow,transform] duration-300 ease-out-expo active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lavender-400",
+  "group/button inline-flex shrink-0 items-center justify-center gap-3 whitespace-nowrap rounded-full font-sans font-semibold uppercase tracking-[0.13em] transition-[background-color,color,box-shadow,transform] duration-300 ease-out-expo active:scale-97 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lavender-400",
   {
     variants: {
       tone: {

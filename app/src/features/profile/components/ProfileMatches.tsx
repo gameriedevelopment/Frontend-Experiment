@@ -1,36 +1,22 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
+import { Segmented } from "@/components/ui/Segmented";
 import { SkeletonText } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
+import { usePlayerChallenges } from "@/features/challenges/hooks";
+import { challengePerspective, challengePhaseLabel, formatChallengeDateTime, sideNames } from "@/features/challenges/lifecycle";
+import { viewerOutcome } from "@/features/challenges/outcome";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { usePlayerMatchHistory } from "../hooks";
-import { getMatchPresentation } from "../matchHistory";
+import { getMatchPresentation, matchGameName, matchResultStyles, matchSourceLabels } from "../matchHistory";
 import type { MatchHistoryEntry, PlayerProfile } from "../types";
 import { ProfileSection } from "./ProfileSection";
 
-const sourceLabels: Record<NonNullable<MatchHistoryEntry["verificationSource"]>, string> = {
-  challenge: "Challenge result",
-  tournament: "Tournament result",
-  organiser: "Organiser recorded",
-  screenshot: "Screenshot verified",
-  player_listed: "Player listed",
-  official_api: "Official game data",
-};
-
-const resultStyles: Record<string, { mark: string; className: string }> = {
-  win: { mark: "W", className: "bg-signal/12 text-signal" },
-  loss: { mark: "L", className: "bg-white/6 text-mist-400" },
-  draw: { mark: "D", className: "bg-lavender-400/12 text-lavender-300" },
-};
-
-function gameName(value: MatchHistoryEntry["game"]) {
-  if (typeof value === "string") return value;
-  return value?.name || "Game";
-}
-
 function MatchRow({ match, playerId }: { match: MatchHistoryEntry; playerId: string }) {
   const presentation = getMatchPresentation(match, playerId);
-  const result = resultStyles[presentation.state];
+  const result = matchResultStyles[presentation.state];
   const date = match.playedAt || match.scheduledDate || match.date || match.createdAt;
   const details = [
     presentation.opponent ? `vs ${presentation.opponent}` : null,
@@ -50,20 +36,20 @@ function MatchRow({ match, playerId }: { match: MatchHistoryEntry; playerId: str
         {result?.mark ?? "–"}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{gameName(match.game)}</p>
+        <p className="truncate text-sm font-semibold">{matchGameName(match.game)}</p>
         <p className="mt-0.5 truncate text-xs text-mist-400">{details.join(" · ") || "Gamerie match"}</p>
       </div>
       <div className="shrink-0 text-right">
         <p className="text-sm font-semibold tabular-nums">{presentation.label}</p>
         {match.verificationSource && (
-          <p className="mt-0.5 text-xs text-mist-500">{sourceLabels[match.verificationSource]}</p>
+          <p className="mt-0.5 text-xs text-mist-500">{matchSourceLabels[match.verificationSource]}</p>
         )}
       </div>
     </li>
   );
 }
 
-export function ProfileMatches({ own, profile }: { own: boolean; profile: PlayerProfile }) {
+function RecordedMatches({ own, profile }: { own: boolean; profile: PlayerProfile }) {
   const query = usePlayerMatchHistory(profile.id);
   const pages = query.data?.pages ?? [];
   const matches = pages.flatMap((page) => page.data);
@@ -139,5 +125,125 @@ export function ProfileMatches({ own, profile }: { own: boolean; profile: Player
         </div>
       )}
     </ProfileSection>
+  );
+}
+
+function ChallengeHistory({ own, profile }: { own: boolean; profile: PlayerProfile }) {
+  const query = usePlayerChallenges(profile.id);
+  const challenges = query.data?.pages.flatMap((page) => page.data) ?? [];
+
+  if (query.isLoading)
+    return (
+      <ProfileSection title="Challenges">
+        <SkeletonText lines={4} />
+      </ProfileSection>
+    );
+  if (query.isError && !query.data)
+    return (
+      <StatePanel
+        icon="warning"
+        tone="danger"
+        title="Challenges could not load"
+        description={getApiErrorMessage(query.error, "Please try again in a moment.")}
+        action={
+          <Button tone="outline" size="sm" icon="refresh" onClick={() => void query.refetch()}>
+            Try again
+          </Button>
+        }
+      />
+    );
+  if (!challenges.length)
+    return (
+      <StatePanel
+        icon="challenges"
+        title="No challenges yet"
+        description={own ? "Challenge any player. Once you both confirm the score, it shows here." : "This player hasn't played a challenge yet."}
+        action={
+          <LinkButton
+            to={own ? "/challenges/new" : `/challenges/new?target=${encodeURIComponent(profile.id)}&targetName=${encodeURIComponent(profile.username)}`}
+            tone="outline"
+            size="sm"
+            icon="challenges"
+          >
+            {own ? "New challenge" : `Challenge ${profile.username}`}
+          </LinkButton>
+        }
+      />
+    );
+
+  return (
+    <ProfileSection title="Challenges" meta={`${query.data?.pages[0]?.total ?? challenges.length} played or scheduled`}>
+      <ul className="divide-y divide-white/6">
+        {challenges.map((challenge) => {
+          const view = challengePerspective(challenge, profile.id, []);
+          const outcome = viewerOutcome(challenge, view);
+          const opponent = view.side ? view.opponentName : sideNames(challenge).join(" vs ");
+          const row = (
+            <>
+              <span
+                className={cn(
+                  "type-display grid size-9 shrink-0 place-items-center rounded-xl text-sm",
+                  outcome === "win" ? "bg-signal/12 text-signal" : outcome === "loss" ? "bg-white/5 text-mist-400" : "bg-white/5 text-mist-300",
+                )}
+              >
+                {outcome === "win" ? "W" : outcome === "loss" ? "L" : outcome === "draw" ? "D" : "–"}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">
+                  {view.side ? <>vs {opponent}</> : opponent}
+                </span>
+                <span className="mt-0.5 block truncate text-xs text-mist-500">
+                  {[challenge.game, challenge.format, formatChallengeDateTime(challenge.scheduledDate)].join(" · ")}
+                </span>
+              </span>
+              <span className="shrink-0 text-right">
+                {challenge.result?.score ? (
+                  <span className="type-display block text-base tabular-nums">{challenge.result.score.replace("-", "–")}</span>
+                ) : (
+                  <span className="type-label block text-mist-500">{challengePhaseLabel(challenge)}</span>
+                )}
+              </span>
+            </>
+          );
+          return (
+            <li key={challenge.id}>
+              {own ? (
+                <Link to={`/challenges/${challenge.id}`} className="-mx-2 flex items-center gap-4 rounded-xl px-2 py-3 transition-colors hover:bg-white/3">
+                  {row}
+                </Link>
+              ) : (
+                <div className="flex items-center gap-4 py-3">{row}</div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {query.hasNextPage && (
+        <div className="mt-5 flex justify-center">
+          <Button tone="outline" size="sm" disabled={query.isFetchingNextPage} onClick={() => void query.fetchNextPage()}>
+            {query.isFetchingNextPage ? "Loading" : "Load more"}
+          </Button>
+        </div>
+      )}
+    </ProfileSection>
+  );
+}
+
+export function ProfileMatches({ own, profile }: { own: boolean; profile: PlayerProfile }) {
+  const [view, setView] = useState<"matches" | "challenges">("matches");
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
+      <Segmented
+        label="Show"
+        value={view}
+        onChange={setView}
+        options={[
+          { value: "matches", label: "Recorded matches" },
+          { value: "challenges", label: "Challenges" },
+        ]}
+        className="w-fit"
+      />
+      {view === "matches" ? <RecordedMatches own={own} profile={profile} /> : <ChallengeHistory own={own} profile={profile} />}
+    </div>
   );
 }

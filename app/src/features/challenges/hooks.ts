@@ -5,6 +5,7 @@ import {
   getChallenge,
   getEligibleLineupMembers,
   getMyChallenges,
+  getPlayerChallenges,
   proposeReschedule,
   refreshChallenge,
   reportChallengeScore,
@@ -50,6 +51,17 @@ export function useChallengeSummary(filters: ChallengeFilters, enabled = true) {
     queryKey: ["challenges", "mine", "summary", filters],
     queryFn: () => getMyChallenges(filters, 1),
     enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function usePlayerChallenges(userId?: string) {
+  return useInfiniteQuery({
+    queryKey: ["challenges", "player", userId],
+    queryFn: ({ pageParam }) => getPlayerChallenges(userId!, pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: (page) => (page.hasMore ? page.page + 1 : undefined),
+    enabled: Boolean(userId),
     staleTime: 30_000,
   });
 }

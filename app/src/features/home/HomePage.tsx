@@ -7,7 +7,7 @@ import type { Challenge } from "@/features/challenges/types";
 import { useCommunityInvites, useUserTeams } from "@/features/communities/hooks";
 import { usePlayerSuggestions } from "@/features/discovery/hooks";
 import { useGameConnections } from "@/features/games/hooks";
-import { usePlayerProfile } from "@/features/profile/hooks";
+import { usePlayerConnections, usePlayerProfile } from "@/features/profile/hooks";
 import { useProgressionGuide } from "@/features/progression/hooks";
 import { useOpenTournaments } from "@/features/tournaments/hooks";
 import { HomePanel, PanelError } from "./components/HomePanel";
@@ -62,6 +62,7 @@ export function HomePage() {
   const profile = usePlayerProfile(user?.username || user?.id);
   const guide = useProgressionGuide();
   const connections = useGameConnections();
+  const followingPages = usePlayerConnections(user?.id ?? "", "following", Boolean(user?.id));
   const teams = useUserTeams(user?.id);
   const history = useChallengeSummary({ scope: "history", direction: "all" });
   const incoming = useChallengeSummary({ scope: "for-you", direction: "received", status: "pending" });
@@ -74,7 +75,7 @@ export function HomePage() {
   const hiddenKey = `Gamerie_setup_hidden_${user?.id}`;
   const [setupHidden, setSetupHidden] = useState(() => readHidden(hiddenKey));
 
-  const setupReady = profile.isSuccess && !connections.isLoading && !teams.isLoading && !history.isLoading;
+  const setupReady = profile.isSuccess && !connections.isLoading && !followingPages.isLoading && !teams.isLoading && !history.isLoading;
   const steps = useMemo(
     () =>
       profile.data && setupReady
@@ -82,11 +83,12 @@ export function HomePage() {
             profile: profile.data,
             guide: guide.data,
             connectionCount: connections.data?.length ?? 0,
+            followingCount: followingPages.data?.pages[0]?.total ?? 0,
             teamCount: teams.data?.length ?? 0,
             challengeCount: history.data?.data.filter((challenge) => challenge.status === "completed").length ?? 0,
           })
         : null,
-    [profile.data, setupReady, guide.data, connections.data, teams.data, history.data],
+    [profile.data, setupReady, guide.data, connections.data, followingPages.data, teams.data, history.data],
   );
 
   const challenges = uniqueById([...(incoming.data?.data ?? []), ...(teamIncoming.data?.data ?? [])]);

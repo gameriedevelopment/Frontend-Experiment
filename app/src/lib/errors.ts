@@ -1,6 +1,8 @@
 import axios from "axios";
 
 export function getApiErrorMessage(error: unknown, fallback: string) {
+  // Empty states pass `query.error`, which is null when the request worked but found nothing.
+  if (error == null) return fallback;
   if (axios.isAxiosError(error) && !error.response && !axios.isCancel(error)) {
     return "We couldn't reach Gamerie. Check your connection and try again.";
   }

@@ -16,7 +16,7 @@ export const ChoiceChip = forwardRef<HTMLInputElement, ChipInputProps>(function 
   ref,
 ) {
   return (
-    <label className={cn("group block", className)}>
+    <label className={cn("group relative block", className)}>
       <input ref={ref} type={multiple ? "checkbox" : "radio"} className="peer sr-only" {...props} />
       <span className={chipClasses}>
         {multiple && (
@@ -46,7 +46,7 @@ export function ChoiceGroup({
   children: ReactNode;
 }) {
   return (
-    <fieldset className="grid gap-3">
+    <fieldset className="grid min-w-0 gap-3">
       <legend className="mb-3 flex w-full items-baseline justify-between gap-3 text-sm font-medium text-mist-200">
         {legend}
         {hint && <span className="text-xs font-normal text-mist-500">{hint}</span>}

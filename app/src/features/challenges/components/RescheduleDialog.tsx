@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
+import { Icon } from "@/components/ui/Icon";
 import { ScheduleField } from "@/components/ui/ScheduleField";
+import { cn } from "@/lib/cn";
+import { formatChallengeDateTime } from "../lifecycle";
 
 export function RescheduleDialog({
   open,
   mode,
   opponent,
+  current,
   pending,
   error,
   onSubmit,
@@ -15,6 +19,8 @@ export function RescheduleDialog({
   open: boolean;
   mode: "propose" | "refresh";
   opponent: string;
+  /** The time currently agreed, shown so the change is clear. */
+  current: string;
   pending: boolean;
   error?: string;
   onSubmit: (iso: string) => void;
@@ -41,6 +47,7 @@ export function RescheduleDialog({
       onClose={onClose}
       dismissible={!pending}
       size="lg"
+      icon={mode === "propose" ? "clock" : "refresh"}
       footer={
         <>
           <Button tone="ghost" size="sm" disabled={pending} onClick={onClose}>
@@ -52,7 +59,22 @@ export function RescheduleDialog({
         </>
       }
     >
-      <div className="grid gap-4">
+      <div className="grid gap-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-2xl bg-white/3 p-4 ring-1 ring-inset ring-white/6">
+          <div className="min-w-0">
+            <p className="type-label text-mist-500">{mode === "propose" ? "Agreed" : "Was"}</p>
+            <p className="mt-1.5 truncate text-sm font-semibold text-mist-300 line-through decoration-mist-500/60">
+              {formatChallengeDateTime(current)}
+            </p>
+          </div>
+          <Icon name="arrowRight" className="size-4 text-mist-500" />
+          <div className="min-w-0 text-right">
+            <p className="type-label text-lavender-300">New</p>
+            <p className={cn("mt-1.5 truncate text-sm font-semibold", !when && "text-mist-500")}>
+              {when ? formatChallengeDateTime(when) : "Pick below"}
+            </p>
+          </div>
+        </div>
         <ScheduleField value={when} onChange={setWhen} error={invalid || error} />
       </div>
     </Dialog>

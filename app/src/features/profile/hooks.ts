@@ -1,19 +1,28 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { syncUserWithBackend } from "@/features/auth/api";
 import {
   claimAchievement,
   followPlayer,
   getAchievements,
+  getMyReferrals,
+  getPlayerPosts,
+  getSkillEndorsers,
   getPlayerConnections,
   getPlayerMatchPage,
   getPlayerProfile,
   getPlayerRankings,
   getPublicPlayerCard,
+  getSalaryEstimation,
+  getSalaryHistory,
   notifySkillEndorsement,
+  recalculateSalary,
   toggleSkillEndorsement,
   unfollowPlayer,
+  updatePlayerProfile,
+  uploadPlayerImage,
 } from "./api";
 import { updatePlayerFollowCache } from "./followCache";
+import type { ConnectionPage } from "./types";
 
 export function usePlayerProfile(identity?: string) {
   return useQuery({
@@ -76,6 +85,17 @@ export function useTogglePlayerFollow(
           updatePlayerFollowCache(value, profileId, following),
         ),
       );
+      const followersKey = ["player-connections", profileId, "followers"];
+      await client.cancelQueries({ queryKey: followersKey });
+      const followersSnapshot = client.getQueryData<InfiniteData<ConnectionPage>>(followersKey);
+      if (followersSnapshot?.pages.length) {
+        const [first, ...rest] = followersSnapshot.pages;
+        client.setQueryData<InfiniteData<ConnectionPage>>(followersKey, {
+          ...followersSnapshot,
+          pages: [{ ...first, total: Math.max(0, first.total + (following ? -1 : 1)) }, ...rest],
+        });
+        snapshots.push([followersKey, followersSnapshot]);
+      }
       return { snapshots };
     },
     onError: (_error, _variables, context) =>
@@ -157,6 +177,92 @@ export function useClaimAchievement(userId: string) {
         client.invalidateQueries({ queryKey: ["player-profile"] }),
       ]);
       await syncUserWithBackend();
+    },
+  });
+}
+
+export function useUpdatePlayerProfile(userId?: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (updates: Parameters<typeof updatePlayerProfile>[1]) => updatePlayerProfile(userId!, updates),
+    onSuccess: async (profile) => {
+      client.setQueryData(["player-profile", profile.username], profile);
+      client.setQueryData(["player-profile", profile.id], profile);
+      await client.invalidateQueries({ queryKey: ["player-profile"] });
+      void client.invalidateQueries({ queryKey: ["progression-guide"] });
+      await syncUserWithBackend();
+    },
+  });
+}
+
+export function useUploadPlayerImage(userId?: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, type }: { file: File; type: "profileImage" | "backgroundImage" }) => uploadPlayerImage(userId!, file, type),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["player-profile"] });
+      void client.invalidateQueries({ queryKey: ["progression-guide"] });
+      await syncUserWithBackend();
+    },
+  });
+}
+
+export function useMyReferrals(enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: ["my-referrals"],
+    queryFn: ({ pageParam }) => getMyReferrals(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (page) => (page.pagination.page < page.pagination.totalPages ? page.pagination.page + 1 : undefined),
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function usePlayerPosts(userId: string) {
+  return useQuery({
+    queryKey: ["wall-posts", userId],
+    queryFn: () => getPlayerPosts(userId),
+    enabled: Boolean(userId),
+    staleTime: 60_000,
+  });
+}
+
+export function useSkillEndorsers(userId: string, skillId: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: ["skill-endorsers", userId, skillId],
+    queryFn: ({ pageParam }) => getSkillEndorsers(userId, skillId, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (page) => (page.page < page.totalPages ? page.page + 1 : undefined),
+    enabled: Boolean(userId && skillId) && enabled,
+    staleTime: 60_000,
+  });
+}
+
+export function useSalaryInsights(userId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["salary-insights", userId],
+    queryFn: () => getSalaryEstimation(userId),
+    enabled: Boolean(userId) && enabled,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useSalaryHistory(userId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["salary-history", userId],
+    queryFn: () => getSalaryHistory(userId),
+    enabled: Boolean(userId) && enabled,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useRecalculateSalary(userId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => recalculateSalary(userId),
+    onSuccess: (data) => {
+      client.setQueryData(["salary-insights", userId], data);
+      client.invalidateQueries({ queryKey: ["salary-history", userId] });
     },
   });
 }

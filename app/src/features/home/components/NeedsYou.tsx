@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import type { Challenge } from "@/features/challenges/types";
 import { useRespondInvite } from "@/features/communities/hooks";
 import type { CommunityInvite, CommunityKind, HubSummary, TeamSummary } from "@/features/communities/types";
+import { toast } from "@/lib/toast";
 import { formatWhen } from "../format";
 import { HomePanel } from "./HomePanel";
 
@@ -70,14 +71,21 @@ function InviteRow({ kind, invite }: PendingInvite) {
           size="sm"
           tone="ghost"
           disabled={respond.isPending}
-          onClick={() => respond.mutate({ id: invite.id, accept: false })}
+          onClick={() =>
+            respond.mutate({ id: invite.id, accept: false }, { onSuccess: () => toast.info("Invite declined") })
+          }
         >
           Decline
         </Button>
         <Button
           size="sm"
           disabled={respond.isPending}
-          onClick={() => respond.mutate({ id: invite.id, accept: true })}
+          onClick={() =>
+            respond.mutate(
+              { id: invite.id, accept: true },
+              { onSuccess: () => toast.success(`You joined ${name}`, kind === "team" ? "It's on your teams list." : undefined) },
+            )
+          }
         >
           Accept
         </Button>

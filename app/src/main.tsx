@@ -7,6 +7,7 @@ import { MotionConfig } from "motion/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./app/App";
+import { Toaster } from "./components/ui/Toaster";
 import { SessionBoundary } from "./features/auth/SessionBoundary";
 import { isSessionError } from "./lib/api";
 
@@ -28,6 +29,7 @@ createRoot(root).render(
       <MotionConfig reducedMotion="user">
         <SessionBoundary />
         <App />
+        <Toaster />
       </MotionConfig>
     </QueryClientProvider>
   </StrictMode>,

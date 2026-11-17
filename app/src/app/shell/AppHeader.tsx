@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { TokenMark } from "@/components/ui/TokenMark";
 import { useAuthStore } from "@/features/auth/authStore";
 import { useTotalUnread } from "@/features/messages/hooks";
+import { NotificationsPopover } from "@/features/notifications/components/NotificationsPopover";
 import { useNotificationUnreadCount } from "@/features/notifications/hooks";
 import { cn } from "@/lib/cn";
 import { AppNavLink } from "./AppNavLink";
@@ -39,6 +40,7 @@ function CountLink({ to, icon, label, count }: { to: string; icon: IconName; lab
 
 export function AppHeader() {
   const navigate = useNavigate();
+  const onSearchPage = useLocation().pathname === "/search";
   const userId = useAuthStore((state) => state.user?.id);
   const unreadMessages = Number(useTotalUnread().data ?? 0);
   const unreadNotifications = Number(useNotificationUnreadCount(userId).data ?? 0);
@@ -66,7 +68,12 @@ export function AppHeader() {
 
       <Link
         to="/search"
-        className="hidden h-10 w-full max-w-md items-center gap-3 rounded-full bg-white/4 px-4 text-sm text-mist-400 ring-1 ring-inset ring-white/8 transition-colors hover:bg-white/7 hover:text-mist-200 sm:flex"
+        aria-hidden={onSearchPage || undefined}
+        tabIndex={onSearchPage ? -1 : undefined}
+        className={cn(
+          "hidden h-10 w-full max-w-md items-center gap-3 rounded-full bg-white/4 px-4 text-sm text-mist-400 ring-1 ring-inset ring-white/8 transition-colors hover:bg-white/7 hover:text-mist-200 sm:flex",
+          onSearchPage && "invisible",
+        )}
       >
         <Icon name="search" className="size-4" />
         Search players, teams and games
@@ -74,11 +81,25 @@ export function AppHeader() {
       </Link>
 
       <div className="ml-auto flex items-center gap-1">
-        <Link to="/search" aria-label="Search" className={cn(iconButton, "sm:hidden")}>
+        <Link to="/search" aria-label="Search" className={cn(iconButton, "sm:hidden", onSearchPage && "hidden")}>
           <Icon name="search" className="size-[1.2rem]" />
         </Link>
         <CountLink to="/messages" icon="messages" label="Messages" count={unreadMessages} />
-        <CountLink to="/notifications" icon="bell" label="Notifications" count={unreadNotifications} />
+        <span className="sm:hidden">
+          <CountLink to="/notifications" icon="bell" label="Notifications" count={unreadNotifications} />
+        </span>
+        <span className="hidden sm:block">
+          <NotificationsPopover
+            className={iconButton}
+            trigger={
+              <>
+                <Icon name="bell" className="size-[1.2rem]" />
+                <span className="sr-only">{unreadNotifications ? `Notifications, ${unreadNotifications} unread` : "Notifications"}</span>
+                <CountBadge count={unreadNotifications} />
+              </>
+            }
+          />
+        </span>
         <span aria-hidden="true" className="mx-1.5 hidden h-6 w-px bg-white/10 sm:block" />
         <ProfileMenu />
       </div>

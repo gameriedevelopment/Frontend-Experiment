@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
   --color-ink-950: #0a0710;
@@ -18,7 +19,10 @@
   --color-lavender-700: #6b46a8;
   --color-lavender-800: #4c435a;
 
+  /* Tailwind ships its own "mist"; clear it so only these shades exist. */
+  --color-mist-*: initial;
   --color-mist-50: #f7f3fc;
+  --color-mist-100: #ebe5f2;
   --color-mist-200: #ddd6e7;
   --color-mist-300: #b9b1c6;
   --color-mist-400: #8e869b;

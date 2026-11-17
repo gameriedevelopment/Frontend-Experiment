@@ -36,7 +36,7 @@ function Contender({
         tone={own ? "brand" : "ink"}
         className={cn(
           "rounded-full ring-4 ring-offset-0 transition-shadow [&>span]:size-16 [&>span]:text-lg sm:[&>span]:size-24 sm:[&>span]:text-2xl",
-          winner ? "ring-lavender-400/60" : "ring-transparent",
+          winner ? "ring-signal/70" : "ring-transparent",
         )}
       />
       <div className="min-w-0 max-w-full">
@@ -106,7 +106,15 @@ export function VersusStage({
           {score ? (
             <>
               <span className="type-display text-4xl tabular-nums leading-none sm:text-6xl">{score.replace("-", "–")}</span>
-              <span className="type-label text-mist-500">{winner === "draw" ? "Draw" : "Final"}</span>
+              <span
+                className={cn(
+                  "type-label flex items-center gap-1.5",
+                  winner === "draw" ? "text-mist-400" : "text-signal",
+                )}
+              >
+                {winner !== "draw" && <Icon name="verified" weight="fill" className="size-3.5" />}
+                {winner === "draw" ? "Draw" : "Final"}
+              </span>
             </>
           ) : (
             <span className="font-serif text-4xl italic leading-none text-lavender-300 sm:text-6xl">vs</span>

@@ -69,7 +69,7 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/6 bg-ink-900/70 backdrop-blur-xl transition-[width] duration-500 ease-out-expo lg:flex",
-        collapsed ? "w-[4.75rem]" : "w-64",
+        collapsed ? "w-19" : "w-64",
       )}
     >
       <AppNavLink
@@ -81,7 +81,7 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
         {!collapsed && <span className="type-display text-[1.05rem] tracking-[0.04em]">Gamerie</span>}
       </AppNavLink>
 
-      <div className="flex flex-1 flex-col gap-7 overflow-y-auto px-3 py-5 [scrollbar-width:none]">
+      <div className="flex flex-1 flex-col gap-7 overflow-y-auto px-3 py-5 scrollbar-none">
         <NavigationGroup label="Network" items={primaryNavigation} collapsed={collapsed} />
         <NavigationGroup label="Your space" items={secondaryNavigation} collapsed={collapsed} />
       </div>

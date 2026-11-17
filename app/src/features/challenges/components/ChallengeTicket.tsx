@@ -68,8 +68,20 @@ export function ChallengeTicket({
         <span className="mt-1.5 text-xs tabular-nums text-mist-400">
           {new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(scheduled)}
         </span>
-        <span aria-hidden="true" className="absolute -right-2 -top-2 size-4 rounded-full bg-ink-950" />
-        <span aria-hidden="true" className="absolute -bottom-2 -right-2 size-4 rounded-full bg-ink-950" />
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute -right-2.5 -top-2.5 size-5 rounded-full bg-ink-950 ring-1",
+            step.tone === "action" ? "ring-lavender-400/30" : "ring-white/6",
+          )}
+        />
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute -bottom-2.5 -right-2.5 size-5 rounded-full bg-ink-950 ring-1",
+            step.tone === "action" ? "ring-lavender-400/30" : "ring-white/6",
+          )}
+        />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-5">
@@ -116,7 +128,7 @@ export function ChallengeTicket({
                   {challenge.result.score.replace("-", "–")}
                 </span>
               )}
-              <span className={cn("type-label", outcome === "win" ? "text-lavender-300" : "text-mist-500")}>
+              <span className={cn("type-label", outcome === "win" ? "text-signal" : "text-mist-500")}>
                 {outcomeLabels[outcome]}
               </span>
             </span>

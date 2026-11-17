@@ -1,5 +1,5 @@
 import { api, type ApiEnvelope } from "@/lib/api";
-import type { CalendarEvent, CalendarFilters, CalendarPageData } from "./types";
+import type { CalendarEvent, CalendarEventStatus, CalendarFilters, CalendarPageData, CreateCalendarEventPayload } from "./types";
 
 export async function getMyEvents(
   filters: CalendarFilters,
@@ -18,4 +18,14 @@ export async function getMyEvents(
     limit,
     totalPages: Math.max(1, Math.ceil(total / limit)),
   };
+}
+
+export async function createCalendarEvent(payload: CreateCalendarEventPayload): Promise<CalendarEvent> {
+  const { data } = await api.post<ApiEnvelope<CalendarEvent>>("/events", payload);
+  return data.data;
+}
+
+export async function updateCalendarEventStatus(id: string, status: CalendarEventStatus): Promise<CalendarEvent> {
+  const { data } = await api.patch<ApiEnvelope<CalendarEvent>>(`/events/${id}/status`, { status });
+  return data.data;
 }

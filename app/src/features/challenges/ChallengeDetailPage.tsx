@@ -10,6 +10,7 @@ import { useOwnedTeams } from "@/features/communities/hooks";
 import { useCreateConversation } from "@/features/messages/hooks";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { toast } from "@/lib/toast";
 import { ChallengeLineups } from "./components/ChallengeLineups";
 import { ChallengeTimeline } from "./components/ChallengeTimeline";
 import { ReportDialog } from "./components/ReportDialog";
@@ -138,16 +139,28 @@ export function ChallengeDetailPage() {
   const actionError = update.error || refresh.error || propose.error || respond.error || remove.error || saveLineup.error;
 
   const answer = (status: "accepted" | "rejected") =>
-    update.mutate({
-      id: challenge.id,
-      type: challenge.type,
-      updates: { status, ...(status === "accepted" && challenge.type === "team" ? { lineupPlayerIds: lineup } : {}) },
-    });
+    update.mutate(
+      {
+        id: challenge.id,
+        type: challenge.type,
+        updates: { status, ...(status === "accepted" && challenge.type === "team" ? { lineupPlayerIds: lineup } : {}) },
+      },
+      {
+        onSuccess: () =>
+          status === "accepted"
+            ? toast.success("Challenge accepted", "It's on your calendar.")
+            : toast.info("Challenge declined", `${view.opponentName} has been told.`),
+      },
+    );
 
   const reschedule = async (scheduledDate: string) => {
     const mutation = challenge.status === "expired" ? refresh : propose;
     await mutation.mutateAsync({ id: challenge.id, type: challenge.type, scheduledDate });
     setOverlay(null);
+    toast.success(
+      challenge.status === "expired" ? "Challenge sent again" : "New time sent",
+      `${view.opponentName} needs to accept it.`,
+    );
   };
 
   const message = async () => {
@@ -197,7 +210,12 @@ export function ChallengeDetailPage() {
           key="accept-time"
           className="w-full"
           disabled={respond.isPending}
-          onClick={() => respond.mutate({ id: challenge.id, type: challenge.type, accept: true })}
+          onClick={() =>
+            respond.mutate(
+              { id: challenge.id, type: challenge.type, accept: true },
+              { onSuccess: () => toast.success("New time locked in", "Your calendar has been updated.") },
+            )
+          }
         >
           {respond.isPending ? "Updating…" : "Accept new time"}
         </Button>,
@@ -206,7 +224,12 @@ export function ChallengeDetailPage() {
           tone="outline"
           className="w-full"
           disabled={respond.isPending}
-          onClick={() => respond.mutate({ id: challenge.id, type: challenge.type, accept: false })}
+          onClick={() =>
+            respond.mutate(
+              { id: challenge.id, type: challenge.type, accept: false },
+              { onSuccess: () => toast.info("Kept the original time") },
+            )
+          }
         >
           Keep current time
         </Button>,
@@ -223,6 +246,29 @@ export function ChallengeDetailPage() {
         >
           {challenge.status === "expired" ? "Send again" : "Propose new time"}
         </Button>,
+      );
+    }
+    if (["completed", "final", "forfeit"].includes(challenge.status) && view.participant) {
+      const opponentSideId =
+        challenge.type === "team"
+          ? view.side === "challenger"
+            ? challenge.challengedTeamId
+            : challenge.challengerTeamId
+          : opponentId;
+      const rematch = new URLSearchParams({
+        rematch: "1",
+        type: challenge.type,
+        target: opponentSideId ?? "",
+        targetName: view.opponentName,
+        game: challenge.game,
+        format: challenge.format,
+      });
+      if (challenge.teamSize) rematch.set("size", String(challenge.teamSize));
+      if (view.ownTeamId) rematch.set("from", view.ownTeamId);
+      primary.push(
+        <LinkButton key="rematch" to={`/challenges/new?${rematch}`} icon="refresh" className="w-full">
+          Rematch
+        </LinkButton>,
       );
     }
     if (challenge.status === "completed" && view.participant) {
@@ -344,7 +390,12 @@ export function ChallengeDetailPage() {
                               view.ownTeamId &&
                               saveLineup.mutate(
                                 { challengeId: challenge.id, teamId: view.ownTeamId, playerIds: lineup },
-                                { onSuccess: () => setEditingLineup(false) },
+                                {
+                                  onSuccess: () => {
+                                    setEditingLineup(false);
+                                    toast.success("Lineup saved");
+                                  },
+                                },
                               ),
                           },
                     }
@@ -417,6 +468,7 @@ export function ChallengeDetailPage() {
         onReported={() => {
           setReported(true);
           setOverlay(null);
+          toast.success("Report sent", "Gamerie will review the result.");
         }}
       />
       {overlay === "reschedule" && (
@@ -424,6 +476,7 @@ export function ChallengeDetailPage() {
           open
           mode={challenge.status === "expired" ? "refresh" : "propose"}
           opponent={view.opponentName}
+          current={challenge.scheduledDate}
           pending={refresh.isPending || propose.isPending}
           error={
             refresh.error || propose.error
@@ -444,7 +497,12 @@ export function ChallengeDetailPage() {
         onConfirm={() =>
           update.mutate(
             { id: challenge.id, type: challenge.type, updates: { status: "cancelled" } },
-            { onSuccess: () => setOverlay(null) },
+            {
+              onSuccess: () => {
+                setOverlay(null);
+                toast.info("Challenge cancelled", `${view.opponentName} has been told.`);
+              },
+            },
           )
         }
         onClose={() => setOverlay(null)}
@@ -459,7 +517,12 @@ export function ChallengeDetailPage() {
         onConfirm={() =>
           remove.mutate(
             { id: challenge.id, type: challenge.type },
-            { onSuccess: () => navigate("/challenges", { replace: true }) },
+            {
+              onSuccess: () => {
+                toast.info("Challenge deleted");
+                navigate("/challenges", { replace: true });
+              },
+            },
           )
         }
         onClose={() => setOverlay(null)}

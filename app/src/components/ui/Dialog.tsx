@@ -2,11 +2,25 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
-import { Icon } from "./Icon";
-import { easeOutExpo } from "./motion";
+import { Icon, type IconName } from "./Icon";
 
 const focusableSelector =
   "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex='0']";
+
+const sizes = {
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-2xl",
+  xl: "sm:max-w-5xl",
+} as const;
+
+const tones = {
+  brand: "bg-lavender-400/12 text-lavender-300 ring-lavender-400/25",
+  danger: "bg-danger/12 text-danger ring-danger/25",
+  signal: "bg-signal/12 text-signal ring-signal/25",
+} as const;
+
+export type DialogTone = keyof typeof tones;
 
 export function Dialog({
   open,
@@ -15,7 +29,11 @@ export function Dialog({
   onClose,
   dismissible = true,
   size = "md",
+  icon,
+  tone = "brand",
+  alert = false,
   footer,
+  bodyClassName,
   children,
 }: {
   open: boolean;
@@ -24,9 +42,15 @@ export function Dialog({
   onClose: () => void;
   /** False while work is in flight, so Escape, the backdrop and the close button can't interrupt it. */
   dismissible?: boolean;
-  size?: "md" | "lg";
+  size?: keyof typeof sizes;
+  /** A mark beside the title that says what kind of moment this is. */
+  icon?: IconName;
+  tone?: DialogTone;
+  /** Announces as an alert dialog, for confirmations that interrupt. */
+  alert?: boolean;
   footer?: ReactNode;
-  children: ReactNode;
+  bodyClassName?: string;
+  children?: ReactNode;
 }) {
   const titleId = useId();
   const descriptionId = useId();
@@ -79,30 +103,43 @@ export function Dialog({
             aria-label="Close dialog"
             tabIndex={-1}
             onClick={close}
-            className="absolute inset-0 bg-ink-950/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-ink-950/75 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
           />
           <motion.div
             ref={panelRef}
-            role="dialog"
+            role={alert ? "alertdialog" : "dialog"}
             aria-modal="true"
             aria-labelledby={titleId}
             aria-describedby={description ? descriptionId : undefined}
             tabIndex={-1}
             className={cn(
-              "relative flex max-h-[90svh] w-full flex-col overflow-hidden rounded-t-panel bg-ink-900 shadow-[0_40px_120px_-30px_rgb(0_0_0/0.9)] outline-none ring-1 ring-white/10 sm:rounded-card",
-              size === "md" ? "sm:max-w-md" : "sm:max-w-2xl",
+              "relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-panel bg-ink-900 shadow-[0_40px_140px_-30px_rgb(0_0_0/0.95)] outline-none ring-1 ring-white/10 sm:max-h-[88svh] sm:rounded-card",
+              sizes[size],
             )}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.4, ease: easeOutExpo }}
+            initial={{ opacity: 0, y: 40, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 380, damping: 34, mass: 0.9 }}
           >
-            <header className="flex items-start justify-between gap-4 border-b border-white/6 px-6 py-4">
-              <div className="min-w-0 pt-1.5">
-                <h2 id={titleId} className="text-base font-semibold">
+            <span aria-hidden="true" className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-white/15 sm:hidden" />
+            <div
+              aria-hidden="true"
+              className="halftone pointer-events-none absolute inset-x-0 top-0 h-28 text-lavender-400/8 mask-[radial-gradient(70%_100%_at_100%_0%,black,transparent)]"
+            />
+            <header className="relative flex items-start gap-4 px-6 pb-4 pt-4 sm:pt-5">
+              {icon && (
+                <span
+                  className={cn("grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset", tones[tone])}
+                >
+                  <Icon name={icon} weight="duotone" className="size-5" />
+                </span>
+              )}
+              <div className="min-w-0 flex-1 pt-0.5">
+                <h2 id={titleId} className="text-[1.05rem] font-semibold tracking-[-0.01em]">
                   {title}
                 </h2>
                 {description && (
@@ -116,21 +153,23 @@ export function Dialog({
                 onClick={close}
                 disabled={!dismissible}
                 aria-label="Close"
-                className="grid size-9 shrink-0 place-items-center rounded-full text-mist-400 transition-colors hover:bg-white/6 hover:text-mist-50 disabled:opacity-40"
+                className="-mr-2 -mt-1 grid size-9 shrink-0 place-items-center rounded-full text-mist-400 transition-colors hover:bg-white/6 hover:text-mist-50 disabled:opacity-40"
               >
                 <Icon name="close" className="size-[1.1rem]" />
               </button>
             </header>
-            <div
-              className={cn(
-                "overflow-y-auto [scrollbar-color:rgb(255_255_255/0.12)_transparent] [scrollbar-width:thin]",
-                size === "md" ? "p-3" : "px-6 py-5",
-              )}
-            >
-              {children}
-            </div>
+            {children && (
+              <div
+                className={cn(
+                  "relative min-h-0 flex-1 overflow-y-auto border-t border-white/6 px-6 py-5 scrollbar-thumb-white/12 scrollbar-track-transparent scrollbar-thin",
+                  bodyClassName,
+                )}
+              >
+                {children}
+              </div>
+            )}
             {footer && (
-              <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-white/6 px-6 py-4">
+              <footer className="relative flex flex-wrap items-center justify-end gap-2 border-t border-white/6 bg-ink-900 px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4">
                 {footer}
               </footer>
             )}

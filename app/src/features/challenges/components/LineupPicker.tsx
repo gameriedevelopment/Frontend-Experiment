@@ -30,7 +30,7 @@ export function LineupPicker({
   };
 
   return (
-    <fieldset className="grid gap-3">
+    <fieldset className="grid min-w-0 gap-3">
       <legend className="mb-3 flex w-full items-center justify-between gap-3 text-sm font-medium text-mist-200">
         Match lineup
         <span className={cn("type-label tabular-nums", selected.length === required ? "text-lavender-300" : "text-mist-500")}>

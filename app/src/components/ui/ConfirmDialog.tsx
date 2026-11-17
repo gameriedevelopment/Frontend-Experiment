@@ -1,11 +1,15 @@
 import { Button } from "./Button";
 import { Dialog } from "./Dialog";
+import type { IconName } from "./Icon";
 
+/** A short, interrupting question before something that can't be undone. */
 export function ConfirmDialog({
   open,
   title,
   description,
   confirmLabel,
+  cancelLabel = "Keep it",
+  icon = "warning",
   pending,
   error,
   onConfirm,
@@ -15,6 +19,8 @@ export function ConfirmDialog({
   title: string;
   description: string;
   confirmLabel: string;
+  cancelLabel?: string;
+  icon?: IconName;
   pending: boolean;
   error?: string;
   onConfirm: () => void;
@@ -24,27 +30,29 @@ export function ConfirmDialog({
     <Dialog
       open={open}
       title={title}
+      description={description}
       onClose={onClose}
       dismissible={!pending}
+      size="sm"
+      icon={icon}
+      tone="danger"
+      alert
       footer={
-        <>
-          <Button tone="ghost" size="sm" disabled={pending} onClick={onClose}>
-            Keep it
+        <div className="grid w-full grid-cols-2 gap-2">
+          <Button tone="outline" size="sm" disabled={pending} onClick={onClose}>
+            {cancelLabel}
           </Button>
           <Button size="sm" className="bg-danger text-ink-950 hover:bg-danger/85" disabled={pending} onClick={onConfirm}>
             {pending ? "Working…" : confirmLabel}
           </Button>
-        </>
+        </div>
       }
     >
-      <div className="grid gap-3 px-3 pb-3 pt-2">
-        <p className="text-sm leading-relaxed text-mist-300">{description}</p>
-        {error && (
-          <p role="alert" className="text-sm text-danger">
-            {error}
-          </p>
-        )}
-      </div>
+      {error ? (
+        <p role="alert" className="text-sm text-danger">
+          {error}
+        </p>
+      ) : undefined}
     </Dialog>
   );
 }

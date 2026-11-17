@@ -7,7 +7,7 @@ const actions: Array<{ icon: IconName; title: string; description: string; to: s
     icon: "challenges",
     title: "Challenge a player",
     description: "Set the game, format and time.",
-    to: "/challenges?compose=user",
+    to: "/challenges/new",
   },
   {
     icon: "trophy",

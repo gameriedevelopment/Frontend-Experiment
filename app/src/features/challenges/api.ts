@@ -16,6 +16,12 @@ export async function getMyChallenges(filters: ChallengeFilters, page = 1): Prom
   return data.data;
 }
 
+/** A player's finished and active challenges, visible on their profile. */
+export async function getPlayerChallenges(userId: string, page = 1, limit = 10): Promise<ChallengePageData> {
+  const { data } = await api.get<ApiEnvelope<ChallengePageData>>(`/challenges/user/${userId}/history`, { params: { page, limit } });
+  return data.data;
+}
+
 export async function getChallenge(id: string): Promise<Challenge> {
   const { data } = await api.get<ApiEnvelope<Challenge>>(`/challenges/${id}`);
   return data.data;

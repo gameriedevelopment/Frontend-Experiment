@@ -8,10 +8,12 @@ import { useAuthStore } from "@/features/auth/authStore";
 import { PlayerCard } from "./components/PlayerCard";
 import { ProfileAchievements } from "./components/ProfileAchievements";
 import { ProfileGames } from "./components/ProfileGames";
-import { ProfileHandoffTab } from "./components/ProfileHandoffTab";
+import { ProfileCareer } from "./components/career/ProfileCareer";
+import { EditProfileDialog, type EditSection } from "./components/EditProfileDialog";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { ProfileMatches } from "./components/ProfileMatches";
 import { ProfileOverview } from "./components/ProfileOverview";
+import { ProfilePosts } from "./components/ProfilePosts";
 import { usePlayerProfile } from "./hooks";
 import { buildPlayerCardModel } from "./playerCard";
 import type { PlayerProfile, ProfileTab } from "./types";
@@ -39,7 +41,7 @@ function ProfileSkeleton() {
       <Skeleton className="h-16" />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <Skeleton className="h-64 rounded-card" />
-        <Skeleton className="hidden h-[30rem] rounded-card lg:block" />
+        <Skeleton className="hidden h-120 rounded-card lg:block" />
       </div>
     </div>
   );
@@ -61,7 +63,8 @@ function TabContent({ own, profile, tab }: { own: boolean; profile: PlayerProfil
   if (tab === "games") return <ProfileGames own={own} profile={profile} />;
   if (tab === "matches") return <ProfileMatches own={own} profile={profile} />;
   if (tab === "achievements") return <ProfileAchievements own={own} profile={profile} />;
-  if (tab === "career" || tab === "posts") return <ProfileHandoffTab profile={profile} tab={tab} />;
+  if (tab === "career") return <ProfileCareer own={own} profile={profile} />;
+  if (tab === "posts") return <ProfilePosts own={own} profile={profile} />;
   return <ProfileOverview own={own} profile={profile} />;
 }
 
@@ -94,6 +97,16 @@ export function ProfilePage() {
   const requested = params.get("tab") as ProfileTab | null;
   const tab = availableTabs.some((item) => item.id === requested) ? requested! : "info";
 
+  const editSections: EditSection[] = ["photos", "identity", "personal", "skills", "links"];
+  const requestedEdit = params.get("edit") as EditSection | null;
+  const editing = own && requestedEdit ? (editSections.includes(requestedEdit) ? requestedEdit : "identity") : null;
+  const setEdit = (section: EditSection | null) => {
+    const nextParams = new URLSearchParams(params);
+    if (section) nextParams.set("edit", section);
+    else nextParams.delete("edit");
+    setParams(nextParams, { replace: true });
+  };
+
   const changeTab = (next: ProfileTab) => {
     const nextParams = new URLSearchParams(params);
     if (next === "info") nextParams.delete("tab");
@@ -102,11 +115,11 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="grid gap-8">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <ProfileHeader own={own} profile={profile} />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
-        <div className="grid min-w-0 gap-6">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
           <Tabs
             label="Profile sections"
             items={availableTabs}
@@ -123,6 +136,7 @@ export function ProfilePage() {
           </aside>
         )}
       </div>
+      {editing && <EditProfileDialog profile={profile} section={editing} onSection={setEdit} onClose={() => setEdit(null)} />}
     </div>
   );
 }

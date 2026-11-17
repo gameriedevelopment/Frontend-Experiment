@@ -72,6 +72,7 @@ export function PlayerCardPage() {
   const { username } = useParams();
   const query = usePublicPlayerCard(username);
   const [copyState, setCopyState] = useState<ActionState>("idle");
+  const [downloadState, setDownloadState] = useState<ActionState>("idle");
   const model = useMemo(() => (query.data?.shareable ? buildPlayerCardModel(query.data) : null), [query.data]);
   const shareUrl = `${window.location.origin}/s/${encodeURIComponent(username || "")}`;
 
@@ -98,6 +99,28 @@ export function PlayerCardPage() {
     }
   };
 
+  const download = async () => {
+    if (!model) return;
+    setDownloadState("working");
+    try {
+      // Loaded on demand; most visitors never save the image.
+      const { renderPlayerCardPng } = await import("./renderPlayerCardPng");
+      const blob = await renderPlayerCardPng(model);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${model.username.replace(/[^a-z0-9_-]+/gi, "-")}-gamerie-card.png`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+      setDownloadState("done");
+      window.setTimeout(() => setDownloadState("idle"), 2400);
+    } catch {
+      setDownloadState("error");
+    }
+  };
+
   const share = async () => {
     if (!model) return;
     if (navigator.share) {
@@ -119,7 +142,7 @@ export function PlayerCardPage() {
     return (
       <Frame>
         <div role="status" aria-label="Loading player card" className="grid gap-10 pt-16 lg:grid-cols-2">
-          <Skeleton className="mx-auto h-[34rem] w-full max-w-[24rem] rounded-card" />
+          <Skeleton className="mx-auto h-136 w-full max-w-96 rounded-card" />
           <Skeleton className="h-64 rounded-card" />
         </div>
       </Frame>
@@ -163,7 +186,7 @@ export function PlayerCardPage() {
   return (
     <Frame>
       <div className="grid items-center gap-12 py-12 lg:grid-cols-2 lg:gap-20 lg:py-20">
-        <PlayerCard model={model} tilt className="mx-auto w-full max-w-[24rem]" />
+        <PlayerCard model={model} tilt className="mx-auto w-full max-w-96" />
         <div className="max-w-md">
           <p className="type-display text-display-md">
             <span className="block">{model.username}'s</span>
@@ -179,7 +202,15 @@ export function PlayerCardPage() {
             <Button tone="outline" size="lg" icon="share" onClick={() => void share()}>
               Share
             </Button>
+            <Button tone="outline" size="lg" icon={downloadState === "done" ? "check" : "image"} disabled={downloadState === "working"} onClick={() => void download()}>
+              {downloadState === "working" ? "Drawing…" : downloadState === "done" ? "Saved" : "Save image"}
+            </Button>
           </div>
+          {downloadState === "error" && (
+            <p role="alert" className="mt-3 text-sm text-danger">
+              The image couldn't be made. Try again, or take a screenshot of the card.
+            </p>
+          )}
           {copyState === "error" && (
             <p role="alert" className="mt-3 text-sm text-danger">
               The link couldn't be copied. Copy it from your browser's address bar instead.

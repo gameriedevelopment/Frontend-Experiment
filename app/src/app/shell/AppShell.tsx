@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import { RealtimeBridge } from "@/features/messages/RealtimeBridge";
 import { cn } from "@/lib/cn";
 import { AppHeader } from "./AppHeader";
 import { AppSidebar } from "./AppSidebar";
 import { MobileNavigation } from "./MobileNavigation";
 import { RouteScrollManager } from "./RouteScrollManager";
+import { RouteTitle } from "./RouteTitle";
 import { useHeartbeat } from "./useHeartbeat";
 
 const collapsedKey = "Gamerie_sidebar_collapsed";
@@ -24,6 +26,8 @@ export function AppShell() {
   return (
     <div className="relative min-h-svh bg-ink-950 text-mist-50">
       <RouteScrollManager />
+      <RouteTitle />
+      <RealtimeBridge />
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-x-0 top-0 h-96 bg-[radial-gradient(55%_100%_at_55%_0%,rgb(198_163_255/0.09),transparent)]"
@@ -35,7 +39,7 @@ export function AppShell() {
         Skip to main content
       </a>
       <AppSidebar collapsed={collapsed} onToggle={toggleSidebar} />
-      <div className={cn("relative transition-[padding] duration-500 ease-out-expo", collapsed ? "lg:pl-[4.75rem]" : "lg:pl-64")}>
+      <div className={cn("relative transition-[padding] duration-500 ease-out-expo", collapsed ? "lg:pl-19" : "lg:pl-64")}>
         <AppHeader />
         <main
           id="main-content"

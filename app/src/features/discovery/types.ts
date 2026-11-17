@@ -17,18 +17,57 @@ export interface PlayerPage {
   totalPages: number;
 }
 
-export type SearchKind = "players" | "teams";
+export type SearchKind = "posts" | "players" | "teams" | "hubs" | "games";
+
+export interface SearchPost {
+  id: string;
+  content: string;
+  tags?: string[];
+  authorId?: string;
+  authorName?: string;
+  authorImage?: string;
+  createdAt?: string;
+}
 
 export interface SearchTeam {
   id: string;
   name: string;
+  slug?: string | null;
   logo?: string;
   description?: string;
   level?: string;
   members?: Array<{ id: string }>;
+  stats?: { tournamentWins?: number };
 }
 
-export interface SearchPage<T> {
+export interface SearchHub {
+  id: string;
+  name: string;
+  slug?: string | null;
+  logo?: string;
+  description?: string;
+  type?: string;
+  region?: string;
+  membersCount?: number;
+  teamsCount?: number;
+}
+
+export interface SearchGame {
+  id: string;
+  name: string;
+  banner?: string;
+  wallPhoto?: string;
+  image?: string;
+  genre?: string;
+  gameType?: string;
+  company?: string;
+  description?: string;
+  platforms?: string[];
+}
+
+export type SearchEntity = SearchPost | PlayerProfile | SearchTeam | SearchHub | SearchGame;
+
+export interface SearchPage<T = SearchEntity> {
   data: T[];
   total: number;
   page: number;

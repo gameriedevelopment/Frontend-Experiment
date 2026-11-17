@@ -21,6 +21,7 @@ export interface SetupInput {
   profile: PlayerProfile;
   guide?: ProgressionGuide;
   connectionCount: number;
+  followingCount: number;
   teamCount: number;
   challengeCount: number;
 }
@@ -35,9 +36,9 @@ function ruleAmount(guide: ProgressionGuide | undefined, actionType: string) {
 const hasItems = (value: unknown) => Array.isArray(value) && value.length > 0;
 
 /** The first moves every new player makes, in the order that makes the rest of Gamerie useful. */
-export function buildSetupSteps({ profile, guide, connectionCount, teamCount, challengeCount }: SetupInput): SetupStep[] {
+export function buildSetupSteps({ profile, guide, connectionCount, followingCount, teamCount, challengeCount }: SetupInput): SetupStep[] {
   const gamesHref = `/profile/${encodeURIComponent(profile.username)}?tab=games`;
-  const following = profile.following?.length ?? 0;
+  const following = Math.max(followingCount, profile.following?.length ?? 0);
 
   return [
     {
@@ -63,7 +64,7 @@ export function buildSetupSteps({ profile, guide, connectionCount, teamCount, ch
       icon: "camera",
       title: "Add a profile photo",
       description: "Teammates and rivals can see who they're playing.",
-      action: { label: "Upload photo", href: "/settings?section=media" },
+      action: { label: "Upload photo", href: `/profile/${encodeURIComponent(profile.username)}?edit=photos` },
       gp: ruleAmount(guide, "profile_picture_added"),
       complete: typeof profile.profileImage === "string" && profile.profileImage.trim().length > 0,
     },

@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { ChoiceChip } from "./ChoiceChips";
 import { inputClasses } from "./Field";
@@ -32,11 +32,16 @@ export function ScheduleField({
   value,
   onChange,
   error,
+  days: dayRange = dayCount,
+  disabled,
 }: {
   label?: string;
   value: string;
   onChange: (iso: string) => void;
   error?: string;
+  /** How many days ahead to offer, starting today. Widened to include an existing value. */
+  days?: number;
+  disabled?: boolean;
 }) {
   const name = useId();
   const initial = value ? new Date(value) : null;
@@ -44,16 +49,27 @@ export function ScheduleField({
   const [time, setTime] = useState(initial ? timeKey(initial) : "");
   const now = new Date();
   const today = dayKey(now);
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  // Bring an existing choice into view, since it may be weeks along the strip.
+  useEffect(() => {
+    const strip = stripRef.current;
+    const chosen = strip?.querySelector<HTMLElement>("input:checked")?.parentElement;
+    if (strip && chosen) strip.scrollLeft = chosen.offsetLeft - 8;
+  }, []);
 
   const days = useMemo(() => {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
-    return Array.from({ length: dayCount }, (_, offset) => {
+    const reach = initial ? Math.ceil((initial.getTime() - start.getTime()) / 86_400_000) + 1 : 0;
+    return Array.from({ length: Math.max(dayRange, reach) }, (_, offset) => {
       const date = new Date(start);
       date.setDate(start.getDate() + offset);
       return date;
     });
-  }, []);
+    // The initial value only widens the range once; later picks are always inside it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayRange]);
 
   const update = (nextDay: string, nextTime: string) => {
     setDay(nextDay);
@@ -75,15 +91,21 @@ export function ScheduleField({
   const custom = Boolean(time) && !presetTimes.includes(time);
 
   return (
-    <fieldset className="grid gap-3" aria-describedby={error ? `${name}-error` : undefined}>
+    <fieldset className="grid min-w-0 gap-3" disabled={disabled} aria-describedby={error ? `${name}-error` : undefined}>
       <legend className="mb-3 flex w-full items-baseline justify-between gap-3 text-sm font-medium text-mist-200">
         {label}
         <span className="text-xs font-normal text-mist-500">Times in {timeZoneLabel()}</span>
       </legend>
 
-      <div className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
-        {days.map((date) => {
+      <div ref={stripRef} className="relative relative -mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1 pr-8 scrollbar-none mask-[linear-gradient(to_right,black_85%,transparent)]">
+        {days.map((date, index) => {
           const key = dayKey(date);
+          const marker =
+            key === today
+              ? "Today"
+              : index > 0 && date.getDate() === 1
+                ? new Intl.DateTimeFormat(undefined, { month: "short" }).format(date)
+                : new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date);
           return (
             <ChoiceChip
               key={key}
@@ -91,11 +113,11 @@ export function ScheduleField({
               value={key}
               checked={day === key}
               onChange={() => update(key, time)}
-              className="w-[4.25rem] shrink-0 snap-start [&>span]:flex-col [&>span]:gap-0.5 [&>span]:px-2"
+              className="w-17 shrink-0 snap-start [&>span]:flex-col [&>span]:gap-0.5 [&>span]:px-2"
               label={
                 <>
-                  <span className="type-label text-mist-500">
-                    {key === today ? "Today" : new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date)}
+                  <span className={cn("type-label", index > 0 && date.getDate() === 1 ? "text-lavender-300" : "text-mist-500")}>
+                    {marker}
                   </span>
                   <span className="text-lg font-semibold tabular-nums">{date.getDate()}</span>
                 </>

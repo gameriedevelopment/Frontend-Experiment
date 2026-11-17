@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { TextAreaField } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
+import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { toast } from "@/lib/toast";
 import { useUpdateChallenge } from "../hooks";
 import { sideIds, sideNames } from "../lifecycle";
 import type { Challenge } from "../types";
@@ -12,18 +14,23 @@ function ScoreInput({
   id,
   name,
   value,
+  leading,
   onChange,
   disabled,
 }: {
   id: string;
   name: string;
   value: number;
+  leading: boolean;
   onChange: (value: number) => void;
   disabled: boolean;
 }) {
   return (
     <div className="grid min-w-0 justify-items-center gap-3">
-      <label htmlFor={id} className="w-full truncate text-center text-sm font-semibold">
+      <label
+        htmlFor={id}
+        className={cn("w-full truncate text-center text-sm font-semibold transition-colors", leading && "text-lavender-200")}
+      >
         {name}
       </label>
       <input
@@ -35,7 +42,10 @@ function ScoreInput({
           const next = Number(event.target.value.replace(/\D/g, "").slice(0, 3));
           onChange(Number.isFinite(next) ? next : 0);
         }}
-        className="type-display h-24 w-full rounded-2xl bg-white/4 text-center text-6xl tabular-nums outline-none ring-1 ring-inset ring-white/10 transition-shadow focus:ring-2 focus:ring-lavender-400"
+        className={cn(
+          "type-display h-28 w-full rounded-2xl text-center text-6xl tabular-nums outline-none ring-1 ring-inset transition-[background-color,box-shadow] duration-300 focus:ring-2 focus:ring-lavender-400",
+          leading ? "bg-lavender-400/10 ring-lavender-400/50" : "bg-white/4 ring-white/10",
+        )}
       />
       <div className="flex gap-2">
         {([-1, 1] as const).map((delta) => (
@@ -81,6 +91,7 @@ export function ScoreDialog({ challenge, open, onClose }: { challenge: Challenge
           },
         },
       });
+      toast.success("Score submitted", `${first}–${second}. The other side can review it.`);
       onClose();
     } catch {
       // Shown below the form.
@@ -95,6 +106,7 @@ export function ScoreDialog({ challenge, open, onClose }: { challenge: Challenge
       onClose={onClose}
       dismissible={!update.isPending}
       size="lg"
+      icon="trophy"
       footer={
         <>
           <Button tone="ghost" size="sm" disabled={update.isPending} onClick={onClose}>
@@ -108,14 +120,32 @@ export function ScoreDialog({ challenge, open, onClose }: { challenge: Challenge
     >
       <form id="challenge-score" onSubmit={(event) => void submit(event)} className="grid gap-6">
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
-          <ScoreInput id="score-first" name={firstName} value={first} onChange={setFirst} disabled={update.isPending} />
+          <ScoreInput
+            id="score-first"
+            name={firstName}
+            value={first}
+            leading={first > second}
+            onChange={setFirst}
+            disabled={update.isPending}
+          />
           <span aria-hidden="true" className="type-display pb-6 text-3xl text-mist-500">
             –
           </span>
-          <ScoreInput id="score-second" name={secondName} value={second} onChange={setSecond} disabled={update.isPending} />
+          <ScoreInput
+            id="score-second"
+            name={secondName}
+            value={second}
+            leading={second > first}
+            onChange={setSecond}
+            disabled={update.isPending}
+          />
         </div>
-        <p aria-live="polite" className="text-center text-sm text-mist-300">
-          <span className="text-mist-500">Result:</span> {outcome}, {first}–{second}
+        <p
+          aria-live="polite"
+          className="mx-auto flex w-fit items-center gap-2 rounded-full bg-white/4 px-4 py-2 text-sm ring-1 ring-inset ring-white/8"
+        >
+          <span className={cn("size-1.5 rounded-full", first === second ? "bg-mist-400" : "bg-lavender-300")} />
+          {outcome}, {first}–{second}
         </p>
         <TextAreaField
           id="score-notes"

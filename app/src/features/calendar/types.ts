@@ -11,10 +11,13 @@ export interface CalendarEvent {
   endTime: string;
   game?: string;
   team?: string;
+  location?: string;
   status: CalendarEventStatus;
   sourceType?: CalendarEventSource;
   sourceId?: string | null;
   challengeId?: string | null;
+  createdBy?: string;
+  reminders?: Array<{ id?: string; time: string; method: "notification"; sentAt?: string }>;
 }
 
 export interface CalendarFilters {
@@ -34,4 +37,17 @@ export interface CalendarPageData {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface CreateCalendarEventPayload {
+  type: Exclude<CalendarEventType, "tournament">;
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  game?: string;
+  team?: string;
+  location?: string;
+  status: "upcoming";
+  reminders?: Array<{ time: string; method: "notification" }>;
 }

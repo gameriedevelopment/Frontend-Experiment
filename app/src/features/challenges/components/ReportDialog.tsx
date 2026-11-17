@@ -55,6 +55,8 @@ export function ReportDialog({
       onClose={onClose}
       dismissible={!report.isPending}
       size="lg"
+      icon="flag"
+      tone="danger"
       footer={
         <>
           <Button tone="ghost" size="sm" disabled={report.isPending} onClick={onClose}>

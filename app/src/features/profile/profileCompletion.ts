@@ -28,7 +28,7 @@ export function getProfileCompletion(profile: CompletionProfile | null | undefin
     {
       id: "avatar",
       label: "add a profile image",
-      route: "/settings?section=media",
+      route: "?edit=photos",
       action: "Add image",
       weight: 20,
       complete: hasText(profile?.profileImage),
@@ -36,7 +36,7 @@ export function getProfileCompletion(profile: CompletionProfile | null | undefin
     {
       id: "bio",
       label: "write a short bio",
-      route: "/settings?section=profile",
+      route: "?edit=identity",
       action: "Add bio",
       weight: 15,
       complete: hasText(profile?.bio),
@@ -44,7 +44,7 @@ export function getProfileCompletion(profile: CompletionProfile | null | undefin
     {
       id: "title",
       label: "choose a player title",
-      route: "/settings?section=profile",
+      route: "?edit=identity",
       action: "Choose title",
       weight: 10,
       complete: hasText(profile?.gamerTitle),
@@ -60,7 +60,7 @@ export function getProfileCompletion(profile: CompletionProfile | null | undefin
     {
       id: "skill",
       label: "add at least one skill",
-      route: "/settings?section=skills",
+      route: "?edit=skills",
       action: "Add skill",
       weight: 10,
       complete: hasItems(profile?.skills),
@@ -68,7 +68,7 @@ export function getProfileCompletion(profile: CompletionProfile | null | undefin
     {
       id: "platform",
       label: "choose at least one platform",
-      route: "/settings?section=skills",
+      route: "?edit=skills",
       action: "Choose platform",
       weight: 10,
       complete: hasItems(profile?.platforms),
@@ -76,7 +76,7 @@ export function getProfileCompletion(profile: CompletionProfile | null | undefin
     {
       id: "social",
       label: "add at least one social link",
-      route: "/settings?section=social",
+      route: "?edit=links",
       action: "Add social link",
       weight: 10,
       complete: hasItems(profile?.socialMedia),
@@ -84,7 +84,7 @@ export function getProfileCompletion(profile: CompletionProfile | null | undefin
     {
       id: "cover",
       label: "add a cover image",
-      route: "/settings?section=media",
+      route: "?edit=photos",
       action: "Add cover",
       weight: 5,
       complete: hasText(profile?.backgroundImage),

@@ -18,7 +18,7 @@ export function Segmented<T extends string>({
 }) {
   const name = useId();
   return (
-    <fieldset className={cn("inline-flex rounded-full bg-white/4 p-1 ring-1 ring-inset ring-white/8", className)}>
+    <fieldset className={cn("inline-flex min-w-0 rounded-full bg-white/4 p-1 ring-1 ring-inset ring-white/8", className)}>
       <legend className="sr-only">{label}</legend>
       {options.map((option) => {
         const active = option.value === value;

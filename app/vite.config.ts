@@ -20,6 +20,16 @@ export default defineConfig(({ mode }) => {
             proxy.on("proxyReq", (request) => request.removeHeader("origin"));
           },
         },
+        // Realtime (socket.io) for messages and notifications, on the same origin as the API.
+        "/socket.io": {
+          target: env.VITE_API_PROXY_TARGET || "http://localhost:8000",
+          changeOrigin: true,
+          ws: true,
+          configure: (proxy) => {
+            proxy.on("proxyReqWs", (request) => request.removeHeader("origin"));
+            proxy.on("proxyReq", (request) => request.removeHeader("origin"));
+          },
+        },
       },
     },
   };

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "@/components/ui/Button";
+import { Navigate, useSearchParams } from "react-router-dom";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { inputClasses } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -12,12 +12,12 @@ import { useAuthStore } from "@/features/auth/authStore";
 import { useOwnedTeams } from "@/features/communities/hooks";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
-import { ChallengeComposer } from "./components/ChallengeComposer";
 import { ChallengeTicket } from "./components/ChallengeTicket";
 import { useMyChallenges, useUpdateChallenge } from "./hooks";
 import { challengePerspective, nextStep, type ChallengeTone } from "./lifecycle";
-import type { Challenge, ChallengeDirection, ChallengeFilters, ChallengeScope, ChallengeType } from "./types";
+import type { Challenge, ChallengeDirection, ChallengeFilters, ChallengeScope } from "./types";
 
 const scopes: Array<{ id: ChallengeScope; label: string }> = [
   { id: "for-you", label: "For you" },
@@ -45,7 +45,7 @@ function ListSkeleton() {
   return (
     <div aria-hidden="true" className="grid gap-3">
       {Array.from({ length: 4 }, (_, index) => (
-        <Skeleton key={index} className="h-[7.5rem] rounded-card" />
+        <Skeleton key={index} className="h-30 rounded-card" />
       ))}
     </div>
   );
@@ -53,7 +53,6 @@ function ListSkeleton() {
 
 export function ChallengesPage() {
   const user = useAuthStore((state) => state.user);
-  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const { owned: ownedTeams } = useOwnedTeams(user?.id);
   const ownedTeamIds = useMemo(() => ownedTeams.map((team) => team.id), [ownedTeams]);
@@ -111,21 +110,6 @@ export function ChallengesPage() {
       { replace: true },
     );
 
-  const composing = params.get("compose");
-  const composeType: ChallengeType = composing === "team" ? "team" : "user";
-  const presetTarget = params.get("target")
-    ? { value: params.get("target")!, label: params.get("targetName") || "Selected opponent" }
-    : null;
-  const openComposer = () => setParam("compose", "user");
-  const closeComposer = () =>
-    setParams(
-      (current) => {
-        const next = new URLSearchParams(current);
-        ["compose", "target", "targetName"].forEach((key) => next.delete(key));
-        return next;
-      },
-      { replace: true },
-    );
 
   const views = useMemo(
     () =>
@@ -150,21 +134,36 @@ export function ChallengesPage() {
       userId={user?.id}
       responding={respond.isPending && respond.variables?.id === challenge.id}
       onRespond={(nextStatus) =>
-        respond.mutate({ id: challenge.id, type: challenge.type, updates: { status: nextStatus } })
+        respond.mutate(
+          { id: challenge.id, type: challenge.type, updates: { status: nextStatus } },
+          {
+            onSuccess: () =>
+              nextStatus === "accepted"
+                ? toast.success("Challenge accepted", "It's on your calendar.")
+                : toast.info("Challenge declined", `${view.opponentName} has been told.`),
+          },
+        )
       }
     />
   );
 
+  // Older links opened a composer here; they now go to the full page with the same prefill.
+  if (params.has("compose")) {
+    const next = new URLSearchParams();
+    if (params.get("compose") === "team") next.set("type", "team");
+    ["target", "targetName"].forEach((key) => params.get(key) && next.set(key, params.get(key)!));
+    return <Navigate to={`/challenges/new${next.size ? `?${next}` : ""}`} replace />;
+  }
+
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <PageHeader
-        eyebrow="Compete"
         title="Challenges"
         description="Play anyone on Gamerie. Agree the terms, play, then confirm the score. Results go on both records."
         actions={
-          <Button icon="plus" onClick={openComposer}>
+          <LinkButton to="/challenges/new" icon="plus">
             New challenge
-          </Button>
+          </LinkButton>
         }
       />
 
@@ -272,23 +271,14 @@ export function ChallengesPage() {
           }
           action={
             term ? undefined : (
-              <Button size="sm" icon="plus" onClick={openComposer}>
+              <LinkButton to="/challenges/new" size="sm" icon="plus">
                 New challenge
-              </Button>
+              </LinkButton>
             )
           }
         />
       )}
 
-      {composing && (
-        <ChallengeComposer
-          open
-          initialType={composeType}
-          initialTarget={presetTarget}
-          onClose={closeComposer}
-          onCreated={(id) => navigate(`/challenges/${id}`, { replace: true })}
-        />
-      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ function StepMarker({ step, active }: { step: SetupStep; active: boolean }) {
       className={cn(
         "grid size-9 shrink-0 place-items-center rounded-full transition-colors duration-300",
         step.complete
-          ? "bg-lavender-400/14 text-lavender-300"
+          ? "bg-signal/12 text-signal"
           : active
             ? "bg-lavender-400 text-ink-950"
             : "text-mist-400 ring-1 ring-inset ring-white/12",

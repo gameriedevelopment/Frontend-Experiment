@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { Avatar } from "./Avatar";
 import { FieldFrame, inputClasses } from "./Field";
@@ -13,7 +13,9 @@ export interface ComboboxOption {
 
 /**
  * Search-as-you-type picker. The parent owns the query and the (usually remote) options; the
- * selected option is shown as a summary row that can be cleared to search again.
+ * selected option is shown as a summary row that can be cleared to search again. With `browse`,
+ * the list opens on focus so people can pick without remembering what to type, and Change keeps
+ * the current choice until a new one is picked.
  */
 export function Combobox({
   id,
@@ -30,6 +32,8 @@ export function Combobox({
   hint,
   avatars = false,
   labelAction,
+  browse = false,
+  browseLabel,
 }: {
   id: string;
   label: string;
@@ -45,17 +49,32 @@ export function Combobox({
   hint?: ReactNode;
   avatars?: boolean;
   labelAction?: ReactNode;
+  browse?: boolean;
+  /** Heading over the unfiltered list, e.g. "Popular games". */
+  browseLabel?: string;
 }) {
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const showList = open && query.trim().length > 0;
+  const [editing, setEditing] = useState(false);
+  const browsing = browse && !query.trim();
+  const showList = open && (browse || query.trim().length > 0);
+
+  // Opening the full list lands on the current choice rather than the top.
+  useEffect(() => {
+    if (!showList || !browsing) return;
+    const index = value ? options.findIndex((option) => option.value === value.value) : -1;
+    if (index < 0) return;
+    setActive(index);
+    requestAnimationFrame(() => document.getElementById(`${listId}-${index}`)?.scrollIntoView({ block: "center" }));
+  }, [showList, browsing, listId, options, value]);
 
   const select = (option: ComboboxOption) => {
     onChange(option);
     onQueryChange("");
     setOpen(false);
+    setEditing(false);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -75,7 +94,7 @@ export function Combobox({
     }
   };
 
-  if (value) {
+  if (value && !editing) {
     return (
       <FieldFrame id={id} label={label} error={error} labelAction={labelAction}>
         <div className="flex min-h-12 items-center gap-3 rounded-2xl bg-lavender-400/8 px-3 py-2 ring-1 ring-inset ring-lavender-400/40">
@@ -89,7 +108,8 @@ export function Combobox({
           <button
             type="button"
             onClick={() => {
-              onChange(null);
+              if (browse) setEditing(true);
+              else onChange(null);
               requestAnimationFrame(() => inputRef.current?.focus());
             }}
             className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-lavender-300 transition-colors hover:bg-white/6 hover:text-lavender-200"
@@ -126,7 +146,13 @@ export function Combobox({
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
+          onClick={() => setOpen(true)}
+          onBlur={() => {
+            setOpen(false);
+            if (!browse) return;
+            setEditing(false);
+            onQueryChange("");
+          }}
           onKeyDown={onKeyDown}
           className={cn(inputClasses, "pl-11")}
         />
@@ -142,6 +168,11 @@ export function Combobox({
             role="listbox"
             className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-20 max-h-72 overflow-y-auto rounded-2xl bg-ink-800 p-1.5 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)] ring-1 ring-white/10"
           >
+            {browsing && browseLabel && options.length > 0 && (
+              <li role="presentation" className="type-label px-3 pb-1.5 pt-2 text-mist-500">
+                {browseLabel}
+              </li>
+            )}
             {options.length ? (
               options.map((option, index) => (
                 <li
@@ -157,6 +188,7 @@ export function Combobox({
                   className={cn(
                     "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5",
                     index === active && "bg-white/6",
+                    value?.value === option.value && "text-lavender-200",
                   )}
                 >
                   {avatars && <Avatar src={option.image} name={option.label} size="sm" className="rounded-full" />}

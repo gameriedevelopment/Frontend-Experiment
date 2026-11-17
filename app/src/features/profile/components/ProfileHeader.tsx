@@ -6,15 +6,28 @@ import { Icon } from "@/components/ui/Icon";
 import { Tag } from "@/components/ui/Tag";
 import { useAuthStore } from "@/features/auth/authStore";
 import { useCreateConversation } from "@/features/messages/hooks";
-import { useTogglePlayerFollow } from "../hooks";
+import { cn } from "@/lib/cn";
+import { getApiErrorMessage } from "@/lib/errors";
+import { toast } from "@/lib/toast";
+import { usePlayerConnections, useTogglePlayerFollow } from "../hooks";
 import { getProfileCompletion } from "../profileCompletion";
 import type { PlayerProfile } from "../types";
 import { NetworkDialog } from "./NetworkDialog";
 
-function Cover({ src }: { src?: string }) {
+function Cover({ src, editable }: { src?: string; editable: boolean }) {
   const [failed, setFailed] = useState(false);
   return (
     <div className="relative h-40 overflow-hidden rounded-panel bg-ink-900 ring-1 ring-inset ring-white/6 sm:h-52">
+      {editable && (
+        <Link
+          to="?edit=photos"
+          aria-label="Change cover and photo"
+          className="absolute right-4 top-4 z-10 flex items-center gap-2 rounded-full bg-ink-950/60 px-3 py-2 text-xs font-semibold text-mist-100 ring-1 ring-inset ring-white/15 backdrop-blur transition-colors hover:bg-ink-950/80"
+        >
+          <Icon name="camera" className="size-4" />
+          <span className="hidden sm:inline">Edit photos</span>
+        </Link>
+      )}
       {src && !failed ? (
         <img src={src} alt="" className="size-full object-cover" onError={() => setFailed(true)} />
       ) : (
@@ -23,7 +36,7 @@ function Cover({ src }: { src?: string }) {
           <div className="halftone absolute inset-0 text-lavender-400/10 [mask-image:radial-gradient(70%_80%_at_70%_20%,black,transparent)]" />
         </>
       )}
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink-950/70 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-ink-950/70 to-transparent" />
     </div>
   );
 }
@@ -89,25 +102,43 @@ export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerP
   const createConversation = useCreateConversation();
   const follow = useTogglePlayerFollow(currentUser?.id, profile.id, Boolean(profile.isFollowedByCurrentUser));
   const [network, setNetwork] = useState<"followers" | "following" | null>(null);
+  const [unfollowArmed, setUnfollowArmed] = useState(true);
   const location = profile.personalInfo?.location || profile.region;
-  const followers = Number(profile.followersCount ?? profile.followers?.length ?? 0);
-  const following = profile.following?.length ?? 0;
+  const followerPages = usePlayerConnections(profile.id, "followers");
+  const followingPages = usePlayerConnections(profile.id, "following");
+  const followers = followerPages.data?.pages[0]?.total ?? Number(profile.followersCount ?? profile.followers?.length ?? 0);
+  const following = followingPages.data?.pages[0]?.total ?? profile.following?.length;
 
   const message = async () => {
     if (!currentUser) return;
-    const conversation = await createConversation.mutateAsync({
-      participantIds: [currentUser.id, profile.id],
-      type: "user",
-      name: profile.username,
-      avatar: profile.profileImage,
+    try {
+      const conversation = await createConversation.mutateAsync({
+        participantIds: [currentUser.id, profile.id],
+        type: "user",
+        name: profile.username,
+        avatar: profile.profileImage,
+      });
+      navigate(`/messages?conversation=${conversation.id}`);
+    } catch (error) {
+      toast.error("Couldn't open a conversation", getApiErrorMessage(error, "Try again in a moment."));
+    }
+  };
+
+  const toggleFollow = () => {
+    const wasFollowing = Boolean(profile.isFollowedByCurrentUser);
+    if (!wasFollowing) setUnfollowArmed(false);
+    follow.mutate(undefined, {
+      onSuccess: () => {
+        if (wasFollowing) toast.info(`Unfollowed ${profile.username}`);
+      },
+      onError: (error) => toast.error(wasFollowing ? "Couldn't unfollow" : "Couldn't follow", getApiErrorMessage(error, "Try again in a moment.")),
     });
-    navigate(`/messages?conversation=${conversation.id}`);
   };
 
   return (
     <section className="grid gap-6">
       <div>
-        <Cover src={profile.backgroundImage} />
+        <Cover src={profile.backgroundImage} editable={own} />
         <div className="relative -mt-12 flex flex-col gap-6 px-2 sm:-mt-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:gap-5">
             <Avatar
@@ -153,7 +184,7 @@ export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerP
                 <LinkButton to={`/card/${encodeURIComponent(profile.username)}`} tone="outline" size="sm" icon="share">
                   Share card
                 </LinkButton>
-                <LinkButton to="/settings" tone="outline" size="sm" icon="edit">
+                <LinkButton to="?edit=identity" tone="outline" size="sm" icon="edit">
                   Edit profile
                 </LinkButton>
               </>
@@ -169,22 +200,33 @@ export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerP
                   Message
                 </Button>
                 <LinkButton
-                  to={`/challenges?compose=user&target=${encodeURIComponent(profile.id)}&targetName=${encodeURIComponent(profile.username)}`}
+                  to={`/challenges/new?target=${encodeURIComponent(profile.id)}&targetName=${encodeURIComponent(profile.username)}`}
                   tone="outline"
                   size="sm"
                   icon="challenges"
                 >
                   Challenge
                 </LinkButton>
-                <Button
-                  tone={profile.isFollowedByCurrentUser ? "outline" : "lavender"}
-                  size="sm"
-                  icon={profile.isFollowedByCurrentUser ? "check" : "follow"}
-                  disabled={follow.isPending}
-                  onClick={() => follow.mutate()}
-                >
-                  {profile.isFollowedByCurrentUser ? "Following" : "Follow"}
-                </Button>
+                {profile.isFollowedByCurrentUser ? (
+                  <Button
+                    tone="outline"
+                    size="sm"
+                    aria-pressed="true"
+                    disabled={follow.isPending}
+                    onClick={toggleFollow}
+                    onMouseLeave={() => setUnfollowArmed(true)}
+                    className={cn(unfollowArmed && "hover:text-danger")}
+                  >
+                    <span className={cn(unfollowArmed && "group-hover/button:hidden")}>Following</span>
+                    <span className={cn("hidden", unfollowArmed && "group-hover/button:inline")}>Unfollow</span>
+                    <Icon name="check" className={cn("size-4", unfollowArmed && "group-hover/button:hidden")} />
+                    <Icon name="close" className={cn("hidden size-4", unfollowArmed && "group-hover/button:block")} />
+                  </Button>
+                ) : (
+                  <Button size="sm" icon="follow" disabled={follow.isPending} onClick={toggleFollow}>
+                    Follow
+                  </Button>
+                )}
               </>
             )}
           </div>
@@ -193,18 +235,19 @@ export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerP
 
       <div className="flex flex-wrap gap-x-8 gap-y-4 border-y border-white/6 px-2 py-4 sm:px-6">
         <Metric label="Followers" value={followers.toLocaleString()} onClick={() => setNetwork("followers")} />
-        <Metric label="Following" value={following.toLocaleString()} onClick={() => setNetwork("following")} />
+        <Metric label="Following" value={following != null ? following.toLocaleString() : "—"} onClick={() => setNetwork("following")} />
         <Metric label="Play level" value={profile.gameLevel || "Not set"} />
         <Metric label="Platforms" value={profile.platforms?.length ? profile.platforms.join(" · ") : "—"} />
       </div>
 
-      {(createConversation.isError || follow.isError) && (
-        <p role="alert" className="text-sm text-danger">
-          That action could not be completed. Please try again.
-        </p>
-      )}
       {own && <CompletionMeter profile={profile} />}
-      <NetworkDialog kind={network} profileId={profile.id} onClose={() => setNetwork(null)} />
+      <NetworkDialog
+        kind={network}
+        profileId={profile.id}
+        username={profile.username}
+        onSwitch={setNetwork}
+        onClose={() => setNetwork(null)}
+      />
     </section>
   );
 }

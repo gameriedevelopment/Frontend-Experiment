@@ -14,7 +14,7 @@ function eventHref(event: CalendarEvent) {
     return `/challenges/${event.challengeId || event.sourceId}`;
   }
   if (event.sourceType === "tournament" && event.sourceId) return `/tournaments/${event.sourceId}`;
-  return "/calendar";
+  return `/calendar?event=${encodeURIComponent(event.id)}`;
 }
 
 function EventRow({ event }: { event: CalendarEvent }) {

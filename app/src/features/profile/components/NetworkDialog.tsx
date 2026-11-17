@@ -3,23 +3,27 @@ import { Link } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dialog } from "@/components/ui/Dialog";
 import { Icon } from "@/components/ui/Icon";
+import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton, SkeletonText } from "@/components/ui/Skeleton";
 import { usePlayerConnections } from "../hooks";
 
 export function NetworkDialog({
   kind,
   profileId,
+  username,
+  onSwitch,
   onClose,
 }: {
   kind: "followers" | "following" | null;
   profileId: string;
+  username: string;
+  onSwitch: (kind: "followers" | "following") => void;
   onClose: () => void;
 }) {
   const query = usePlayerConnections(profileId, kind ?? "followers", Boolean(kind));
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const players = query.data?.pages.flatMap((page) => page.data) ?? [];
   const total = query.data?.pages[0]?.total ?? 0;
-  const label = kind === "following" ? "Following" : "Followers";
 
   useEffect(() => {
     const node = loadMoreRef.current;
@@ -35,7 +39,28 @@ export function NetworkDialog({
   }, [query.fetchNextPage, query.hasNextPage, query.isFetchingNextPage]);
 
   return (
-    <Dialog open={Boolean(kind)} title={`${label}${total ? ` · ${total.toLocaleString()}` : ""}`} onClose={onClose}>
+    <Dialog
+      open={Boolean(kind)}
+      title={`${username}'s network`}
+      description={
+        query.isSuccess
+          ? `${total.toLocaleString()} ${kind === "following" ? "following" : total === 1 ? "follower" : "followers"}`
+          : undefined
+      }
+      icon="people"
+      onClose={onClose}
+      bodyClassName="px-3 pt-3"
+    >
+      <Segmented
+        label="List"
+        options={[
+          { value: "followers", label: "Followers" },
+          { value: "following", label: "Following" },
+        ]}
+        value={kind ?? "followers"}
+        onChange={onSwitch}
+        className="mx-3 mb-3 grid grid-cols-2 [&_label]:text-center"
+      />
       <div className="grid gap-0.5">
         {query.isLoading &&
           Array.from({ length: 5 }, (_, index) => (

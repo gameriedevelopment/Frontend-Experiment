@@ -3,6 +3,7 @@ import { cn } from "@/lib/cn";
 import type { TimelineStep } from "../lifecycle";
 
 export function ChallengeTimeline({ steps }: { steps: TimelineStep[] }) {
+  const finished = steps.every((step) => step.state === "done");
   return (
     <ol aria-label="Challenge progress" className="grid grid-cols-4 gap-2">
       {steps.map((step, index) => (
@@ -12,7 +13,10 @@ export function ChallengeTimeline({ steps }: { steps: TimelineStep[] }) {
               aria-hidden="true"
               className={cn(
                 "grid size-6 shrink-0 place-items-center rounded-full ring-1 ring-inset",
-                step.state === "done" && "bg-lavender-400 text-ink-950 ring-lavender-400",
+                step.state === "done" &&
+                  (finished && index === steps.length - 1
+                    ? "bg-signal text-ink-950 ring-signal"
+                    : "bg-lavender-400 text-ink-950 ring-lavender-400"),
                 step.state === "current" && "bg-lavender-400/14 text-lavender-300 ring-lavender-400/60",
                 step.state === "upcoming" && "text-mist-500 ring-white/12",
                 step.state === "stopped" && "bg-white/5 text-mist-400 ring-white/15",
