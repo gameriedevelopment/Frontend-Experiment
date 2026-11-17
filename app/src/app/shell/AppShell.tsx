@@ -37,7 +37,7 @@ export function AppShell() {
   };
 
   return (
-    <div className="relative min-h-svh bg-ink-950 text-mist-50">
+    <div className="relative min-h-dvh bg-ink-950 text-mist-50">
       <RouteScrollManager />
       <RealtimeBridge />
       <div
@@ -56,7 +56,7 @@ export function AppShell() {
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto w-full max-w-[84rem] px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-8 outline-none sm:px-6 lg:px-10 lg:pb-16 lg:pt-10"
+          className="mx-auto w-full max-w-[84rem] px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-8 outline-none sm:px-6 lg:px-10 lg:pb-16 lg:pt-10"
         >
           <ErrorBoundary resetKey={pathname} withinApp>
             <Outlet />

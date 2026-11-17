@@ -194,8 +194,9 @@ npm run dev            # http://localhost:5179
   - Single-column grids that hold truncated text or wide tables use `grid-cols-[minmax(0,1fr)]`, including grids whose columns only start at `lg:`.
   - Every text input is at least 16px on touch screens (`pointer-coarse:text-base`, built into `inputClasses`). Below 16px, iPhone browsers zoom in on focus, and the zoom persists across routes.
   - Native date and time inputs get `appearance-none min-w-0` (also in `inputClasses`), because iOS gives them an intrinsic width.
-  - The page doesn't rubber-band (`overscroll-y-none` on `<html>`): on iOS the bounce dragged the fixed bottom bar up with it. Every vertical scroll area is `overscroll-contain`, and sheet bodies never scroll sideways.
-  - Bottom-pinned UI adds `env(safe-area-inset-bottom)` to its offset (bottom bar, page padding, save bar, toasts), never as padding inside a floating element.
+  - The page keeps iOS's bounce. Don't set `overscroll-behavior` on `<html>`: it made taps stop registering on iPhone. iOS carries fixed elements along when the page bounces at its end, so the mobile bar is flush with the bottom edge (like the revamp) and has a fill below it, which shows more bar rather than a gap. The shell uses `min-h-dvh`, and `<html>` has the page background.
+  - Every vertical scroll area is `overscroll-contain`, and sheet bodies never scroll sideways.
+  - Safe area: the flush bar pads inside with `env(safe-area-inset-bottom)`; page padding, the save bar and toasts add it to their offsets.
   - Heroes over banner art size to their content (art is `absolute inset-0`, the text block is in flow with a minimum height), so long names never clip on phones.
 - **Backend note:** unfollowing writes to `referral_follow_opt_outs` (migration `AddReferralFollows1794787200001`). Without that migration every unfollow returns a 500.
 - **Feed algorithm (backend-two):** For you is candidate → score → diversify with a cached ranked session, then newest-first; Following and Teams are newest-first. See `newsfeed-feed.repository.ts`, `feed-ranking.service.ts` (with spec) and `get-feed.use-case.ts`. Indexes: `AddPostFeedIndexes`, `AddFeedRankingIndexes`.
