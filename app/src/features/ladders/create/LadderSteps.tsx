@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { ChoiceChip, ChoiceGroup } from "@/components/ui/ChoiceChips";
 import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
+import { FileDrop } from "@/components/ui/FileDrop";
 import { TextAreaField, TextField } from "@/components/ui/Field";
 import { OptionCards } from "@/components/ui/OptionCards";
 import { ScheduleField } from "@/components/ui/ScheduleField";
@@ -28,7 +29,36 @@ const toLocal = (iso: string) => {
 };
 const toIso = (local: string) => (local ? new Date(local).toISOString() : "");
 
-export function IdentityStep({ form, errors, update, hosting }: StepProps & { hosting: LadderHostingOptions }) {
+const COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_COVER_BYTES = 4 * 1024 * 1024;
+
+/** A ladder cover, like a tournament banner. The page uploads it once the draft is saved. */
+export function LadderCoverDrop({ file, url, onFile }: { file: File | null; url: string | null; onFile: (file: File | null) => void }) {
+  return (
+    <FileDrop
+      label="Cover image (optional)"
+      hint="Shown on the ladder card and page. 16:6, JPG, PNG or WebP, up to 4 MB"
+      accept={COVER_TYPES}
+      maxBytes={MAX_COVER_BYTES}
+      currentUrl={url}
+      file={file}
+      onFile={onFile}
+    />
+  );
+}
+
+export function IdentityStep({
+  form,
+  errors,
+  update,
+  hosting,
+  cover,
+  onCover,
+}: StepProps & {
+  hosting: LadderHostingOptions;
+  cover: { file: File | null; url: string | null };
+  onCover: (file: File | null) => void;
+}) {
   const b = form.basics;
   const [query, setQuery] = useState("");
   const games = useGameOptions(useDebouncedValue(query), true);
@@ -89,16 +119,23 @@ export function IdentityStep({ form, errors, update, hosting }: StepProps & { ho
           ))}
         </ChoiceGroup>
         <TextAreaField id="ladder-description" label="Description" maxLength={2000} value={b.description ?? ""} onChange={(event) => update("basics", { description: event.target.value })} placeholder="Who it's for, how often people should play, and what's at stake." />
+        <LadderCoverDrop file={cover.file} url={cover.url} onFile={onCover} />
       </StepSection>
     </div>
   );
 }
 
-export function CompetitionStep({ form, errors, update }: StepProps) {
+/** Editing a published ladder: the format is fixed, and scoring and the start lock once it runs. */
+export type LadderEditing = { started: boolean };
+
+export function CompetitionStep({ form, errors, update, editing }: StepProps & { editing?: LadderEditing }) {
   const f = form.format;
   const r = form.rules;
+  const scoringLocked = Boolean(editing?.started);
   return (
     <div className="grid gap-7">
+      {!editing && (
+      <>
       <StepSection title="Entrants">
         <OptionCards
           legend="Who competes"
@@ -139,13 +176,18 @@ export function CompetitionStep({ form, errors, update }: StepProps) {
           </>
         )}
       </StepSection>
-      <StepSection title="Scoring">
+      </>
+      )}
+      <StepSection
+        title="Scoring"
+        description={scoringLocked ? "Points and draws are locked because the ladder has started and they decide the standings." : undefined}
+      >
         <ChipRow legend="Series" options={[1, 3, 5] as const} value={r.bestOf} format={(value) => `Best of ${value}`} onChange={(bestOf) => update("rules", { bestOf })} />
         <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
-          <TextField id="ladder-win" label="Points for a win" inputMode="numeric" value={String(r.winPoints)} onChange={(event) => update("rules", { winPoints: Number(event.target.value.replace(/\D/g, "")) || 0 })} error={errors.winPoints} />
-          <TextField id="ladder-draw" label="Points for a draw" inputMode="numeric" disabled={!r.allowDraws} value={String(r.drawPoints)} onChange={(event) => update("rules", { drawPoints: Number(event.target.value.replace(/\D/g, "")) || 0 })} error={errors.drawPoints} />
+          <TextField id="ladder-win" label="Points for a win" inputMode="numeric" disabled={scoringLocked} value={String(r.winPoints)} onChange={(event) => update("rules", { winPoints: Number(event.target.value.replace(/\D/g, "")) || 0 })} error={errors.winPoints} />
+          <TextField id="ladder-draw" label="Points for a draw" inputMode="numeric" disabled={scoringLocked || !r.allowDraws} value={String(r.drawPoints)} onChange={(event) => update("rules", { drawPoints: Number(event.target.value.replace(/\D/g, "")) || 0 })} error={errors.drawPoints} />
         </div>
-        <Switch label="Allow draws" description="A series can end level." checked={r.allowDraws} onChange={(allowDraws) => update("rules", { allowDraws })} />
+        <Switch label="Allow draws" description="A series can end level." checked={r.allowDraws} disabled={scoringLocked} onChange={(allowDraws) => update("rules", { allowDraws })} />
         <ChipRow legend="Rematch wait" hint="Before the same pair can play again" options={[0, 1, 3, 7, 14, 30]} value={r.rematchWaitDays} format={(value) => (value === 0 ? "None" : `${value} d`)} onChange={(rematchWaitDays) => update("rules", { rematchWaitDays })} />
         <ChipRow legend="Matches to place for prizes" options={[0, 3, 5, 10, 15, 20]} value={r.minimumMatchesForPrizes} onChange={(minimumMatchesForPrizes) => update("rules", { minimumMatchesForPrizes })} />
       </StepSection>
@@ -158,7 +200,7 @@ export function CompetitionStep({ form, errors, update }: StepProps) {
   );
 }
 
-export function AccessStep({ form, errors, update, hubHost }: StepProps & { hubHost: boolean }) {
+export function AccessStep({ form, errors, update, hubHost, editing }: StepProps & { hubHost: boolean; editing?: LadderEditing }) {
   const j = form.joining;
   const s = form.schedule;
   const places = s.prizePlaces;
@@ -190,7 +232,7 @@ export function AccessStep({ form, errors, update, hubHost }: StepProps & { hubH
         )}
       </StepSection>
       <StepSection title="Season">
-        <ScheduleField label="Starts" days={60} value={toIso(s.startsAt)} onChange={(iso) => update("schedule", { startsAt: iso ? toLocal(iso) : "" })} error={errors.startsAt} />
+        <ScheduleField label={editing?.started ? "Starts (locked once running)" : "Starts"} days={60} disabled={editing?.started} value={toIso(s.startsAt)} onChange={(iso) => update("schedule", { startsAt: iso ? toLocal(iso) : "" })} error={errors.startsAt} />
         <ScheduleField label="Ends" days={180} value={toIso(s.endsAt)} onChange={(iso) => update("schedule", { endsAt: iso ? toLocal(iso) : "" })} error={errors.endsAt} />
       </StepSection>
       <StepSection title="Prize">

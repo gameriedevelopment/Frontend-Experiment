@@ -27,9 +27,18 @@ export interface LadderSummary {
   startsAt: string | null;
   endsAt: string | null;
   prize: { total: number; currency: string; places: number } | null;
+  /** The viewer's relationship to the ladder, sent with list results. */
+  viewer?: { isOrganizer: boolean; entryStatus: LadderParticipantStatus | null };
+  /** Shown only to the organizer when Gamerie has taken the ladder down. */
+  removed?: LadderRemoval | null;
 }
 
-export interface LadderDetail extends Omit<LadderSummary, "prize"> {
+export interface LadderRemoval {
+  at: string;
+  reason: string | null;
+}
+
+export interface LadderDetail extends Omit<LadderSummary, "prize" | "viewer"> {
   description: string;
   ownerId: string;
   teamSize: number | null;
@@ -140,6 +149,37 @@ export interface LadderDatesPrizeInput {
     total: number;
     places: Array<{ placement: number; amount: number }>;
   } | null;
+}
+
+/** Editing a published ladder: each section is sent whole. Game, host and format are fixed. */
+export interface UpdateLadderInput {
+  details?: { name: string; region?: string; description?: string };
+  rules?: LadderRulesInput;
+  joining?: LadderJoiningInput;
+  datesAndPrize?: LadderDatesPrizeInput;
+}
+
+export interface LadderLeaderboardRow {
+  rank: number;
+  id: string;
+  name: string | null;
+  avatar: string | null;
+  ladders: number;
+  titles: number;
+  podiums: number;
+  bestPlacement: number | null;
+  matchWins: number;
+  matchDraws: number;
+  matchLosses: number;
+  points: number;
+}
+
+export interface LadderLeaderboardPage {
+  data: LadderLeaderboardRow[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface SaveLadderDraftInput {

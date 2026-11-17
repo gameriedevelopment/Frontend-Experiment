@@ -8,6 +8,7 @@ export interface AuthUser {
   profileImage?: string;
   region?: string | null;
   role?: string;
+  gamerieId?: string | null;
   isFirstSocialLogin?: boolean;
   [key: string]: unknown;
 }

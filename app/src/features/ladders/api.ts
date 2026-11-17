@@ -13,6 +13,8 @@ import type {
   LadderActivity,
   LadderEntryInput,
   LadderGroup,
+  LadderLeaderboardPage,
+  UpdateLadderInput,
 } from "./types";
 
 type Envelope<T> = { data: T };
@@ -51,6 +53,26 @@ export const createLadderDraft = (basics: LadderBasicsInput) =>
 export const saveLadderDraft = (id: string, input: SaveLadderDraftInput) =>
   api
     .patch<Envelope<LadderDetail>>(`/ladders/${encodeURIComponent(id)}/settings`, input)
+    .then(unwrap);
+
+export const updateLadder = (id: string, input: UpdateLadderInput) =>
+  api.patch<Envelope<LadderDetail>>(`/ladders/${encodeURIComponent(id)}`, input).then(unwrap);
+
+export function uploadLadderBanner(id: string, file: File) {
+  const body = new FormData();
+  body.append("file", file);
+  return api
+    .post<Envelope<{ banner: string }>>(`/ladders/${encodeURIComponent(id)}/banner`, body, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then(unwrap);
+}
+
+export const getLadderLeaderboard = (kind: "player" | "team", game?: string, page = 1) =>
+  api
+    .get<Envelope<LadderLeaderboardPage>>("/ladders/leaderboard", {
+      params: { kind, game: game || undefined, page, limit: 20 },
+    })
     .then(unwrap);
 
 export const publishLadder = (id: string) =>

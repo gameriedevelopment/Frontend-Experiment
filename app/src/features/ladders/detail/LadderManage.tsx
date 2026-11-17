@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button, LinkButton } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TextAreaField, TextField } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
+import { LadderSettings } from "./LadderSettings";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useSearchResults } from "@/features/discovery/hooks";
 import { cn } from "@/lib/cn";
@@ -16,7 +17,7 @@ import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useLadderAction, useLadderActivity, useLadderGroups, useLadderManagement, useLadderParticipants } from "../hooks";
 import type { LadderDetail, LadderParticipant } from "../types";
 
-type View = "entries" | "groups" | "updates";
+type View = "entries" | "groups" | "updates" | "settings";
 
 const activityLabels: Record<string, [string, IconName]> = {
   "ladder.draft_created": ["Draft created", "edit"],
@@ -331,13 +332,19 @@ export function LadderManage({ ladder }: { ladder: LadderDetail }) {
             { value: "entries", label: "Entries" },
             { value: "groups", label: "Groups" },
             { value: "updates", label: "Updates" },
+            { value: "settings", label: "Settings" },
           ]}
         />
-        <LinkButton to={`/ladders/${ladder.id}/edit`} tone="outline" size="sm" icon="edit">
-          Edit details
-        </LinkButton>
       </div>
-      {view === "entries" ? <Entries ladder={ladder} /> : view === "groups" ? <Groups ladder={ladder} /> : <Updates ladder={ladder} />}
+      {view === "entries" ? (
+        <Entries ladder={ladder} />
+      ) : view === "groups" ? (
+        <Groups ladder={ladder} />
+      ) : view === "updates" ? (
+        <Updates ladder={ladder} />
+      ) : (
+        <LadderSettings ladder={ladder} />
+      )}
     </div>
   );
 }

@@ -19,6 +19,7 @@ import {
   getCommunityPosts,
   getHub,
   getHubDashboard,
+  getOrCreateTeamReferralCode,
   getHubInvites,
   getHubMembershipRequest,
   getHubPendingInvites,
@@ -59,12 +60,15 @@ import {
   transferTeamWalletTokens,
   updateCommunity,
   updateHubPolicy,
+  changeHubDesignation,
 } from "./api";
 import type {
   CommunityFilters,
   CommunityFormPayload,
   CommunityMediaFiles,
   TeamWalletTransactionFilters,
+  HubDesignation,
+  HubMemberFilter,
 } from "./types";
 const refreshMembershipCaches = (client: ReturnType<typeof useQueryClient>) => {
   void client.invalidateQueries({ queryKey: ["profile-teams"] });
@@ -280,10 +284,10 @@ export function useTeamPendingInvites(teamId: string, enabled: boolean) {
     staleTime: 15_000,
   });
 }
-export function useHubMembers(hubId: string, search: string, enabled = true) {
+export function useHubMembers(hubId: string, search: string, enabled = true, filter?: HubMemberFilter) {
   return useInfiniteQuery({
-    queryKey: ["hub-members", hubId, search],
-    queryFn: ({ pageParam }) => getHubMembers(hubId, pageParam, search),
+    queryKey: ["hub-members", hubId, search, filter ?? "all"],
+    queryFn: ({ pageParam }) => getHubMembers(hubId, pageParam, search, filter),
     initialPageParam: 1,
     getNextPageParam: (page) => (page.page < page.totalPages ? page.page + 1 : undefined),
     enabled: enabled && Boolean(hubId),
@@ -446,6 +450,14 @@ export function useCancelHubTeamInvite(hubId: string, slug: string) {
     onSuccess: () => refreshHub(client, hubId, slug),
   });
 }
+export function useChangeHubDesignation(hubId: string, slug: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, designation }: { userId: string; designation: HubDesignation | null }) =>
+      changeHubDesignation(hubId, userId, designation),
+    onSuccess: () => refreshHub(client, hubId, slug),
+  });
+}
 export function useChangeHubMember(hubId: string, slug: string) {
   const client = useQueryClient();
   return useMutation({
@@ -550,4 +562,8 @@ export function useOwnedTeams(userId?: string) {
   const teams = useUserTeams(userId);
   const owned = useMemo(() => (userId ? (teams.data ?? []).filter((team) => isTeamOwner(team, userId)) : []), [teams.data, userId]);
   return { ...teams, owned };
+}
+/** The team's referral code, created the first time a manager asks for it. */
+export function useTeamReferralCode(teamId: string) {
+  return useMutation({ mutationFn: () => getOrCreateTeamReferralCode(teamId) });
 }

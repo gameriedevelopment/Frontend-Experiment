@@ -1,10 +1,13 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { connectMessagingSocket } from "@/features/messages/api";
 import * as laddersApi from "./api";
 import type {
   LadderBasicsInput,
   LadderEntryInput,
   LadderFilters,
   SaveLadderDraftInput,
+  UpdateLadderInput,
 } from "./types";
 
 export const ladderKeys = {
@@ -19,6 +22,8 @@ export const ladderKeys = {
   groups: (id: string) => ["ladders", id, "groups"] as const,
   announcements: (id: string) => ["ladders", id, "announcements"] as const,
   activity: (id: string) => ["ladders", id, "activity"] as const,
+  leaderboard: (kind: "player" | "team", game?: string) =>
+    ["ladders", "leaderboard", kind, game ?? ""] as const,
 };
 
 export function useLadders(filters: LadderFilters) {
@@ -185,7 +190,49 @@ export function useLadderManagement(id?: string) {
         laddersApi.postLadderAnnouncement(id!, input),
       onSuccess: refresh,
     }),
+    // Edits change list cards too, so every ladder query refreshes.
+    update: useMutation({
+      mutationFn: (input: UpdateLadderInput) => laddersApi.updateLadder(id!, input),
+      onSuccess: () => void client.invalidateQueries({ queryKey: ["ladders"] }),
+    }),
+    uploadBanner: useMutation({
+      mutationFn: (file: File) => laddersApi.uploadLadderBanner(id!, file),
+      onSuccess: () => void client.invalidateQueries({ queryKey: ["ladders"] }),
+    }),
   };
+}
+
+export function useLadderLeaderboard(kind: "player" | "team", game?: string) {
+  return useInfiniteQuery({
+    queryKey: ladderKeys.leaderboard(kind, game),
+    queryFn: ({ pageParam }) => laddersApi.getLadderLeaderboard(kind, game, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    staleTime: 60_000,
+  });
+}
+
+/** Refreshes the ladder and everything under it (standings, matches, entries) when it changes. */
+export function useLadderRealtime(id?: string) {
+  const client = useQueryClient();
+  useEffect(() => {
+    if (!id) return;
+    const socket = connectMessagingSocket();
+    const join = () => socket.emit("ladder.join", { ladderId: id });
+    const refresh = (event: { ladderId?: string }) => {
+      if (event?.ladderId !== id) return;
+      void client.invalidateQueries({ queryKey: ["ladders", id] });
+      void client.invalidateQueries({ queryKey: ladderKeys.detail(id) });
+    };
+    join();
+    socket.on("connect", join);
+    socket.on("ladder.updated", refresh);
+    return () => {
+      socket.emit("ladder.leave", { ladderId: id });
+      socket.off("connect", join);
+      socket.off("ladder.updated", refresh);
+    };
+  }, [client, id]);
 }
 
 export function useLadder(id?: string) {

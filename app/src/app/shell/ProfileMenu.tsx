@@ -6,6 +6,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 import { easeOutExpo } from "@/components/ui/motion";
 import { signOut } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/authStore";
+import { useGpGuide } from "@/features/progression/guideStore";
 import { cn } from "@/lib/cn";
 
 const menuItem =
@@ -13,6 +14,7 @@ const menuItem =
 
 export function ProfileMenu() {
   const navigate = useNavigate();
+  const openGuide = useGpGuide((state) => state.openGuide);
   const user = useAuthStore((state) => state.user);
   const [open, setOpen] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
@@ -79,6 +81,7 @@ export function ProfileMenu() {
               <Avatar src={user?.profileImage} name={user?.username ?? user?.email} size="md" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{user?.username ?? "Player"}</p>
+                {user?.gamerieId && <p className="type-label mt-1 text-[0.6rem] text-lavender-300">{user.gamerieId}</p>}
                 <p className="truncate text-xs text-mist-400">{user?.email}</p>
               </div>
             </div>
@@ -89,6 +92,18 @@ export function ProfileMenu() {
                   {link.label}
                 </Link>
               ))}
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  openGuide();
+                }}
+                className={menuItem}
+              >
+                <Icon name="trophy" className="size-[1.1rem] text-mist-400" />
+                Ways to earn GP
+              </button>
             </div>
             <div className="border-t border-white/6 pt-2">
               {/* Neutral at rest; red only on hover or focus, since signing out isn't destructive. */}

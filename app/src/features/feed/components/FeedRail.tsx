@@ -56,7 +56,7 @@ export function FeedRail() {
   const user = useAuthStore((state) => state.user);
   const suggestions = usePlayerSuggestions();
   return (
-    <aside aria-label="Around Gamerie" className="hidden gap-6 xl:sticky xl:top-24 xl:grid">
+    <aside aria-label="Around Gamerie" className="hidden gap-6 xl:sticky xl:top-24 xl:grid xl:grid-cols-[minmax(0,1fr)]">
       <Trending />
       {user?.id && (
         <PlayersToFollow

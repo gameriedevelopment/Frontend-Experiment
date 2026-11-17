@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { connectMessagingSocket } from "@/features/messages/api";
 import * as tournamentsApi from "./api";
 import type { TournamentFilters, TournamentPhase } from "./types";
 
@@ -14,7 +15,7 @@ export const tournamentKeys = {
   mine: (role: string) => ["tournaments", "mine", role] as const,
 };
 
-// Without a live socket here yet, tournaments in play refresh on a short timer.
+// The socket pushes changes as they happen; tournaments in play also refresh on a timer in case it drops.
 const livePhases: TournamentPhase[] = ["check_in", "awaiting_start", "live"];
 
 /** Upcoming tournaments hosted on Gamerie, for surfaces that show a short list. `game` is a game name. */
@@ -34,6 +35,15 @@ export function useTournaments(filters: TournamentFilters) {
     initialPageParam: 1,
     getNextPageParam: (page) => (page.hasMore ? page.page + 1 : undefined),
     staleTime: 60_000,
+  });
+}
+
+/** Platforms, regions, skill levels and team sizes that open tournaments actually use, for the directory filters. */
+export function useTournamentFacets() {
+  return useQuery({
+    queryKey: ["tournaments", "facets"],
+    queryFn: tournamentsApi.getTournamentFacets,
+    staleTime: 10 * 60_000,
   });
 }
 
@@ -75,6 +85,27 @@ export function useHostedTournament(id?: string) {
     staleTime: 15_000,
     refetchInterval: (query) => (query.state.data && livePhases.includes(query.state.data.phase) ? 20_000 : false),
   });
+}
+
+/** Refreshes the tournament, its bracket and entrants whenever the host or a result changes it. */
+export function useTournamentRealtime(id?: string) {
+  const client = useQueryClient();
+  useEffect(() => {
+    if (!id) return;
+    const socket = connectMessagingSocket();
+    const join = () => socket.emit("tournament.join", { tournamentId: id });
+    const refresh = (event: { tournamentId?: string }) => {
+      if (event?.tournamentId === id) void client.invalidateQueries({ queryKey: tournamentKeys.hosted(id) });
+    };
+    join();
+    socket.on("connect", join);
+    socket.on("tournament.updated", refresh);
+    return () => {
+      socket.emit("tournament.leave", { tournamentId: id });
+      socket.off("connect", join);
+      socket.off("tournament.updated", refresh);
+    };
+  }, [client, id]);
 }
 
 export function useTournamentBracket(id: string, enabled = true, live = false) {

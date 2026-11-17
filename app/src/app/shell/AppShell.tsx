@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { RealtimeBridge } from "@/features/messages/RealtimeBridge";
+import { GpGuideHost } from "@/features/progression/GpGuideHost";
 import { cn } from "@/lib/cn";
 import { AppHeader } from "./AppHeader";
 import { AppSidebar } from "./AppSidebar";
@@ -64,6 +65,7 @@ export function AppShell() {
         </main>
       </div>
       <MobileNavigation />
+      <GpGuideHost />
     </div>
   );
 }

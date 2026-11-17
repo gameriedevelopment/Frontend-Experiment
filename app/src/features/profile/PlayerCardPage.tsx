@@ -9,29 +9,13 @@ import { TokenMark } from "@/components/ui/TokenMark";
 import { publicLinks } from "@/config/links";
 import { useAuthStore } from "@/features/auth/authStore";
 import { cn } from "@/lib/cn";
+import { copyText } from "@/lib/clipboard";
 import { getApiErrorMessage } from "@/lib/errors";
 import { PlayerCard } from "./components/PlayerCard";
 import { usePublicPlayerCard } from "./hooks";
 import { buildPlayerCardModel } from "./playerCard";
 
 type ActionState = "idle" | "working" | "done" | "error";
-
-async function copyText(value: string) {
-  if (window.isSecureContext && navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return;
-  }
-  const field = document.createElement("textarea");
-  field.value = value;
-  field.setAttribute("readonly", "");
-  field.style.position = "fixed";
-  field.style.opacity = "0";
-  document.body.appendChild(field);
-  field.select();
-  const copied = document.execCommand("copy");
-  field.remove();
-  if (!copied) throw new Error("Clipboard access is unavailable.");
-}
 
 function updateMeta(name: string, content: string, property = false) {
   const selector = property ? `meta[property="${name}"]` : `meta[name="${name}"]`;

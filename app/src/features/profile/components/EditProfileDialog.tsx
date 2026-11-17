@@ -237,7 +237,7 @@ export function EditProfileDialog({ profile, section, onSection, onClose }: { pr
     >
       <div className="grid min-h-0 grid-cols-[minmax(0,1fr)] sm:grid-cols-[13rem_minmax(0,1fr)]">
         <nav aria-label="Profile sections" className="border-b border-white/6 p-3 sm:border-b-0 sm:border-r">
-          <ul className="relative flex gap-1 overflow-x-auto scrollbar-none sm:grid">
+          <ul className="relative flex gap-1 overflow-x-auto scrollbar-none sm:grid sm:grid-cols-[minmax(0,1fr)]">
             {sections.map((item) => (
               <li key={item.id} className="shrink-0">
                 <button

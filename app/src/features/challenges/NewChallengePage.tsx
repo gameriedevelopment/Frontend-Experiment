@@ -308,7 +308,7 @@ export function NewChallengePage() {
           <div className="lg:hidden">{sendBlock}</div>
         </div>
 
-        <aside className="hidden gap-4 lg:sticky lg:top-24 lg:grid">
+        <aside className="hidden gap-4 lg:sticky lg:top-24 lg:grid lg:grid-cols-[minmax(0,1fr)]">
           <ChallengeInvitePreview
             from={{
               name: type === "team" ? sourceTeam?.name || "Your team" : user?.username || "You",

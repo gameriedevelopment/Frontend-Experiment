@@ -23,15 +23,31 @@ import {
   useRespondTeamRequest,
   useTeamHubInvites,
   useTeamPendingInvites,
+  useTeamReferralCode,
   useTeamRequests,
 } from "../hooks";
 import { formatMemberRole } from "../options";
 import type { CommunityMember, HubSummary, TeamSummary } from "../types";
-import { DangerZone, EntityPicker, Empty, RequestRow, Section, fail, userName } from "./ManageParts";
+import { DangerZone, EntityPicker, Empty, ReferralLink, RequestRow, Section, fail, userName } from "./ManageParts";
 import { TeamWallet } from "./TeamWallet";
 
 const TITLES = ["manager", "leader", "vice leader", "coach", "analyst", "scouter", "partner", "member"];
 type View = "people" | "roster" | "hubs" | "wallet" | "ownership";
+
+function TeamReferral({ teamId }: { teamId: string }) {
+  const referral = useTeamReferralCode(teamId);
+  return (
+    <Section title="Referral link" description="People who sign up through this link follow your team and the hubs it belongs to.">
+      {referral.data ? (
+        <ReferralLink code={referral.data} />
+      ) : (
+        <Button tone="outline" size="sm" icon="link" disabled={referral.isPending} onClick={() => referral.mutate(undefined, { onError: fail("Couldn't get the referral link") })}>
+          {referral.isPending ? "Getting link…" : "Get referral link"}
+        </Button>
+      )}
+    </Section>
+  );
+}
 
 function People({ team }: { team: TeamSummary }) {
   const slug = slugOf(team);
@@ -67,6 +83,7 @@ function People({ team }: { team: TeamSummary }) {
           </Button>
         </div>
       </Section>
+      <TeamReferral key={team.id} teamId={team.id} />
       <Section title="Asking to join" meta={incoming.length}>
         {requests.isLoading ? (
           <Skeleton className="h-24 rounded-2xl" />

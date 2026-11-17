@@ -1,4 +1,4 @@
-import type { LadderJoinMode, LadderStatus } from "./types";
+import type { LadderJoinMode, LadderStatus, LadderSummary } from "./types";
 
 export const LADDER_STATUS_LABELS: Record<LadderStatus, string> = {
   draft: "Draft",
@@ -44,3 +44,34 @@ export function ladderPlayScopeLabel(value: "own_group" | "other_groups" | "anyo
   if (value === "other_groups") return "Play other groups";
   return "Challenge anyone";
 }
+
+export type LadderCardAction = {
+  label: string;
+  state: "setup" | "manage" | "registered" | "pending" | "invited" | "register" | "view";
+  href: string;
+};
+
+/** The list card's call to action, from the viewer's place in the ladder. */
+export function ladderCardAction(ladder: LadderSummary): LadderCardAction {
+  const href = `/ladders/${ladder.id}`;
+  if (ladder.status === "draft") return { label: "Continue setup", state: "setup", href: `${href}/edit` };
+  if (ladder.viewer?.isOrganizer) return { label: "Manage", state: "manage", href: `${href}?tab=manage` };
+  switch (ladder.viewer?.entryStatus) {
+    case "active":
+    case "inactive":
+    case "finished":
+      return { label: "Registered", state: "registered", href };
+    case "pending_approval":
+      return { label: "Awaiting approval", state: "pending", href };
+    case "invited":
+      return { label: "Invited", state: "invited", href };
+  }
+  const running = ladder.status === "upcoming" || ladder.status === "in_progress";
+  const full = ladder.maxParticipants !== null && ladder.participantCount >= ladder.maxParticipants;
+  if (running && ladder.joinMode !== "private" && !full) return { label: "Register", state: "register", href };
+  if (ladder.status === "completed" || ladder.status === "archived") {
+    return { label: "Final table", state: "view", href };
+  }
+  return { label: "View ladder", state: "view", href };
+}
+

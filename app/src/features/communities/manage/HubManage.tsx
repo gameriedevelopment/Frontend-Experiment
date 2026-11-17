@@ -1,18 +1,23 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
+import { Button, LinkButton } from "@/components/ui/Button";
 import type { ComboboxOption } from "@/components/ui/Combobox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { inputClasses } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { Menu } from "@/components/ui/Menu";
 import { OptionCards } from "@/components/ui/OptionCards";
 import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { cn } from "@/lib/cn";
+import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { memberName, memberUserId, slugOf } from "../format";
 import {
   useCancelHubTeamInvite,
   useCancelHubUserInvite,
+  useChangeHubDesignation,
   useChangeHubMember,
   useHubDashboard,
   useHubMembers,
@@ -27,21 +32,18 @@ import {
   useRespondHubTeamRequest,
   useUpdateHubPolicy,
 } from "../hooks";
-import { formatMemberRole } from "../options";
-import type { CommunityMember, HubSummary, TeamSummary } from "../types";
-import { DangerZone, EntityPicker, Empty, RequestRow, Section, fail, userName } from "./ManageParts";
+import { DESIGNATION_LABELS, HUB_ROLE_GROUPS, hubMemberRoles } from "../hubRoles";
+import type { CommunityMember, HubDesignation, HubMemberFilter, HubSummary, TeamSummary } from "../types";
+import { HubReport } from "./HubReport";
+import { DangerZone, EntityPicker, Empty, ReferralLink, RequestRow, Section, fail, userName } from "./ManageParts";
 
 type View = "overview" | "people" | "teams" | "roles" | "access" | "ownership";
-const ROLES = ["admin", "manager", "member"];
 
 function Overview({ hub }: { hub: HubSummary }) {
   const dashboard = useHubDashboard(hub.id, true);
-  if (dashboard.isLoading) return <Skeleton className="h-80 rounded-card" />;
+  if (dashboard.isLoading) return <Skeleton className="h-[36rem] rounded-card" />;
   if (!dashboard.data) return <Empty>The dashboard isn't available right now.</Empty>;
-  const { community, referral, growth } = dashboard.data;
-  const link = referral.code ? `${window.location.origin}/register?ref=${encodeURIComponent(referral.code)}` : "";
-  const points = growth.memberGrowth.slice(-14);
-  const peak = Math.max(1, ...points.map((point) => point.count));
+  const { referral } = dashboard.data;
   const funnel: Array<[string, number]> = [
     ["Signed up", referral.totalSignups],
     ["Verified", referral.verifiedUsers],
@@ -49,59 +51,23 @@ function Overview({ hub }: { hub: HubSummary }) {
   ];
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
-      <Section title="Community">
-        <dl className="grid grid-cols-2 gap-5">
-          {[
-            ["Members", community.members],
-            ["Teams", community.teams],
-            ["Followers", community.followers],
-            ["Posts", community.posts],
-          ].map(([label, value]) => (
-            <div key={label as string}>
-              <dt className="type-label text-mist-500">{label}</dt>
-              <dd className="type-display mt-2 text-3xl tabular-nums">{Number(value).toLocaleString()}</dd>
-            </div>
-          ))}
-        </dl>
-        {points.length > 1 && (
-          <div className="mt-6 border-t border-white/6 pt-5">
-            <p className="type-label text-mist-500">New members, last {points.length} days</p>
-            <div className="mt-3 flex h-20 items-end gap-1">
-              {points.map((point, index) => (
-                <span
-                  key={point.date}
-                  title={`${new Date(point.date).toLocaleDateString()}: ${point.count}`}
-                  className={index === points.length - 1 ? "flex-1 rounded-t bg-lavender-400" : "flex-1 rounded-t bg-white/10"}
-                  style={{ height: `${Math.max(6, (point.count / peak) * 100)}%` }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </Section>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+      <HubReport
+        hub={hub}
+        data={dashboard.data}
+        actions={
+          <LinkButton to={`/hubs/${encodeURIComponent(slugOf(hub))}/report`} target="_blank" tone="outline" size="sm" icon="printer">
+            Sponsor report
+          </LinkButton>
+        }
+      />
       <Section title="Referrals" description="Everyone who signs up with the hub's link is credited to the hub.">
-        {link ? (
-          <div className="flex items-center gap-2 rounded-2xl bg-white/3 p-1.5 pl-4 ring-1 ring-inset ring-white/8">
-            <span className="min-w-0 flex-1 truncate font-mono text-sm text-mist-200">{link}</span>
-            <Button
-              tone="outline"
-              size="sm"
-              icon="copy"
-              onClick={() =>
-                navigator.clipboard
-                  .writeText(link)
-                  .then(() => toast.success("Referral link copied"))
-                  .catch(() => toast.error("Couldn't copy the link"))
-              }
-            >
-              Copy
-            </Button>
-          </div>
+        {referral.code ? (
+          <ReferralLink code={referral.code} />
         ) : (
           <Empty>The hub doesn't have a referral code yet.</Empty>
         )}
-        <ol className="mt-5 grid gap-3">
+        <ol className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-6">
           {funnel.map(([label, value]) => (
             <li key={label}>
               <div className="flex items-baseline justify-between text-sm">
@@ -274,68 +240,174 @@ function Teams({ hub }: { hub: HubSummary }) {
   );
 }
 
+const ACCESS_ROLES: Array<{ value: string; label: string }> = [
+  { value: "admin", label: "Co-owner" },
+  { value: "manager", label: "Manager" },
+  { value: "member", label: "No management access" },
+];
+const chip = "type-label rounded-full bg-white/6 px-2 py-0.5 text-mist-200";
+const pill = "flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-mist-300 ring-1 ring-inset ring-white/10 hover:text-mist-50";
+
 function Roles({ hub }: { hub: HubSummary }) {
   const slug = slugOf(hub);
-  const members = useHubMembers(hub.id, "");
+  const relationship = hub.viewerRelationship;
+  const canAssign = Boolean(relationship?.isOwner) || relationship?.role === "owner" || relationship?.role === "admin";
+  const [filter, setFilter] = useState<HubMemberFilter | undefined>();
+  const [search, setSearch] = useState("");
+  const term = useDebouncedValue(search.trim(), 350);
+  const dashboard = useHubDashboard(hub.id, true);
+  const members = useHubMembers(hub.id, term, true, filter);
   const change = useChangeHubMember(hub.id, slug);
+  const designate = useChangeHubDesignation(hub.id, slug);
   const remove = useRemoveHubMember(hub.id, slug);
   const [removing, setRemoving] = useState<CommunityMember | null>(null);
   const rows = members.data?.pages.flatMap((page) => page.items) ?? [];
+  const summary = dashboard.data?.roles;
+  const groups = [
+    { filter: undefined, label: "Everyone", description: "Every member of the hub", count: summary?.total ?? members.data?.pages[0]?.total },
+    ...HUB_ROLE_GROUPS.map((group) => ({ ...group, count: summary ? group.count(summary) : undefined })),
+  ];
 
   return (
-    <Section title="Members and roles" description="Admins can manage people, teams and settings. Managers handle requests." meta={members.data?.pages[0]?.total}>
-      {members.isLoading ? (
-        <Skeleton className="h-64 rounded-2xl" />
-      ) : (
-        <>
-          <ul className="grid gap-2">
-            {rows.map((member) => {
-              const id = memberUserId(member);
-              const owner = id === hub.ownerId;
-              return (
-                <li key={member.id || id} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
-                  <Avatar src={member.user?.profileImage} name={memberName(member)} className="rounded-full" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">{memberName(member)}</span>
-                    <span className="block text-xs text-mist-500">{owner ? "Owner" : formatMemberRole(member.role, member.title)}</span>
-                  </span>
-                  {!owner && (
-                    <span className="flex items-center gap-1">
-                      <Menu
-                        label={`Role for ${memberName(member)}`}
-                        triggerClassName="flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-mist-300 ring-1 ring-inset ring-white/10 hover:text-mist-50"
-                        trigger={
-                          <>
-                            {formatMemberRole(member.role)}
-                            <Icon name="chevronDown" className="size-3.5 text-mist-500" />
-                          </>
-                        }
-                        items={ROLES.map((role) => ({
-                          label: formatMemberRole(role),
-                          checked: (member.role || "member") === role,
-                          onSelect: () => change.mutate({ userId: id, role, title: member.title || "player" }, { onSuccess: () => toast.success("Role updated"), onError: fail("Couldn't change the role") }),
-                        }))}
-                      />
-                      <Button tone="ghost" size="sm" onClick={() => setRemoving(member)}>
-                        Remove
-                      </Button>
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-          {members.hasNextPage && (
-            <Button tone="outline" size="sm" className="mx-auto mt-4 flex" disabled={members.isFetchingNextPage} onClick={() => void members.fetchNextPage()}>
-              Show more
-            </Button>
-          )}
-        </>
+    <Section
+      title="Members and roles"
+      description="Give people a role that says how they belong. Team roles follow each player's team automatically, and leaving the team removes it."
+      meta={members.data?.pages[0]?.total}
+    >
+      <div role="group" aria-label="Filter members by role" className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {groups.map((group) => {
+          const attention = group.filter === "unassigned" && Boolean(group.count);
+          return (
+            <button
+              key={group.label}
+              type="button"
+              title={group.description}
+              aria-pressed={filter === group.filter}
+              onClick={() => setFilter(group.filter)}
+              className={cn(
+                "grid gap-1 rounded-2xl px-3.5 py-3 text-left ring-1 ring-inset transition-colors",
+                filter === group.filter ? "bg-lavender-400/12 ring-lavender-400/40" : "bg-white/3 ring-white/6 hover:bg-white/5",
+              )}
+            >
+              <span className={cn("type-display text-xl tabular-nums", attention && "text-signal")}>{group.count?.toLocaleString() ?? "–"}</span>
+              <span className="text-xs text-mist-400">{group.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      {filter === "unassigned" && (
+        <p className="mt-4 flex items-start gap-2 rounded-2xl bg-signal/8 px-4 py-3 text-sm text-mist-200 ring-1 ring-inset ring-signal/20">
+          <Icon name="info" className="mt-0.5 size-4 text-signal" />
+          These members have no role. Keep them as hub members, give them a role, or remove them from the hub.
+        </p>
       )}
+      <label className="relative mt-4 block">
+        <span className="sr-only">Search members</span>
+        <Icon name="search" className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-mist-500" />
+        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search members by username" className={cn(inputClasses, "h-11 rounded-full pl-11")} />
+      </label>
+
+      <div className="mt-4">
+        {members.isLoading ? (
+          <Skeleton className="h-64 rounded-2xl" />
+        ) : members.isError ? (
+          <p className="text-sm text-danger">{getApiErrorMessage(members.error, "Members didn't load.")}</p>
+        ) : rows.length ? (
+          <>
+            <ul className="grid gap-2">
+              {rows.map((member) => {
+                const id = memberUserId(member);
+                const owner = member.role === "owner" || id === hub.ownerId;
+                const protectedAdmin = !relationship?.isOwner && relationship?.role === "admin" && member.role === "admin";
+                return (
+                  <li key={member.id || id} className="flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
+                    <Avatar src={member.user?.profileImage} name={memberName(member)} className="rounded-full" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold">{memberName(member)}</span>
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        {hubMemberRoles(member, hub.ownerId).map((label) => (
+                          <span key={label} className={cn(chip, "max-w-full truncate", label === "Hub member" && "bg-white/4 text-mist-500")}>
+                            {label}
+                          </span>
+                        ))}
+                      </span>
+                    </span>
+                    <span className="flex w-full flex-wrap items-center gap-1 sm:w-auto">
+                      {canAssign && id && (
+                        <Menu
+                          label={`Hub role for ${memberName(member)}`}
+                          triggerClassName={pill}
+                          trigger={
+                            <>
+                              {member.designation ? DESIGNATION_LABELS[member.designation] : "Assign role"}
+                              <Icon name="chevronDown" className="size-3.5 text-mist-500" />
+                            </>
+                          }
+                          items={[null, ...(Object.keys(DESIGNATION_LABELS) as HubDesignation[])].map((designation) => ({
+                            label: designation ? DESIGNATION_LABELS[designation] : "No hub role",
+                            checked: (member.designation ?? null) === designation,
+                            onSelect: () =>
+                              designate.mutate({ userId: id, designation }, { onSuccess: () => toast.success("Hub role updated"), onError: fail("Couldn't change the hub role") }),
+                          }))}
+                        />
+                      )}
+                      {owner ? (
+                        <span className="flex h-9 items-center gap-1.5 px-2 text-sm text-lavender-300">
+                          <Icon name="crown" className="size-4" />
+                          Owner
+                        </span>
+                      ) : protectedAdmin ? (
+                        <span className="px-2 text-xs text-mist-500">Managed by the owner</span>
+                      ) : (
+                        <>
+                          <Menu
+                            label={`Access for ${memberName(member)}`}
+                            triggerClassName={pill}
+                            trigger={
+                              <>
+                                Access
+                                <Icon name="chevronDown" className="size-3.5 text-mist-500" />
+                              </>
+                            }
+                            items={ACCESS_ROLES.map((role) => ({
+                              label: role.label,
+                              checked: (member.role || "member") === role.value,
+                              onSelect: () =>
+                                change.mutate({ userId: id, role: role.value, title: member.title || "player" }, { onSuccess: () => toast.success("Access updated"), onError: fail("Couldn't change access") }),
+                            }))}
+                          />
+                          <Button tone="ghost" size="sm" onClick={() => setRemoving(member)}>
+                            Remove
+                          </Button>
+                        </>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            {members.hasNextPage && (
+              <Button tone="outline" size="sm" className="mx-auto mt-4 flex" disabled={members.isFetchingNextPage} onClick={() => void members.fetchNextPage()}>
+                {members.isFetchingNextPage ? "Loading…" : "Show more"}
+              </Button>
+            )}
+          </>
+        ) : (
+          <Empty>
+            {term
+              ? `No one in this hub has a username containing “${term}”.`
+              : filter === "unassigned"
+                ? "Every member of this hub has a role."
+                : filter
+                  ? "No members hold a role in this group yet."
+                  : "Members appear here after joining or accepting an invitation."}
+          </Empty>
+        )}
+      </div>
       <ConfirmDialog
         open={Boolean(removing)}
         title={`Remove ${removing ? memberName(removing) : ""}?`}
-        description="They leave the hub and its members-only posts."
+        description="They leave the hub and its members-only posts. If they're on one of the hub's teams, they stay on that team."
         confirmLabel="Remove"
         pending={remove.isPending}
         onConfirm={() => removing && remove.mutate(memberUserId(removing), { onSuccess: () => (toast.info(`${memberName(removing)} was removed`), setRemoving(null)), onError: fail("Couldn't remove the member") })}

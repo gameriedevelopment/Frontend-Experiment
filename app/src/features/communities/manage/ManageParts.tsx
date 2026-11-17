@@ -6,6 +6,7 @@ import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { Dialog } from "@/components/ui/Dialog";
 import { TextField } from "@/components/ui/Field";
 import { useSearchResults } from "@/features/discovery/hooks";
+import { copyText } from "@/lib/clipboard";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { timeAgo } from "@/lib/time";
@@ -50,6 +51,28 @@ export function RequestRow({ name, image, detail, at, children, square }: { name
       </span>
       {children && <span className="flex gap-1.5">{children}</span>}
     </li>
+  );
+}
+
+/** A sign-up link with the referral code, and a button that copies it. */
+export function ReferralLink({ code }: { code: string }) {
+  const link = `${window.location.origin}/register?ref=${encodeURIComponent(code)}`;
+  return (
+    <div className="flex items-center gap-2 rounded-2xl bg-white/3 p-1.5 pl-4 ring-1 ring-inset ring-white/8">
+      <span className="min-w-0 flex-1 truncate font-mono text-sm text-mist-200">{link}</span>
+      <Button
+        tone="outline"
+        size="sm"
+        icon="copy"
+        onClick={() =>
+          copyText(link)
+            .then(() => toast.success("Referral link copied"))
+            .catch(() => toast.error("Couldn't copy the link", "Select the link and copy it instead."))
+        }
+      >
+        Copy
+      </Button>
+    </div>
   );
 }
 

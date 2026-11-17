@@ -35,6 +35,8 @@ export function Segmented<T extends string>({
             {active && (
               <m.span
                 layoutId={`${name}-thumb`}
+                // Slide only when the choice changes, not when content above pushes the switch down.
+                layoutDependency={value}
                 className="absolute inset-0 rounded-full bg-white/10 ring-1 ring-inset ring-white/10"
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
               />

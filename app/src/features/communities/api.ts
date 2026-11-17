@@ -6,6 +6,8 @@ import type {
   CommunityMediaFiles,
   DirectoryPage,
   HubDashboard,
+  HubDesignation,
+  HubMemberFilter,
   HubMemberPage,
   HubPendingInvites,
   HubRequestSummary,
@@ -197,7 +199,12 @@ export async function getTeamFollowers(teamId: string, page = 1): Promise<TeamFo
     totalPages: Number(data.data.totalPages || 1),
   };
 }
-export async function getHubMembers(hubId: string, page = 1, search = ""): Promise<HubMemberPage> {
+export async function getHubMembers(
+  hubId: string,
+  page = 1,
+  search = "",
+  filter?: HubMemberFilter,
+): Promise<HubMemberPage> {
   const { data } = await api.get<
     Envelope<{
       data: HubMemberPage["items"];
@@ -205,7 +212,9 @@ export async function getHubMembers(hubId: string, page = 1, search = ""): Promi
       page: number;
       totalPages: number;
     }>
-  >(`/hubs/${hubId}/members`, { params: { page, limit: 20, search: search || undefined } });
+  >(`/hubs/${hubId}/members`, {
+    params: { page, limit: 20, search: search || undefined, filter: filter || undefined },
+  });
   return {
     items: data.data.data || [],
     total: Number(data.data.total || 0),
@@ -269,6 +278,9 @@ export async function cancelHubTeamInvite(hubId: string, teamId: string) {
 }
 export async function changeHubMember(hubId: string, userId: string, role: string, title: string) {
   await api.patch(`/hubs/${hubId}/members/${userId}/role`, { role, title });
+}
+export async function changeHubDesignation(hubId: string, userId: string, designation: HubDesignation | null) {
+  await api.patch(`/hubs/${hubId}/members/${userId}/designation`, { designation });
 }
 export async function removeHubMember(hubId: string, userId: string) {
   await api.delete(`/hubs/${hubId}/members/${userId}`);

@@ -16,6 +16,7 @@ import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { CommunityCard } from "../components/CommunityCard";
 import { countOf, hrefOf, hubTypeLabel, memberName, memberUserId, type Community } from "../format";
 import { useCommunityPosts, useHubMembers, useTeamFollowers, useTeamGameRanks } from "../hooks";
+import { hubMemberRoles } from "../hubRoles";
 import { formatMemberRole } from "../options";
 import type { CommunityKind, CommunityMember, CompetitionItem, HubSummary, TeamSummary } from "../types";
 
@@ -39,11 +40,15 @@ function rankWeight(member: CommunityMember, ownerId?: string) {
   return role === "admin" || role === "co-owner" ? 1 : role === "captain" || role === "manager" ? 2 : 3;
 }
 
-export function MemberRow({ member, ownerId, actions }: { member: CommunityMember; ownerId?: string; actions?: ReactNode }) {
+/** `roles` replaces the team role with a hub member's roles: the first is the badge, the rest the detail line. */
+export function MemberRow({ member, ownerId, roles, actions }: { member: CommunityMember; ownerId?: string; roles?: string[]; actions?: ReactNode }) {
   const owner = memberUserId(member) === ownerId;
-  const role = owner ? "Owner" : formatMemberRole(member.role, member.title);
+  const role = roles?.[0] ?? (owner ? "Owner" : formatMemberRole(member.role, member.title));
   const joined = joinedOn(member.joinedAt);
   const username = member.user?.username;
+  const detail = roles
+    ? [...roles.slice(1), member.user?.gamerTitle, joined ? `since ${joined}` : null]
+    : [member.title && member.title.toLowerCase() !== role.toLowerCase() ? member.title : null, member.user?.gamerTitle, joined ? `since ${joined}` : null];
   return (
     <li className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/3">
       <Link to={username ? `/profile/${encodeURIComponent(username)}` : "#"} className="flex min-w-0 flex-1 items-center gap-3">
@@ -51,13 +56,11 @@ export function MemberRow({ member, ownerId, actions }: { member: CommunityMembe
         <span className="min-w-0">
           <span className="block truncate text-sm font-semibold">{memberName(member)}</span>
           <span className="block truncate text-xs text-mist-500">
-            {[member.title && member.title.toLowerCase() !== role.toLowerCase() ? member.title : null, member.user?.gamerTitle, joined ? `since ${joined}` : null]
-              .filter(Boolean)
-              .join(" · ") || "Member"}
+            {detail.filter(Boolean).join(" · ") || "Member"}
           </span>
         </span>
       </Link>
-      <span className={cn("type-label shrink-0 rounded-full px-2.5 py-1", owner ? "bg-lavender-400/14 text-lavender-300" : role === "Member" ? "bg-white/5 text-mist-400" : "bg-white/8 text-mist-200")}>
+      <span className={cn("type-label shrink-0 rounded-full px-2.5 py-1", owner ? "bg-lavender-400/14 text-lavender-300" : role === "Member" || role === "Hub member" ? "bg-white/5 text-mist-400" : "bg-white/8 text-mist-200")}>
         {role}
       </span>
       {actions}
@@ -310,7 +313,7 @@ export function CommunityOverview({ kind, item, onTab }: { kind: CommunityKind; 
             {members.length ? (
               <ul className="-mx-2 grid">
                 {members.slice(0, 5).map((member) => (
-                  <MemberRow key={member.id || memberUserId(member)} member={member} ownerId={item.ownerId} />
+                  <MemberRow key={member.id || memberUserId(member)} member={member} ownerId={item.ownerId} roles={hubMemberRoles(member, item.ownerId)} />
                 ))}
               </ul>
             ) : (
@@ -373,7 +376,7 @@ export function HubMembers({ hub }: { hub: HubSummary }) {
         <>
           <ul className="-mx-2 grid sm:grid-cols-2 sm:gap-x-4">
             {members.map((member) => (
-              <MemberRow key={member.id || memberUserId(member)} member={member} ownerId={hub.ownerId} />
+              <MemberRow key={member.id || memberUserId(member)} member={member} ownerId={hub.ownerId} roles={hubMemberRoles(member, hub.ownerId)} />
             ))}
           </ul>
           {query.hasNextPage && (

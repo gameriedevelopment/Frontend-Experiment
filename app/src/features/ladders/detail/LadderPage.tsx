@@ -15,7 +15,7 @@ import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { LadderStatusBadge } from "../components/LadderBits";
-import { useLadder, useLadderAction, useLadderAnnouncements, useLadderParticipants, useLadderStandings } from "../hooks";
+import { useLadder, useLadderAction, useLadderAnnouncements, useLadderParticipants, useLadderRealtime, useLadderStandings } from "../hooks";
 import type { LadderChallenge, LadderDetail, LadderParticipant } from "../types";
 import { LADDER_JOIN_LABELS, formatLadderDateRange, formatLadderMoney, ladderPlayScopeLabel } from "../utils";
 import { LadderChallengeDialog, LadderEntryDialog, LadderResultDialog, ladderError } from "./LadderDialogs";
@@ -260,6 +260,7 @@ export function LadderPage() {
   const { ladderId = "" } = useParams();
   const [params, setParams] = useSearchParams();
   const query = useLadder(ladderId);
+  useLadderRealtime(ladderId);
   const actions = useLadderAction(ladderId);
   const [entry, setEntry] = useState<"join" | "accept" | null>(null);
   const [opponent, setOpponent] = useState<LadderParticipant | null>(null);
@@ -337,6 +338,18 @@ export function LadderPage() {
         <Icon name="arrowLeft" className="size-4 transition-transform group-hover:-translate-x-0.5" />
         Ladders
       </Link>
+
+      {ladder.removed && (
+        <div role="status" className="flex items-start gap-3 rounded-card bg-danger/8 p-4 ring-1 ring-inset ring-danger/30">
+          <Icon name="prohibit" className="mt-0.5 size-5 shrink-0 text-danger" />
+          <div className="min-w-0 text-sm">
+            <p className="font-semibold">Gamerie has removed this ladder</p>
+            <p className="mt-1 text-mist-300">
+              Players can no longer see or join it.{ladder.removed.reason ? ` Reason: ${ladder.removed.reason}` : ""} Contact support if you think this is a mistake.
+            </p>
+          </div>
+        </div>
+      )}
 
       <section className="overflow-hidden rounded-panel bg-ink-900 ring-1 ring-inset ring-white/8">
         <HeroBanner src={ladder.banner} game={ladder.game.name} className="min-h-56 sm:min-h-72">

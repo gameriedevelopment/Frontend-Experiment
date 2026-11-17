@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
 import type { PlayerProfile } from "@/features/profile/types";
 import type { ProgressionGuide } from "@/features/progression/types";
-import { GpGuideDialog } from "./GpGuideDialog";
+import { useGpGuide } from "@/features/progression/guideStore";
 import { PanelError } from "./HomePanel";
 
 export function LevelCard({
@@ -26,7 +25,7 @@ export function LevelCard({
   setup?: { done: number; total: number; onResume: () => void };
   className?: string;
 }) {
-  const [guideOpen, setGuideOpen] = useState(false);
+  const openGuide = useGpGuide((state) => state.openGuide);
   const progression = guide?.progression;
   const percent = Math.min(100, Math.max(0, Math.round(progression?.progressPercent ?? 0)));
   const remaining = progression?.nextLevelGp != null ? Math.max(0, progression.nextLevelGp - progression.totalGp) : null;
@@ -123,7 +122,7 @@ export function LevelCard({
         <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 border-t border-white/6 pt-4 text-sm font-medium">
           <button
             type="button"
-            onClick={() => setGuideOpen(true)}
+            onClick={openGuide}
             disabled={!guide}
             aria-haspopup="dialog"
             className="text-lavender-300 transition-colors hover:text-lavender-200 disabled:text-mist-500"
@@ -138,7 +137,6 @@ export function LevelCard({
           </Link>
         </div>
       </div>
-      {guide && <GpGuideDialog guide={guide} open={guideOpen} onClose={() => setGuideOpen(false)} />}
     </section>
   );
 }

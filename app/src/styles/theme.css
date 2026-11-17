@@ -134,7 +134,7 @@
   }
 
   body {
-    @apply bg-ink-950 font-sans text-mist-50 antialiased;
+    @apply bg-ink-950 font-sans text-mist-50 antialiased print:bg-white print:text-ink-950;
   }
 
 :focus-visible {

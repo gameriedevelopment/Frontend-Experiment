@@ -135,7 +135,7 @@ export function HomePage() {
       <QuickStart />
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_23rem]">
-        <div className="contents lg:grid lg:gap-6">
+        <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)] lg:gap-6">
           <NeedsYou className="order-2 lg:order-none" challenges={challenges} invites={invites} />
           {setupHidden ? null : profile.isError ? (
             <HomePanel className="order-3 lg:order-none" title="Set up your player ID">
@@ -168,7 +168,7 @@ export function HomePage() {
           )}
         </div>
 
-        <div className="contents lg:grid lg:gap-6">
+        <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)] lg:gap-6">
           <LevelCard
             className="order-1 lg:order-none"
             profile={{

@@ -13,7 +13,7 @@ import { checkInEntrant } from "../api";
 import { EntrantMark } from "../components/EntrantMark";
 import { PhaseBadge, phaseOf } from "../components/PhaseBadge";
 import { HeroBanner } from "../components/HeroBanner";
-import { useHostedTournament, useNow, useTournamentAction, useTournamentBracket } from "../hooks";
+import { useHostedTournament, useNow, useTournamentAction, useTournamentBracket, useTournamentRealtime } from "../hooks";
 import type { HostedTournamentDetail } from "../types";
 import { FORMAT_LABELS, HOST_TYPE_LABELS, bestOfLabel, durationLabel, formatMoney } from "../utils";
 import { BracketTab } from "./BracketTab";
@@ -162,6 +162,7 @@ export function TournamentPage() {
   const { tournamentId = "" } = useParams();
   const [params, setParams] = useSearchParams();
   const query = useHostedTournament(tournamentId);
+  useTournamentRealtime(tournamentId);
   useDocumentTitle(query.data?.name);
   const now = useNow();
   const [register, setRegister] = useState<RegisterMode | null>(null);

@@ -12,6 +12,8 @@ export interface CommunityUser {
   gamerTitle?: string;
   isOnline?: boolean;
 }
+export type HubDesignation = "partner" | "official_member" | "honorary_member";
+export type HubMemberFilter = "leadership" | "team" | "community" | "unassigned";
 export interface CommunityMember {
   id?: string;
   userId?: string;
@@ -20,6 +22,11 @@ export interface CommunityMember {
   joinedAt?: string;
   isActive?: boolean;
   user?: CommunityUser;
+  /** Hubs only: a recognition the owner gives, on top of the access role. */
+  designation?: HubDesignation | null;
+  /** Hubs only: from the rosters of the hub's teams, so it follows the team automatically. */
+  teamRole?: "leader" | "member" | null;
+  teams?: Array<{ id: string; name: string; slug: string | null }>;
 }
 export interface ViewerRelationship {
   isOwner: boolean;
@@ -162,12 +169,42 @@ export interface HubPendingInvites {
   users: HubRequestSummary[];
   teams: HubTeamRequestSummary[];
 }
+export type HubBreakdown = Array<{ label: string; count: number }>;
+export interface HubRoleSummary {
+  total: number;
+  owner: number;
+  coOwners: number;
+  managers: number;
+  teamLeaders: number;
+  teamMembers: number;
+  partners: number;
+  officialMembers: number;
+  honoraryMembers: number;
+  unassigned: number;
+}
 export interface HubDashboard {
   community: {
     members: number;
     followers: number;
     teams: number;
     posts: number;
+    newMembers: number;
+    activeMembers: number;
+  };
+  roles: HubRoleSummary;
+  engagement: { days: number; posts: number; comments: number; reactions: number; views: number; reach: number };
+  audience: {
+    regions: HubBreakdown;
+    games: HubBreakdown;
+    platforms: HubBreakdown;
+    verifiedEmail: number;
+    verifiedPhone: number;
+  };
+  competition: {
+    teamRecord: { played: number; wins: number; draws: number; losses: number };
+    tournaments: { entries: number; wins: number; podiums: number };
+    ladders: { entries: number; titles: number; podiums: number };
+    hosted: { tournaments: number; ladders: number; entrants: number };
   };
   referral: {
     code: string | null;

@@ -46,6 +46,9 @@ const CommunityDirectoryPage = lazy(() =>
 const CommunityDetailPage = lazy(() =>
   import("@/features/communities/CommunityDetailPage").then((module) => ({ default: module.CommunityDetailPage })),
 );
+const HubReportPage = lazy(() =>
+  import("@/features/communities/HubReportPage").then((module) => ({ default: module.HubReportPage })),
+);
 const CommunityFormPage = lazy(() =>
   import("@/features/communities/CommunityFormPage").then((module) => ({ default: module.CommunityFormPage })),
 );
@@ -143,6 +146,16 @@ export function App() {
             }
           />
         ))}
+        <Route
+          path="/hubs/:communitySlug/report"
+          element={
+            <ProtectedRoute>
+              <Deferred>
+                <HubReportPage />
+              </Deferred>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/forgot-password"
           element={

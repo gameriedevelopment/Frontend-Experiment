@@ -99,7 +99,7 @@ export function AppSidebar({ collapsed, onToggle }: { collapsed: boolean; onTogg
           {!collapsed && (
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold">{user?.username ?? "Player"}</span>
-              <span className="type-label mt-1 block text-[0.6rem] text-mist-500">View player ID</span>
+              <span className="type-label mt-1 block truncate text-[0.6rem] text-mist-500">{user?.gamerieId || "Your profile"}</span>
             </span>
           )}
         </AppNavLink>

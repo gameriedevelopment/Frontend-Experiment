@@ -8,7 +8,7 @@ export const leaderboardMetrics: Array<{
   { value: "ranking", label: "Overall score", shortLabel: "Overall" },
   { value: "wins", label: "Match wins", shortLabel: "Wins" },
   { value: "winRate", label: "Win rate", shortLabel: "Win rate" },
-  { value: "tournamentWins", label: "Tournament wins", shortLabel: "Tournaments" },
+  { value: "tournamentWins", label: "Tournament wins", shortLabel: "Tournament wins" },
   { value: "matches", label: "Matches played", shortLabel: "Matches" },
   { value: "challenges", label: "Challenges played", shortLabel: "Challenges" },
 ];

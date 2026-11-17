@@ -90,6 +90,9 @@ import {
   RepeatIcon,
   PaperPlaneRightIcon,
   ArrowBendUpLeftIcon,
+  PrinterIcon,
+  SlidersHorizontalIcon,
+  ChartBarIcon,
   type Icon as PhosphorIcon,
   type IconWeight,
 } from "@phosphor-icons/react";
@@ -188,6 +191,9 @@ const icons = {
   transfer: UserSwitchIcon,
   arrowUp: ArrowUpIcon,
   arrowDown: ArrowDownIcon,
+  printer: PrinterIcon,
+  filters: SlidersHorizontalIcon,
+  report: ChartBarIcon,
 } satisfies Record<string, PhosphorIcon>;
 
 export type IconName = keyof typeof icons;

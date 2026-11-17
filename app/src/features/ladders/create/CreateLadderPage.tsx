@@ -8,6 +8,7 @@ import { useGame } from "@/features/games/hooks";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
+import { uploadLadderBanner } from "../api";
 import { useCreateLadderDraft, useLadder, useLadderHostingOptions, usePublishLadder, useSaveLadderDraft } from "../hooks";
 import {
   LADDER_STEPS,
@@ -40,6 +41,8 @@ export function CreateLadderPage() {
   const [form, setForm] = useState<LadderDraftForm | null>(null);
   const [errors, setErrors] = useState<LadderFormErrors>({});
   const [serverError, setServerError] = useState("");
+  const [cover, setCover] = useState<File | null>(null);
+  const [coverPending, setCoverPending] = useState(false);
   const initialised = useRef(false);
   const game = useGame(form?.basics.gameId || undefined);
 
@@ -71,7 +74,7 @@ export function CreateLadderPage() {
     requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   };
 
-  const pending = createDraft.isPending || saveDraft.isPending || publishDraft.isPending;
+  const pending = createDraft.isPending || saveDraft.isPending || publishDraft.isPending || coverPending;
 
   const saveStep = async () => {
     if (!form || step === "review") return;
@@ -85,6 +88,15 @@ export function CreateLadderPage() {
       else if (step === "basics") await saveDraft.mutateAsync({ basics });
       else if (step === "competition") await saveDraft.mutateAsync({ format: form.format, rules: form.rules });
       else if (step === "access") await saveDraft.mutateAsync({ joining: form.joining, datesAndPrize: datesAndPrizePayload(form) });
+      if (step === "basics" && cover && id) {
+        setCoverPending(true);
+        try {
+          await uploadLadderBanner(id, cover);
+          setCover(null);
+        } finally {
+          setCoverPending(false);
+        }
+      }
       const next = LADDER_STEPS[stepIndex + 1].key;
       if (!ladderId) navigate(`/ladders/${id}/edit?step=${next}`, { replace: true });
       else goTo(next);
@@ -211,7 +223,14 @@ export function CreateLadderPage() {
           <div className="px-5 py-6 sm:px-7 sm:py-7">
             <fieldset disabled={pending} className="min-w-0">
               {step === "basics" ? (
-                <IdentityStep form={form} errors={errors} update={update} hosting={hosting.data} />
+                <IdentityStep
+                  form={form}
+                  errors={errors}
+                  update={update}
+                  hosting={hosting.data}
+                  cover={{ file: cover, url: existing.data?.banner ?? null }}
+                  onCover={setCover}
+                />
               ) : step === "competition" ? (
                 <CompetitionStep form={form} errors={errors} update={update} />
               ) : step === "access" ? (

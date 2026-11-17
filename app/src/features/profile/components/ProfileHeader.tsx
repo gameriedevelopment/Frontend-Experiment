@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Tag } from "@/components/ui/Tag";
 import { useAuthStore } from "@/features/auth/authStore";
 import { useCreateConversation } from "@/features/messages/hooks";
+import { useGpGuide } from "@/features/progression/guideStore";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
@@ -13,6 +14,7 @@ import { usePlayerConnections, useTogglePlayerFollow } from "../hooks";
 import { getProfileCompletion } from "../profileCompletion";
 import type { PlayerProfile } from "../types";
 import { NetworkDialog } from "./NetworkDialog";
+import { PlayerIdBadge } from "./PlayerIdBadge";
 
 function Cover({ src, editable }: { src?: string; editable: boolean }) {
   const [failed, setFailed] = useState(false);
@@ -97,6 +99,7 @@ function CompletionMeter({ profile }: { profile: PlayerProfile }) {
 }
 
 export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerProfile }) {
+  const openGuide = useGpGuide((state) => state.openGuide);
   const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.user);
   const createConversation = useCreateConversation();
@@ -156,6 +159,7 @@ export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerP
                     Level {Math.max(0, Number(profile.progression.level) || 0)}
                   </Tag>
                 )}
+                {profile.gamerieId && <PlayerIdBadge id={profile.gamerieId} />}
               </div>
               <p className="mt-2 text-[0.95rem] text-mist-300">
                 {profile.gamerTitle || profile.bio || "Building a place in the Gamerie community."}
@@ -167,7 +171,6 @@ export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerP
                     {location}
                   </span>
                 )}
-                {profile.gamerieId && <span className="type-label text-mist-500">{profile.gamerieId}</span>}
                 {profile.isOnline && (
                   <span className="flex items-center gap-1.5 text-signal">
                     <span className="size-1.5 rounded-full bg-signal" />
@@ -187,6 +190,9 @@ export function ProfileHeader({ own, profile }: { own: boolean; profile: PlayerP
                 <LinkButton to="?edit=identity" tone="outline" size="sm" icon="edit">
                   Edit profile
                 </LinkButton>
+                <Button tone="outline" size="sm" icon="trophy" aria-haspopup="dialog" onClick={openGuide}>
+                  Earn GP
+                </Button>
               </>
             ) : (
               <>

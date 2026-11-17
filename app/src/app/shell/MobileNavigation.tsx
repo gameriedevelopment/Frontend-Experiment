@@ -6,6 +6,7 @@ import { easeOutExpo } from "@/components/ui/motion";
 import { signOut } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/authStore";
 import { useTotalUnread } from "@/features/messages/hooks";
+import { useGpGuide } from "@/features/progression/guideStore";
 import { cn } from "@/lib/cn";
 import { AppNavLink } from "./AppNavLink";
 import { mobileMoreNavigation, mobileNavigation, type NavigationItem } from "./navigation";
@@ -49,6 +50,7 @@ export function MobileNavigation() {
   const user = useAuthStore((state) => state.user);
   const unread = Number(useTotalUnread().data ?? 0);
   const [open, setOpen] = useState(false);
+  const openGuide = useGpGuide((state) => state.openGuide);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
 
@@ -161,7 +163,7 @@ export function MobileNavigation() {
               </nav>
 
               <p className="type-label mb-3 mt-7 text-mist-500">Account</p>
-              <nav aria-label="Account" className="grid grid-cols-3 gap-2">
+              <nav aria-label="Account" className="grid grid-cols-4 gap-2">
                 <AppNavLink
                   to={`/profile/${user?.username ?? user?.id ?? ""}`}
                   onClick={() => setOpen(false)}
@@ -170,6 +172,17 @@ export function MobileNavigation() {
                   <Icon name="identity" className="size-[1.35rem] text-lavender-300" weight="duotone" />
                   Profile
                 </AppNavLink>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    openGuide();
+                  }}
+                  className={sheetLink}
+                >
+                  <Icon name="trophy" className="size-[1.35rem] text-lavender-300" weight="duotone" />
+                  Earn GP
+                </button>
                 <AppNavLink to="/settings" onClick={() => setOpen(false)} className={sheetLink}>
                   <Icon name="settings" className="size-[1.35rem] text-lavender-300" weight="duotone" />
                   Settings

@@ -66,7 +66,7 @@ export function MonthGrid({
                       <span key={event.id} className={cn("size-1.5 rounded-full", event.status === "cancelled" ? "bg-white/20" : "bg-lavender-300")} />
                     ))}
                   </span>
-                  <span className="hidden min-w-0 gap-0.5 sm:grid">
+                  <span className="hidden min-w-0 gap-0.5 sm:grid sm:grid-cols-[minmax(0,1fr)]">
                     {events.slice(0, 2).map((event) => (
                       <span
                         key={event.id}

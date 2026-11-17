@@ -8,7 +8,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
-import { Tabs } from "@/components/ui/Tabs";
+import { Tabs, type TabItem } from "@/components/ui/Tabs";
+import { useLadderLeaderboard } from "@/features/ladders/hooks";
 import { Pagination } from "@/components/ui/Pagination";
 import { useAuthStore } from "@/features/auth/authStore";
 import { useGameOptions } from "@/features/games/hooks";
@@ -29,11 +30,16 @@ import {
   leaderboardSubtitle,
 } from "./utils";
 
-type View = LeaderboardMetric | "tournaments";
-const views: Array<{ id: View; label: string }> = [
+// Record metrics rank overall results; competition boards rank placings in Gamerie events.
+type Competition = "tournaments" | "ladders";
+type View = LeaderboardMetric | Competition | "leagues";
+const views: Array<TabItem<View>> = [
   ...leaderboardMetrics.map((metric) => ({ id: metric.value as View, label: metric.shortLabel })),
-  { id: "tournaments", label: "Tournament points" },
+  { id: "tournaments", label: "Tournaments", dividerBefore: true },
+  { id: "ladders", label: "Ladders" },
+  { id: "leagues", label: "Leagues", disabled: true, note: "Soon" },
 ];
+const isCompetition = (view: View): view is Competition => view === "tournaments" || view === "ladders";
 const limit = 20;
 
 function Podium({ entities, metric, me }: { entities: LeaderboardEntity[]; metric: LeaderboardMetric; me?: string }) {
@@ -167,13 +173,76 @@ function TournamentPoints({ kind, game }: { kind: "player" | "team"; game?: stri
   );
 }
 
+function LadderPoints({ kind, game }: { kind: "player" | "team"; game?: string }) {
+  const query = useLadderLeaderboard(kind, game);
+  const rows = query.data?.pages.flatMap((page) => page.data) ?? [];
+  if (query.isLoading) return <Skeleton className="h-96 rounded-card" />;
+  if (query.isError)
+    return <StatePanel icon="warning" tone="danger" title="Ladder standings didn't load" description={getApiErrorMessage(query.error, "Try again in a moment.")} />;
+  if (!rows.length)
+    return <StatePanel icon="ladders" title="No ladder results yet" description={game ? `Play a ${game} ladder match on Gamerie to appear here.` : "Results from ladders run on Gamerie fill this table."} />;
+  return (
+    <div className="grid gap-3">
+      <p className="text-sm text-mist-400">
+        Points per finished ladder: 100 for 1st, 70 for 2nd, 50 for 3rd, 40 for 4th, 25 for the top 8, 10 for finishing. Ladders still running count
+        through their match record.
+      </p>
+      <div className="relative overflow-x-auto rounded-card bg-ink-900/60 ring-1 ring-inset ring-white/6">
+        <table className="w-full min-w-136 text-sm">
+          <thead>
+            <tr className="type-label text-left text-mist-500">
+              <th scope="col" className="px-5 py-4 font-medium">#</th>
+              <th scope="col" className="w-full px-2 py-4 font-medium">{kind === "team" ? "Team" : "Player"}</th>
+              {["Points", "Titles", "Podiums", "Best", "Record", "Ladders"].map((label) => (
+                <th key={label} scope="col" className="px-3 py-4 text-right font-medium last:pr-5">
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} className="border-t border-white/6">
+                <td className={cn("px-5 py-3 font-semibold tabular-nums", row.rank === 1 ? "text-signal" : row.rank <= 3 ? "text-lavender-300" : "text-mist-400")}>{row.rank}</td>
+                <th scope="row" className="px-2 py-3 text-left font-normal">
+                  <span className="flex items-center gap-2.5">
+                    <EntrantMark name={row.name} src={row.avatar} size="sm" className={kind === "player" ? "rounded-full" : undefined} />
+                    <span className="truncate font-semibold">{row.name ?? "Unknown"}</span>
+                  </span>
+                </th>
+                <td className="px-3 py-3 text-right font-semibold tabular-nums">{row.points}</td>
+                <td className="px-3 py-3 text-right tabular-nums text-mist-300">{row.titles}</td>
+                <td className="px-3 py-3 text-right tabular-nums text-mist-300">{row.podiums}</td>
+                <td className="px-3 py-3 text-right tabular-nums text-mist-300">{row.bestPlacement ? ordinal(row.bestPlacement) : "—"}</td>
+                <td className="whitespace-nowrap px-3 py-3 text-right tabular-nums text-mist-300" title="Wins, draws and losses">
+                  {row.matchWins}–{row.matchDraws}–{row.matchLosses}
+                </td>
+                <td className="px-3 py-3 pr-5 text-right tabular-nums text-mist-300">{row.ladders}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {query.hasNextPage && (
+          <div className="flex justify-center border-t border-white/6 p-4">
+            <Button tone="outline" size="sm" disabled={query.isFetchingNextPage} onClick={() => void query.fetchNextPage()}>
+              {query.isFetchingNextPage ? "Loading…" : "Show more"}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function LeaderboardPage() {
   const user = useAuthStore((state) => state.user);
   const [params, setParams] = useSearchParams();
   const type: LeaderboardEntityType = params.get("type") === "teams" ? "teams" : "users";
-  const requestedView = (params.get("view") === "tournaments" ? "tournaments" : params.get("metric")) as View | null;
+  const requestedView = (
+    params.get("view") === "tournaments" || params.get("view") === "ladders" ? params.get("view") : params.get("metric")
+  ) as View | null;
   const view: View = views.some((item) => item.id === requestedView) ? requestedView! : "ranking";
-  const metric: LeaderboardMetric = view === "tournaments" ? "ranking" : view;
+  const metric: LeaderboardMetric = isCompetition(view) || view === "leagues" ? "ranking" : view;
   const game = params.get("game") ?? "";
   const page = Math.max(1, Number(params.get("page")) || 1);
   const [gameQuery, setGameQuery] = useState("");
@@ -183,7 +252,7 @@ export function LeaderboardPage() {
     [games.data],
   );
   const filters = useMemo(() => ({ type, metric, game: game || undefined }), [game, metric, type]);
-  const query = useLeaderboard(filters, page, view !== "tournaments");
+  const query = useLeaderboard(filters, page, !isCompetition(view));
   const entities = query.data?.data ?? [];
   const totalPages = query.data?.totalPages ?? 1;
   const podium = page === 1 && entities.length >= 3 ? entities.slice(0, 3) : [];
@@ -240,13 +309,19 @@ export function LeaderboardPage() {
           label="Ranked by"
           items={views}
           value={view}
-          onChange={(next) => (next === "tournaments" ? update({ view: "tournaments", metric: undefined }) : update({ view: undefined, metric: next === "ranking" ? undefined : next }))}
+          onChange={(next) =>
+            isCompetition(next)
+              ? update({ view: next, metric: undefined })
+              : next !== "leagues" && update({ view: undefined, metric: next === "ranking" ? undefined : next })
+          }
           indicatorId="leaderboard-view"
         />
       </div>
 
       {view === "tournaments" ? (
         <TournamentPoints kind={type === "teams" ? "team" : "player"} game={game || undefined} />
+      ) : view === "ladders" ? (
+        <LadderPoints kind={type === "teams" ? "team" : "player"} game={game || undefined} />
       ) : query.isLoading ? (
         <div aria-hidden="true" className="grid gap-4">
           <div className="grid grid-cols-3 items-end gap-4">
