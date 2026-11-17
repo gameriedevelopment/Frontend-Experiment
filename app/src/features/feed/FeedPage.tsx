@@ -9,7 +9,6 @@ import { FeedRail } from "./components/FeedRail";
 import { PostCard } from "./components/PostCard";
 import { PostComposer } from "./components/PostComposer";
 import { PostSkeleton } from "./components/PostSkeleton";
-import { RegionPrompt } from "./components/RegionPrompt";
 import { useFeedPosts } from "./hooks";
 import type { FeedFilter } from "./types";
 
@@ -56,7 +55,6 @@ export function FeedPage() {
         </header>
 
         <PostComposer />
-        <RegionPrompt />
 
         <Tabs
           label="Feed"

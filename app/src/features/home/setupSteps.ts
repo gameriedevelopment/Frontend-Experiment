@@ -2,14 +2,16 @@ import type { IconName } from "@/components/ui/Icon";
 import type { PlayerProfile } from "@/features/profile/types";
 import type { ProgressionGuide } from "@/features/progression/types";
 
-export type SetupStepId = "game" | "connection" | "avatar" | "follow" | "team" | "challenge";
+export type SetupStepId = "game" | "connection" | "avatar" | "region" | "follow" | "team" | "challenge";
 
 export interface SetupStep {
   id: SetupStepId;
   icon: IconName;
   title: string;
   description: string;
-  action: { label: string; href: string };
+  /** Where the step is done. Steps without one are finished in place, inside the list. */
+  action?: { label: string; href: string };
+  inline?: "region";
   secondaryAction?: { label: string; href: string };
   /** GP the backend awards for this step, read from the live rules. Null when no rule applies. */
   gp: number | null;
@@ -67,6 +69,15 @@ export function buildSetupSteps({ profile, guide, connectionCount, followingCoun
       action: { label: "Upload photo", href: `/profile/${encodeURIComponent(profile.username)}?edit=photos` },
       gp: ruleAmount(guide, "profile_picture_added"),
       complete: typeof profile.profileImage === "string" && profile.profileImage.trim().length > 0,
+    },
+    {
+      id: "region",
+      icon: "globe",
+      title: "Add your region",
+      description: "Players and teams near you can find you, and you show up when people filter by region.",
+      inline: "region",
+      gp: null,
+      complete: Boolean(profile.region?.trim()),
     },
     {
       id: "follow",

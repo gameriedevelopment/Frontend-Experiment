@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import { easeOutExpo } from "@/components/ui/motion";
 import { cn } from "@/lib/cn";
 import type { SetupStep, SetupStepId } from "../setupSteps";
+import { RegionStep } from "./RegionStep";
 
 function StepMarker({ step, active }: { step: SetupStep; active: boolean }) {
   return (
@@ -73,7 +74,7 @@ export function SetupQuest({
           </h2>
           <p className="mt-1 max-w-md text-sm leading-relaxed text-mist-400">
             {done === 0
-              ? "Six first moves that make Gamerie work for you."
+              ? "First moves that make Gamerie work for you."
               : `${left} ${left === 1 ? "move" : "moves"} left.`}
             {totalGp > 0 && ` ${totalGp} GP waiting.`}
           </p>
@@ -147,16 +148,19 @@ export function SetupQuest({
                   >
                     <div className="grid gap-4 pb-4 pl-16 pr-4">
                       <p className="max-w-md text-sm leading-relaxed text-mist-300">{step.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        <LinkButton to={step.action.href} size="sm" icon="arrowRight">
-                          {step.action.label}
-                        </LinkButton>
-                        {step.secondaryAction && (
-                          <LinkButton to={step.secondaryAction.href} size="sm" tone="outline">
-                            {step.secondaryAction.label}
+                      {step.inline === "region" && <RegionStep />}
+                      {step.action && (
+                        <div className="flex flex-wrap gap-2">
+                          <LinkButton to={step.action.href} size="sm" icon="arrowRight">
+                            {step.action.label}
                           </LinkButton>
-                        )}
-                      </div>
+                          {step.secondaryAction && (
+                            <LinkButton to={step.secondaryAction.href} size="sm" tone="outline">
+                              {step.secondaryAction.label}
+                            </LinkButton>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </m.div>
                 )}
