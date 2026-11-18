@@ -198,7 +198,7 @@ export function TournamentPage() {
     );
   }
 
-  const [phase, tone] = phaseOf(tournament);
+  const [phase, tone] = phaseOf(tournament, tournament.startsAt);
   const unit = tournament.entrantType === "team" ? "Teams" : "Players";
   const fill = tournament.bracketSize ? Math.min(100, (tournament.entrantCount / tournament.bracketSize) * 100) : 0;
   const startsIn =

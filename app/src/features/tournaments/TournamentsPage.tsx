@@ -65,7 +65,7 @@ function MyTournaments({ onSeeAll }: { onSeeAll: () => void }) {
       </div>
       <div className="relative -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 scrollbar-none sm:mx-0 sm:px-0">
         {items.map((item) => {
-          const [label, tone] = phaseOf({ phase: item.phase, status: undefined });
+          const [label, tone] = phaseOf({ phase: item.phase, status: undefined }, item.startsAt);
           return (
             <Link
               key={item.id}

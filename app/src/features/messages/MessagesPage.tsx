@@ -20,8 +20,20 @@ export function MessagesPage() {
   const [composing, setComposing] = useState(false);
   const [created, setCreated] = useState<MessageConversation | null>(null);
   const term = useDebouncedValue(search.trim());
-  const list = useConversations(tab);
+  const direct = useConversations("user");
+  const teams = useConversations("team");
+  const list = tab === "team" ? teams : direct;
   const searched = useConversationSearch(term);
+  const unreadByTab = useMemo(() => {
+    const sum = (data: typeof direct.data) => flattenConversations(data).reduce((total, conversation) => total + Number(conversation.unreadCount ?? 0), 0);
+    return { user: sum(direct.data), team: sum(teams.data) };
+  }, [direct.data, teams.data]);
+
+  // Opening Messages with only team chats unread goes straight to them.
+  useEffect(() => {
+    if (params.get("tab") || selectedId || !direct.data || !teams.data) return;
+    if (unreadByTab.team > 0 && unreadByTab.user === 0) setParams({ tab: "team" }, { replace: true });
+  }, [direct.data, params, selectedId, setParams, teams.data, unreadByTab]);
 
   const conversations = useMemo(() => {
     const source = term.length >= 2 ? (searched.data ?? []) : flattenConversations(list.data);
@@ -51,6 +63,7 @@ export function MessagesPage() {
         <aside className={cn("min-h-0 border-white/6 pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:border-r lg:pb-0", selectedId && "hidden lg:block")}>
           <ConversationList
             tab={tab}
+            unread={unreadByTab}
             onTab={(next) => {
               setSearch("");
               setParams({ tab: next }, { replace: true });

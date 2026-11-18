@@ -58,7 +58,7 @@ export function emptyLadderDraft(hostId: string): LadderDraftForm {
       drawPoints: 1,
       allowDraws: true,
       bestOf: 1,
-      rematchWaitDays: 7,
+      rematchWaitHours: 168,
       minimumMatchesForPrizes: 5,
       allowedMaps: [],
       allowedModes: [],
@@ -100,7 +100,7 @@ export function ladderDraftFromDetail(ladder: LadderDetail): LadderDraftForm {
       drawPoints: ladder.points.draw,
       allowDraws: ladder.allowDraws,
       bestOf: ladder.bestOf as 1 | 3 | 5,
-      rematchWaitDays: ladder.rematchWaitDays,
+      rematchWaitHours: ladder.rematchWaitHours ?? ladder.rematchWaitDays * 24,
       minimumMatchesForPrizes: ladder.minimumMatchesForPrizes,
       allowedMaps: ladder.allowedMaps,
       allowedModes: ladder.allowedModes,
@@ -132,6 +132,8 @@ export function validateLadderStep(step: LadderStep, form: LadderDraftForm): Lad
     if (form.format.entrantType === "team" && (!form.format.teamSize || form.format.teamSize < 1)) {
       errors.teamSize = "Enter the number of starting players.";
     }
+    if (form.rules.rematchWaitHours < 0 || form.rules.rematchWaitHours > 720) errors.rematchWait = "Use a wait between none and 30 days.";
+    if (!form.rules.allowedModes.length) errors.allowedModes = "Choose at least one mode players can use.";
     if (form.rules.winPoints < 0 || form.rules.winPoints > 100)
       errors.winPoints = "Use 0 to 100 points.";
     if (form.rules.allowDraws && (form.rules.drawPoints < 0 || form.rules.drawPoints > 100)) {

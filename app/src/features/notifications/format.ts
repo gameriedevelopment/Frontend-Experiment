@@ -17,6 +17,8 @@ export function notificationTarget(notification: GamerieNotification) {
   if (typeof data.postId === "string") return `/post/${data.postId}`;
   if (typeof data.challengeId === "string") return `/challenges/${data.challengeId}`;
   if (typeof data.tournamentId === "string") return `/tournaments/${data.tournamentId}`;
+  if (typeof data.leagueId === "string") return `/leagues/${data.leagueId}`;
+  if (typeof data.ladderId === "string") return `/ladders/${data.ladderId}`;
   if (typeof data.actorUsername === "string") return `/profile/${encodeURIComponent(data.actorUsername)}`;
   return null;
 }
@@ -25,6 +27,9 @@ export function notificationIcon(value: string | undefined): { icon: IconName; t
   const type = typeof value === "string" ? value : "";
   if (type === "like") return { icon: "heart", tone: "danger" };
   if (type === "comment") return { icon: "comment", tone: "lavender" };
+  if (type === "repost") return { icon: "repost", tone: "lavender" };
+  if (type === "ladder") return { icon: "ladders", tone: "lavender" };
+  if (type === "league") return { icon: "leagues", tone: "lavender" };
   if (type === "follow" || type === "hub-follow" || type === "endorse") return { icon: "follow", tone: "lavender" };
   if (type.endsWith("announcement")) return { icon: "megaphone", tone: "lavender" };
   if (type.startsWith("hub")) return { icon: "hub", tone: "lavender" };

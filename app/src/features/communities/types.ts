@@ -205,6 +205,8 @@ export interface HubDashboard {
     tournaments: { entries: number; wins: number; podiums: number };
     ladders: { entries: number; titles: number; podiums: number };
     hosted: { tournaments: number; ladders: number; entrants: number };
+    /** Views and joins of the hub's own ladders and leagues, last 30 days. */
+    engagement?: { days: number; views: number; viewers: number; joins: number };
   };
   referral: {
     code: string | null;

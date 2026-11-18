@@ -30,3 +30,24 @@ export interface ProgressionGuide {
   levels: Array<{ level: number; cumulativeGp: number }>;
   notes: string[];
 }
+
+export interface ProgressionHistoryEntry {
+  id: string;
+  actionType: string;
+  label: string;
+  section: string;
+  gpAmount: number;
+  ruleAmount: number | null;
+  capped: boolean;
+  levelUp: number | null;
+  awardedAt: string;
+}
+
+export interface ProgressionHistory {
+  entries: ProgressionHistoryEntry[];
+  bySection: Array<{ section: string; gp: number; count: number }>;
+  totalGp: number;
+  page: number;
+  limit: number;
+  total: number;
+}

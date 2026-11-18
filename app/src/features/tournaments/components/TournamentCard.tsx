@@ -16,7 +16,7 @@ function startLabel(value: string | null) {
 
 export function TournamentCard({ tournament, preview = false }: { tournament: Tournament; preview?: boolean }) {
   const hosted = isHosted(tournament);
-  const [phase, tone] = phaseOf(tournament);
+  const [phase, tone] = phaseOf(tournament, tournament.startDate);
   const capacity = tournament.bracketSize ?? tournament.maxTeams ?? 0;
   const entrants = tournament.entrantCount ?? tournament.currentTeams ?? 0;
   const fill = capacity ? Math.min(100, Math.round((entrants / capacity) * 100)) : 0;

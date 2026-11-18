@@ -21,6 +21,7 @@ export const secondaryNavigation: NavigationItem[] = [
   { label: "Challenges", href: "/challenges", icon: "challenges" },
   { label: "Tournaments", href: "/tournaments", icon: "trophy" },
   { label: "Ladders", href: "/ladders", icon: "ladders" },
+  { label: "Leagues", href: "/leagues", icon: "leagues" },
   { label: "Leaderboard", href: "/leaderboard", icon: "leaderboard" },
   { label: "Calendar", href: "/calendar", icon: "calendar" },
 ];
@@ -51,6 +52,7 @@ export const pageTitles: Record<string, string> = {
   "/challenges": "Challenges",
   "/tournaments": "Tournaments",
   "/ladders": "Ladders",
+  "/leagues": "Leagues",
   "/leaderboard": "Leaderboard",
   "/calendar": "Calendar",
   "/search": "Search",

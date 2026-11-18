@@ -10,6 +10,7 @@ import { formatChallengeDateTime } from "@/features/challenges/lifecycle";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
+import { LadderLoadError } from "../components/LadderBits";
 import { useLadderAction, useLadderMatches } from "../hooks";
 import type { LadderChallenge, LadderDetail } from "../types";
 import { formatLadderDate } from "../utils";
@@ -90,6 +91,7 @@ export function LadderMatches({ ladder, onReport }: { ladder: LadderDetail; onRe
         ))}
       </div>
     );
+  if (query.isError) return <LadderLoadError what="matches" error={query.error} onRetry={() => void query.refetch()} />;
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4">

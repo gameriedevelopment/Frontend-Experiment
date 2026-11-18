@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, m } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
@@ -18,7 +18,7 @@ import { registerAccount } from "./api";
 import { AuthHeading, AuthLayout } from "./components/AuthLayout";
 import { SocialAuthOptions } from "./components/SocialAuthOptions";
 import { PasswordChecklist } from "./components/PasswordChecklist";
-import { Turnstile } from "./components/Turnstile";
+import { Turnstile, useTurnstile } from "./components/Turnstile";
 import { levels, platformLabels, platforms, titles } from "./profileOptions";
 
 const registrationSchema = z
@@ -111,16 +111,14 @@ export function RegisterPage() {
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState<RegistrationStep>(1);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileFailed, setTurnstileFailed] = useState(false);
-  const turnstileRequired = Boolean(import.meta.env.VITE_TURNSTILE_SITE_KEY);
-  // If verification can't load/errors, don't trap the user on a dead button.
-  const turnstileBlocking = turnstileRequired && !turnstileToken && !turnstileFailed;
+  const turnstile = useTurnstile();
   const {
     register,
     handleSubmit,
     trigger,
     setValue,
+    setError,
+    getValues,
     watch,
     control,
     formState: { errors, isSubmitting },
@@ -150,21 +148,18 @@ export function RegisterPage() {
   }, [searchParams, setValue]);
 
   const nextStep = async () => {
-    if (await trigger(fieldsByStep[step])) {
-      setSubmitError(null);
-      setStep((current) => Math.min(3, current + 1) as RegistrationStep);
+    if (!(await trigger(fieldsByStep[step]))) return;
+    // The schema-level match check only runs once every step is valid, so check it here.
+    if (step === 2 && getValues("password") !== getValues("confirmPassword")) {
+      setError("confirmPassword", { message: "Passwords do not match" });
+      return;
     }
+    setSubmitError(null);
+    setStep((current) => Math.min(3, current + 1) as RegistrationStep);
   };
 
-  const onTurnstileVerify = useCallback((token: string) => {
-    setTurnstileToken(token);
-    setTurnstileFailed(false);
-  }, []);
-  const onTurnstileExpire = useCallback(() => setTurnstileToken(null), []);
-  const onTurnstileError = useCallback(() => setTurnstileFailed(true), []);
-
   const onSubmit = handleSubmit(async (values) => {
-    if (turnstileBlocking) {
+    if (turnstile.blocking) {
       setSubmitError("Complete the verification check to create your account.");
       return;
     }
@@ -181,14 +176,19 @@ export function RegisterPage() {
         termsAccepted: values.termsAccepted,
         dateOfBirth: values.dateOfBirth,
         referralCode: values.referralCode || undefined,
-        turnstileToken: turnstileToken ?? undefined,
+        turnstileToken: turnstile.token ?? undefined,
       });
       navigate("/verify-email", { replace: true });
     } catch (error) {
+      turnstile.renew();
       const message = getApiErrorMessage(error, "We couldn't create your account. Please try again.");
       setSubmitError(message);
       if ((error as { response?: { status?: number } }).response?.status === 409) setStep(1);
     }
+  }, (invalid) => {
+    // Errors on earlier steps aren't on screen, so take the player back to the first one.
+    const first = ([1, 2, 3] as const).find((index) => fieldsByStep[index].some((name) => invalid[name]));
+    if (first) setStep(first);
   });
 
   return (
@@ -357,7 +357,7 @@ export function RegisterPage() {
                   error={errors.referralCode?.message}
                   {...register("referralCode")}
                 />
-                <Turnstile onVerify={onTurnstileVerify} onExpire={onTurnstileExpire} onError={onTurnstileError} />
+                <Turnstile {...turnstile.widget} />
               </>
             )}
           </m.div>
@@ -385,7 +385,7 @@ export function RegisterPage() {
               size="lg"
               icon={isSubmitting ? undefined : "arrowRight"}
               orb
-              disabled={isSubmitting || turnstileBlocking}
+              disabled={isSubmitting || turnstile.blocking}
               className="flex-1 justify-between pl-7"
             >
               {isSubmitting ? (

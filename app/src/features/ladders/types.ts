@@ -49,6 +49,7 @@ export interface LadderDetail extends Omit<LadderSummary, "prize" | "viewer"> {
   points: { win: number; draw: number; loss: number };
   bestOf: number;
   rematchWaitDays: number;
+  rematchWaitHours: number;
   minimumMatchesForPrizes: number;
   groups: {
     count: number;
@@ -63,8 +64,11 @@ export interface LadderDetail extends Omit<LadderSummary, "prize" | "viewer"> {
   } | null;
   rulesText: string;
   viewer: {
+    /** True for the organizer and for staff; `role` and `permissions` say how much they can do. */
     isOrganizer: boolean;
     isParticipant: boolean;
+    role?: LadderRole | null;
+    permissions?: LadderPermission[];
     participant: {
       id: string;
       kind: LadderEntrantType;
@@ -75,10 +79,24 @@ export interface LadderDetail extends Omit<LadderSummary, "prize" | "viewer"> {
   };
 }
 
+export type LadderStaffRole = "manager" | "moderator";
+export type LadderRole = "owner" | LadderStaffRole;
+export type LadderPermission = "entries" | "participants" | "groups" | "announce" | "activity" | "settings" | "staff";
+
+export interface LadderStaffMember {
+  userId: string;
+  username: string;
+  avatar: string | null;
+  role: LadderStaffRole;
+  addedAt: string;
+}
+
 export interface LadderFilters {
   view: LadderView;
   search?: string;
   gameId?: string;
+  /** A game by name, as the game picker gives it. */
+  game?: string;
   platform?: string;
   region?: string;
   entrantType?: LadderEntrantType;
@@ -102,6 +120,8 @@ export interface LadderHostingOptions {
   activeUserLadders: number;
   activeUserLadderLimit: number;
   canCreateUserOrTeamLadder: boolean;
+  /** An admin stopped this account from creating ladders and leagues. */
+  creationLocked?: boolean;
 }
 
 export interface LadderBasicsInput {
@@ -128,7 +148,7 @@ export interface LadderRulesInput {
   drawPoints: number;
   allowDraws: boolean;
   bestOf: 1 | 3 | 5;
-  rematchWaitDays: number;
+  rematchWaitHours: number;
   minimumMatchesForPrizes: number;
   allowedMaps: string[];
   allowedModes: string[];
@@ -269,4 +289,49 @@ export interface LadderEntryInput {
   teamId?: string;
   starterUserIds?: string[];
   substituteUserIds?: string[];
+}
+
+export interface LadderResultLadder {
+  id: string;
+  name: string;
+  game: string;
+  banner: string | null;
+  logo: string | null;
+  official: boolean;
+  host: { type: string; name: string };
+  entrantType: LadderEntrantType;
+  entrants: number;
+  endedAt: string | null;
+}
+
+/** A finished ladder on a player's or team's profile. */
+export interface LadderFinish {
+  ladder: LadderResultLadder;
+  place: number;
+  points: number;
+  record: { played: number; won: number; drawn: number; lost: number };
+  prizeWinner: boolean;
+  team: { id: string; name: string } | null;
+}
+
+/** A ladder a hub hosted, with its champion. */
+export interface LadderHosted {
+  ladder: LadderResultLadder;
+  champion: { id: string; name: string; avatar: string | null; points: number } | null;
+}
+
+export interface LadderRosterMember {
+  userId: string;
+  displayName: string;
+  role: "player" | "substitute";
+  addedAt: string;
+}
+
+export interface LadderRoster {
+  members: LadderRosterMember[];
+  teamSize: number | null;
+  substitutes: number;
+  canManage: boolean;
+  /** When the team may add its next player; null when it can add one now. */
+  nextAdditionAt: string | null;
 }

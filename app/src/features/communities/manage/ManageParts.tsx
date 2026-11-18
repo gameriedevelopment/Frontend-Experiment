@@ -211,7 +211,11 @@ export function DangerZone({ kind, item }: { kind: CommunityKind; item: Communit
                 </div>
               </fieldset>
             )}
-            <TextField id="confirm-name" label={`Type ${item.name} to confirm`} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="off" />
+            <TextField id="confirm-name" label={
+                <>
+                  Type <strong className="font-semibold text-mist-50">{item.name}</strong> to confirm
+                </>
+              } value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="off" />
           </div>
         </Dialog>
       )}

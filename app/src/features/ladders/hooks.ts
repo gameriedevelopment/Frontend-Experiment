@@ -6,6 +6,7 @@ import type {
   LadderBasicsInput,
   LadderEntryInput,
   LadderFilters,
+  LadderRoster,
   SaveLadderDraftInput,
   UpdateLadderInput,
 } from "./types";
@@ -172,6 +173,15 @@ export function useLadderActivity(id?: string, enabled = true) {
   });
 }
 
+export function useLadderStaff(id?: string, enabled = true) {
+  return useQuery({
+    queryKey: ["ladders", id, "staff"],
+    queryFn: () => laddersApi.getLadderStaff(id!),
+    enabled: Boolean(id) && enabled,
+    staleTime: 15_000,
+  });
+}
+
 export function useLadderManagement(id?: string) {
   const client = useQueryClient();
   const refresh = () => void client.invalidateQueries({ queryKey: ["ladders", id] });
@@ -190,6 +200,14 @@ export function useLadderManagement(id?: string) {
         laddersApi.postLadderAnnouncement(id!, input),
       onSuccess: refresh,
     }),
+    setStaff: useMutation({
+      mutationFn: ({ userId, role }: { userId: string; role: "manager" | "moderator" }) => laddersApi.setLadderStaff(id!, userId, role),
+      onSuccess: refresh,
+    }),
+    removeStaff: useMutation({
+      mutationFn: (userId: string) => laddersApi.removeLadderStaff(id!, userId),
+      onSuccess: () => void client.invalidateQueries({ queryKey: ["ladders"] }),
+    }),
     // Edits change list cards too, so every ladder query refreshes.
     update: useMutation({
       mutationFn: (input: UpdateLadderInput) => laddersApi.updateLadder(id!, input),
@@ -198,6 +216,55 @@ export function useLadderManagement(id?: string) {
     uploadBanner: useMutation({
       mutationFn: (file: File) => laddersApi.uploadLadderBanner(id!, file),
       onSuccess: () => void client.invalidateQueries({ queryKey: ["ladders"] }),
+    }),
+    uploadLogo: useMutation({
+      mutationFn: (file: File) => laddersApi.uploadLadderLogo(id!, file),
+      onSuccess: () => void client.invalidateQueries({ queryKey: ["ladders"] }),
+    }),
+    runAgain: useMutation({
+      mutationFn: () => laddersApi.runLadderAgain(id!),
+      onSuccess: () => void client.invalidateQueries({ queryKey: ["ladders"] }),
+    }),
+  };
+}
+
+/** Finished ladders on a player's or team's profile. */
+export function useLadderFinishes(subject: { userId: string } | { teamId: string } | null) {
+  return useQuery({
+    queryKey: ["ladders", "finishes", subject],
+    queryFn: () => laddersApi.getLadderFinishes(subject!),
+    enabled: Boolean(subject),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useHostedLadders(hubId?: string) {
+  return useQuery({
+    queryKey: ["ladders", "hosted-by", hubId],
+    queryFn: () => laddersApi.getHostedLadders(hubId!),
+    enabled: Boolean(hubId),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useLadderRoster(id: string, participantId?: string) {
+  const client = useQueryClient();
+  const key = ["ladders", id, "roster", participantId];
+  const update = (roster: LadderRoster) => client.setQueryData(key, roster);
+  return {
+    query: useQuery({
+      queryKey: key,
+      queryFn: () => laddersApi.getLadderRoster(id, participantId!),
+      enabled: Boolean(participantId),
+    }),
+    add: useMutation({
+      mutationFn: (input: { userId: string; role: "player" | "substitute" }) =>
+        laddersApi.addLadderRosterMember(id, participantId!, input),
+      onSuccess: update,
+    }),
+    remove: useMutation({
+      mutationFn: (userId: string) => laddersApi.removeLadderRosterMember(id, participantId!, userId),
+      onSuccess: update,
     }),
   };
 }

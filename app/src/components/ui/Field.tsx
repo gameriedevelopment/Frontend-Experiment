@@ -7,7 +7,7 @@ export const inputClasses =
 
 type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   id: string;
-  label: string;
+  label: ReactNode;
   error?: string;
   labelAction?: ReactNode;
 };

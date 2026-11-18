@@ -3,16 +3,19 @@ import { ChoiceChip, ChoiceGroup } from "@/components/ui/ChoiceChips";
 import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { FileDrop } from "@/components/ui/FileDrop";
 import { TextAreaField, TextField } from "@/components/ui/Field";
+import { Icon } from "@/components/ui/Icon";
 import { OptionCards } from "@/components/ui/OptionCards";
 import { ScheduleField } from "@/components/ui/ScheduleField";
+import { Segmented } from "@/components/ui/Segmented";
 import { Switch } from "@/components/ui/Switch";
 import { TagInput } from "@/components/ui/TagInput";
 import { useGame, useGameOptions } from "@/features/games/hooks";
 import { REGIONS } from "@/features/tournaments/create/draftForm";
 import { ChipRow, StepSection } from "@/features/tournaments/create/steps/StepParts";
+import { cn } from "@/lib/cn";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import type { LadderHostingOptions } from "../types";
-import { formatLadderDateRange, formatLadderMoney, LADDER_JOIN_LABELS, ladderPlayScopeLabel } from "../utils";
+import { formatLadderDateRange, formatLadderMoney, formatRematchWait, LADDER_JOIN_LABELS, ladderPlayScopeLabel } from "../utils";
 import type { LadderDraftForm, LadderFormErrors } from "./draft";
 
 type Update = <K extends keyof LadderDraftForm>(section: K, patch: Partial<LadderDraftForm[K]>) => void;
@@ -47,6 +50,21 @@ export function LadderCoverDrop({ file, url, onFile }: { file: File | null; url:
   );
 }
 
+/** A square logo for the ladder, shown next to its name. Uploaded with the cover. */
+export function LadderLogoDrop({ file, url, onFile }: { file: File | null; url: string | null; onFile: (file: File | null) => void }) {
+  return (
+    <FileDrop
+      label="Logo (optional)"
+      hint="Square, at least 400 × 400. JPG, PNG or WebP, up to 4 MB"
+      accept={COVER_TYPES}
+      maxBytes={MAX_COVER_BYTES}
+      currentUrl={url}
+      file={file}
+      onFile={onFile}
+    />
+  );
+}
+
 export function IdentityStep({
   form,
   errors,
@@ -54,10 +72,14 @@ export function IdentityStep({
   hosting,
   cover,
   onCover,
+  logo,
+  onLogo,
 }: StepProps & {
   hosting: LadderHostingOptions;
   cover: { file: File | null; url: string | null };
   onCover: (file: File | null) => void;
+  logo: { file: File | null; url: string | null };
+  onLogo: (file: File | null) => void;
 }) {
   const b = form.basics;
   const [query, setQuery] = useState("");
@@ -119,8 +141,100 @@ export function IdentityStep({
           ))}
         </ChoiceGroup>
         <TextAreaField id="ladder-description" label="Description" maxLength={2000} value={b.description ?? ""} onChange={(event) => update("basics", { description: event.target.value })} placeholder="Who it's for, how often people should play, and what's at stake." />
-        <LadderCoverDrop file={cover.file} url={cover.url} onFile={onCover} />
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
+          <LadderCoverDrop file={cover.file} url={cover.url} onFile={onCover} />
+          <LadderLogoDrop file={logo.file} url={logo.url} onFile={onLogo} />
+        </div>
       </StepSection>
+    </div>
+  );
+}
+
+/** A wait typed in hours or days; 0 lets the same pair play again straight away. */
+function RematchWaitField({ hours, onChange, error }: { hours: number; onChange: (hours: number) => void; error?: string }) {
+  const [unit, setUnit] = useState<"hours" | "days">(hours && hours % 24 === 0 ? "days" : "hours");
+  const amount = unit === "days" ? hours / 24 : hours;
+  return (
+    <div className="grid gap-2.5">
+      <div className="flex flex-wrap items-end gap-3">
+        <TextField
+          id="ladder-rematch"
+          label="Rematch wait"
+          inputMode="numeric"
+          className="w-28"
+          value={String(amount)}
+          onChange={(event) => {
+            const next = Number(event.target.value.replace(/\D/g, "")) || 0;
+            onChange(Math.min(720, unit === "days" ? next * 24 : next));
+          }}
+          error={error}
+        />
+        <Segmented
+          label="Unit"
+          value={unit}
+          onChange={(next) => {
+            setUnit(next);
+            onChange(Math.min(720, next === "days" ? Math.round(amount) * 24 : Math.round(amount)));
+          }}
+          options={[
+            { value: "hours", label: "Hours" },
+            { value: "days", label: "Days" },
+          ]}
+          className="mb-0.5"
+        />
+      </div>
+      <p className="text-xs text-mist-500">
+        {hours ? `The same pair can play again after ${formatRematchWait(hours)}.` : "No wait: the same pair can play again as soon as a result is final."} Up to 30 days.
+      </p>
+    </div>
+  );
+}
+
+/** The selected game's own modes as chips; games without a list take typed modes. */
+function ModePicker({ gameId, values, onChange, error }: { gameId: string; values: string[]; onChange: (values: string[]) => void; error?: string }) {
+  const game = useGame(gameId || undefined);
+  const modes = game.data?.gameModes ?? [];
+  if (game.isLoading) return <p className="text-sm text-mist-400">Loading the game's modes…</p>;
+  if (!modes.length)
+    return (
+      <div className="grid gap-1.5">
+        <TagInput label="Allowed modes" hint="Required" values={values} onChange={onChange} placeholder="Ranked, 1v1…" />
+        <p className="text-xs text-mist-500">{game.data?.name ?? "This game"} doesn't list its modes, so type the ones players can use.</p>
+        {error && <p role="alert" className="text-[0.8rem] text-danger">{error}</p>}
+      </div>
+    );
+  const toggle = (mode: string) => onChange(values.includes(mode) ? values.filter((item) => item !== mode) : [...values, mode]);
+  const all = modes.every((mode) => values.includes(mode));
+  return (
+    <div className="grid gap-2.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-sm font-medium text-mist-100">Allowed modes</p>
+        <button type="button" onClick={() => onChange(all ? [] : modes)} className="text-xs font-medium text-lavender-300 hover:text-lavender-200">
+          {all ? "Clear" : "Select all"}
+        </button>
+      </div>
+      <p className="text-xs text-mist-500">The modes {game.data?.name ?? "this game"} supports. Challenges can only be played in the ones you pick.</p>
+      <div className="flex flex-wrap gap-2">
+        {modes.map((mode) => {
+          const on = values.includes(mode);
+          return (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={on}
+              onClick={() => toggle(mode)}
+              className={cn(
+                "flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm ring-1 ring-inset transition-colors",
+                on ? "bg-lavender-400/12 text-mist-50 ring-lavender-400/60" : "text-mist-400 ring-white/10 hover:text-mist-100",
+              )}
+            >
+              {on && <Icon name="check" weight="bold" className="size-3.5 text-lavender-300" />}
+              {mode}
+            </button>
+          );
+        })}
+      </div>
+      {error && <p role="alert" className="text-[0.8rem] text-danger">{error}</p>}
     </div>
   );
 }
@@ -188,11 +302,11 @@ export function CompetitionStep({ form, errors, update, editing }: StepProps & {
           <TextField id="ladder-draw" label="Points for a draw" inputMode="numeric" disabled={scoringLocked || !r.allowDraws} value={String(r.drawPoints)} onChange={(event) => update("rules", { drawPoints: Number(event.target.value.replace(/\D/g, "")) || 0 })} error={errors.drawPoints} />
         </div>
         <Switch label="Allow draws" description="A series can end level." checked={r.allowDraws} disabled={scoringLocked} onChange={(allowDraws) => update("rules", { allowDraws })} />
-        <ChipRow legend="Rematch wait" hint="Before the same pair can play again" options={[0, 1, 3, 7, 14, 30]} value={r.rematchWaitDays} format={(value) => (value === 0 ? "None" : `${value} d`)} onChange={(rematchWaitDays) => update("rules", { rematchWaitDays })} />
+        <RematchWaitField hours={r.rematchWaitHours} onChange={(rematchWaitHours) => update("rules", { rematchWaitHours })} error={errors.rematchWait} />
         <ChipRow legend="Matches to place for prizes" options={[0, 3, 5, 10, 15, 20]} value={r.minimumMatchesForPrizes} onChange={(minimumMatchesForPrizes) => update("rules", { minimumMatchesForPrizes })} />
       </StepSection>
       <StepSection title="Rules">
-        <TagInput label="Allowed modes" hint="Optional" values={r.allowedModes} onChange={(allowedModes) => update("rules", { allowedModes })} placeholder="Competitive, Unrated…" />
+        <ModePicker gameId={form.basics.gameId} values={r.allowedModes} onChange={(allowedModes) => update("rules", { allowedModes })} error={errors.allowedModes} />
         <TagInput label="Allowed maps" hint="Optional" values={r.allowedMaps} onChange={(allowedMaps) => update("rules", { allowedMaps })} placeholder="Ascent, Bind…" />
         <TextAreaField id="ladder-rules" label="House rules (optional)" maxLength={10000} value={r.rulesText ?? ""} onChange={(event) => update("rules", { rulesText: event.target.value })} />
       </StepSection>
@@ -294,7 +408,7 @@ export function ReviewStep({ form, gameName, hostName, onEdit }: { form: LadderD
         ["Entrants", form.format.entrantType === "team" ? `Teams of ${form.format.teamSize}` : "Players"],
         ["Table", form.format.groupCount ? `${form.format.groupCount} groups · ${ladderPlayScopeLabel(form.format.playScope)}` : "One table"],
         ["Scoring", `Bo${form.rules.bestOf} · win ${form.rules.winPoints}${form.rules.allowDraws ? ` · draw ${form.rules.drawPoints}` : ""}`],
-        ["Rematches", form.rules.rematchWaitDays ? `After ${form.rules.rematchWaitDays} days` : "Any time"],
+        ["Rematches", form.rules.rematchWaitHours ? `After ${formatRematchWait(form.rules.rematchWaitHours)}` : "Any time"],
       ],
     ],
     [

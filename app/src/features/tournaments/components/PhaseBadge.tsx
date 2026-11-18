@@ -22,7 +22,11 @@ const toneClasses: Record<Tone, string> = {
   danger: "bg-danger text-ink-950",
 };
 
-export function phaseOf(tournament: Pick<Tournament, "phase" | "status">): [string, Tone] {
+/** With the start time, a bracket that didn't start on time reads as waiting on its organizer. */
+export function phaseOf(tournament: Pick<Tournament, "phase" | "status">, startsAt?: string | null): [string, Tone] {
+  if (tournament.phase === "awaiting_start" && startsAt && new Date(startsAt).getTime() < Date.now()) {
+    return ["Awaiting organizer", "neutral"];
+  }
   if (tournament.phase) return phaseCopy[tournament.phase];
   if (tournament.status === "ongoing") return ["Live", "live"];
   if (tournament.status === "completed") return ["Completed", "muted"];

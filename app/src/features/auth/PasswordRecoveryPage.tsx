@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useSearchParams } from "react-router-dom";
 import { z } from "zod";
@@ -11,7 +11,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { confirmPasswordReset, requestPasswordReset } from "./api";
 import { AuthHeading, AuthLayout } from "./components/AuthLayout";
 import { PasswordChecklist } from "./components/PasswordChecklist";
-import { Turnstile } from "./components/Turnstile";
+import { Turnstile, useTurnstile } from "./components/Turnstile";
 
 const requestSchema = z.object({
   email: z.string().trim().min(1, "Enter your email address").email("Enter a valid email address"),
@@ -50,26 +50,17 @@ function Submit({ busy, idle, working }: { busy: boolean; idle: string; working:
 function RequestLink() {
   const [sentTo, setSentTo] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileFailed, setTurnstileFailed] = useState(false);
-  const turnstileRequired = Boolean(import.meta.env.VITE_TURNSTILE_SITE_KEY);
+  const turnstile = useTurnstile();
   const form = useForm<z.infer<typeof requestSchema>>({ resolver: zodResolver(requestSchema), defaultValues: { email: "" } });
-  const onVerify = useCallback((token: string) => {
-    setTurnstileToken(token);
-    setTurnstileFailed(false);
-  }, []);
-  const onExpire = useCallback(() => setTurnstileToken(null), []);
-  const onFail = useCallback(() => setTurnstileFailed(true), []);
 
   const submit = form.handleSubmit(async ({ email }) => {
-    // A widget that can't load shouldn't trap people; the API still checks where it's configured.
-    if (turnstileRequired && !turnstileToken && !turnstileFailed) return setError("Complete the check below to send a reset link.");
+    if (turnstile.blocking) return setError("Complete the check below to send a reset link.");
     setError(null);
     try {
-      await requestPasswordReset(email, turnstileToken ?? undefined);
+      await requestPasswordReset(email, turnstile.token ?? undefined);
       setSentTo(email);
     } catch (reason) {
-      setTurnstileToken(null);
+      turnstile.renew();
       setError(getApiErrorMessage(reason, "We couldn't send the reset link. Try again."));
     }
   });
@@ -80,7 +71,13 @@ function RequestLink() {
         <AuthHeading title="Check your email" description={<>If an account exists for <span className="font-semibold text-mist-100">{sentTo}</span>, a reset link is on its way.</>} />
         <p className="mt-6 text-sm leading-relaxed text-mist-400">It can take a few minutes. If it doesn't arrive, check your spam folder.</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Button tone="outline" onClick={() => setSentTo("")}>
+          <Button
+            tone="outline"
+            onClick={() => {
+              turnstile.renew();
+              setSentTo("");
+            }}
+          >
             Use another email
           </Button>
           <LinkButton to="/login" tone="ghost">
@@ -100,7 +97,7 @@ function RequestLink() {
           </Notice>
         )}
         <TextField id="email" label="Email address" type="email" autoComplete="email" autoFocus placeholder="you@example.com" error={form.formState.errors.email?.message} {...form.register("email")} />
-        {turnstileRequired && <Turnstile onVerify={onVerify} onExpire={onExpire} onError={onFail} />}
+        <Turnstile {...turnstile.widget} />
         <Submit busy={form.formState.isSubmitting} idle="Send reset link" working="Sending" />
       </form>
     </>

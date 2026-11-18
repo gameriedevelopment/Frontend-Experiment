@@ -8,7 +8,7 @@ import { useGame } from "@/features/games/hooks";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
-import { uploadLadderBanner } from "../api";
+import { uploadLadderBanner, uploadLadderLogo } from "../api";
 import { useCreateLadderDraft, useLadder, useLadderHostingOptions, usePublishLadder, useSaveLadderDraft } from "../hooks";
 import {
   LADDER_STEPS,
@@ -42,6 +42,7 @@ export function CreateLadderPage() {
   const [errors, setErrors] = useState<LadderFormErrors>({});
   const [serverError, setServerError] = useState("");
   const [cover, setCover] = useState<File | null>(null);
+  const [logo, setLogo] = useState<File | null>(null);
   const [coverPending, setCoverPending] = useState(false);
   const initialised = useRef(false);
   const game = useGame(form?.basics.gameId || undefined);
@@ -88,11 +89,17 @@ export function CreateLadderPage() {
       else if (step === "basics") await saveDraft.mutateAsync({ basics });
       else if (step === "competition") await saveDraft.mutateAsync({ format: form.format, rules: form.rules });
       else if (step === "access") await saveDraft.mutateAsync({ joining: form.joining, datesAndPrize: datesAndPrizePayload(form) });
-      if (step === "basics" && cover && id) {
+      if (step === "basics" && (cover || logo) && id) {
         setCoverPending(true);
         try {
-          await uploadLadderBanner(id, cover);
-          setCover(null);
+          if (cover) {
+            await uploadLadderBanner(id, cover);
+            setCover(null);
+          }
+          if (logo) {
+            await uploadLadderLogo(id, logo);
+            setLogo(null);
+          }
         } finally {
           setCoverPending(false);
         }
@@ -146,6 +153,19 @@ export function CreateLadderPage() {
           <Skeleton className="h-128 rounded-card" />
         </div>
       </div>
+    );
+  if (!ladderId && hosting.data.creationLocked)
+    return (
+      <StatePanel
+        icon="lock"
+        title="Creating ladders is paused for your account"
+        description="A Gamerie admin has stopped this account from creating ladders and leagues. Contact support if you think this is a mistake."
+        action={
+          <LinkButton to="/ladders" tone="outline" size="sm" icon="arrowLeft">
+            Back to ladders
+          </LinkButton>
+        }
+      />
     );
   if (!ladderId && !hosting.data.canCreateUserOrTeamLadder && !hosting.data.hubs.length)
     return (
@@ -230,6 +250,8 @@ export function CreateLadderPage() {
                   hosting={hosting.data}
                   cover={{ file: cover, url: existing.data?.banner ?? null }}
                   onCover={setCover}
+                  logo={{ file: logo, url: existing.data?.logo ?? null }}
+                  onLogo={setLogo}
                 />
               ) : step === "competition" ? (
                 <CompetitionStep form={form} errors={errors} update={update} />

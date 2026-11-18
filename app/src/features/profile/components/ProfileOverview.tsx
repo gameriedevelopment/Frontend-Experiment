@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { useToggleSkillEndorsement } from "../hooks";
 import type { PlayerProfile, ProfileSkill } from "../types";
 import { EmptyLine, ProfileSection } from "./ProfileSection";
+import { SocialLinks } from "./SocialLinks";
 import { NeedsPanel, ReferralPanel } from "./OpportunityPanels";
 
 const endorsementCount = (skill: ProfileSkill) =>
@@ -123,6 +124,15 @@ export function ProfileOverview({ own, profile }: { own: boolean; profile: Playe
           </EmptyLine>
         )}
       </ProfileSection>
+      {(profile.socialMedia ?? []).some((item) => item.url) ? (
+        <ProfileSection title="Socials">
+          <SocialLinks socials={profile.socialMedia} />
+        </ProfileSection>
+      ) : own ? (
+        <ProfileSection title="Socials">
+          <EmptyLine>Add your Twitch, YouTube, X or other channels from Edit profile so people can follow you.</EmptyLine>
+        </ProfileSection>
+      ) : null}
       <SkillsPanel own={own} profile={profile} />
       <NeedsPanel own={own} profile={profile} />
       {own && <ReferralPanel />}

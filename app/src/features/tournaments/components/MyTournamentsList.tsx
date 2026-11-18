@@ -31,7 +31,7 @@ function rowAction(tournament: HostedTournamentSummary): { to: string; label: st
 }
 
 function Row({ tournament }: { tournament: HostedTournamentSummary }) {
-  const [label, tone] = phaseOf({ phase: tournament.phase, status: undefined });
+  const [label, tone] = phaseOf({ phase: tournament.phase, status: undefined }, tournament.startsAt);
   const action = rowAction(tournament);
   return (
     <li>

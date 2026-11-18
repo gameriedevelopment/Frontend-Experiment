@@ -10,6 +10,8 @@ import { useAuthStore } from "@/features/auth/authStore";
 import { PostCard } from "@/features/feed/components/PostCard";
 import { PostComposer } from "@/features/feed/components/PostComposer";
 import { PostSkeleton } from "@/features/feed/components/PostSkeleton";
+import { HostedLadderList, LadderFinishList } from "@/features/ladders/components/LadderFinishes";
+import { HostedLeagueList, LeagueFinishList } from "@/features/leagues/components/LeagueFinishes";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
@@ -43,11 +45,12 @@ function rankWeight(member: CommunityMember, ownerId?: string) {
 /** `roles` replaces the team role with a hub member's roles: the first is the badge, the rest the detail line. */
 export function MemberRow({ member, ownerId, roles, actions }: { member: CommunityMember; ownerId?: string; roles?: string[]; actions?: ReactNode }) {
   const owner = memberUserId(member) === ownerId;
-  const role = roles?.[0] ?? (owner ? "Owner" : formatMemberRole(member.role, member.title));
+  // A hub role can name the team ("Team member · Ravens"); the badge keeps the role, the line below the team.
+  const [role, roleTeam] = (roles?.[0] ?? (owner ? "Owner" : formatMemberRole(member.role, member.title))).split(" · ");
   const joined = joinedOn(member.joinedAt);
   const username = member.user?.username;
   const detail = roles
-    ? [...roles.slice(1), member.user?.gamerTitle, joined ? `since ${joined}` : null]
+    ? [roleTeam, ...roles.slice(1), member.user?.gamerTitle, joined ? `since ${joined}` : null]
     : [member.title && member.title.toLowerCase() !== role.toLowerCase() ? member.title : null, member.user?.gamerTitle, joined ? `since ${joined}` : null];
   return (
     <li className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/3">
@@ -60,7 +63,7 @@ export function MemberRow({ member, ownerId, roles, actions }: { member: Communi
           </span>
         </span>
       </Link>
-      <span className={cn("type-label shrink-0 rounded-full px-2.5 py-1", owner ? "bg-lavender-400/14 text-lavender-300" : role === "Member" || role === "Hub member" ? "bg-white/5 text-mist-400" : "bg-white/8 text-mist-200")}>
+      <span className={cn("type-label max-w-36 shrink-0 truncate rounded-full px-2.5 py-1", owner ? "bg-lavender-400/14 text-lavender-300" : role === "Member" || role === "Hub member" ? "bg-white/5 text-mist-400" : "bg-white/8 text-mist-200")}>
         {role}
       </span>
       {actions}
@@ -281,7 +284,7 @@ export function CommunityOverview({ kind, item, onTab }: { kind: CommunityKind; 
         <RecentPosts kind={kind} item={item} onSeeAll={() => onTab("posts")} />
       </div>
 
-      <aside className="grid gap-6">
+      <aside className="grid grid-cols-[minmax(0,1fr)] gap-6">
         <Panel title="Details">
           <dl className="-my-2.5 divide-y divide-white/5">
             <Fact icon="mapPin" label="Region" value={[item.region, item.country].filter(Boolean).join(" · ") || "Global"} />
@@ -311,7 +314,7 @@ export function CommunityOverview({ kind, item, onTab }: { kind: CommunityKind; 
             }
           >
             {members.length ? (
-              <ul className="-mx-2 grid">
+              <ul className="-mx-2 grid grid-cols-[minmax(0,1fr)]">
                 {members.slice(0, 5).map((member) => (
                   <MemberRow key={member.id || memberUserId(member)} member={member} ownerId={item.ownerId} roles={hubMemberRoles(member, item.ownerId)} />
                 ))}
@@ -321,9 +324,19 @@ export function CommunityOverview({ kind, item, onTab }: { kind: CommunityKind; 
             )}
           </Panel>
         )}
+        {kind === "hub" && (
+          <Panel title="Ladders">
+            <HostedLadderList hubId={hub.id} />
+          </Panel>
+        )}
+        {kind === "hub" && (
+          <Panel title="Leagues">
+            <HostedLeagueList hubId={hub.id} />
+          </Panel>
+        )}
         {kind === "team" && (team.hubs?.length ?? 0) > 0 && (
           <Panel title="Hubs">
-            <ul className="-mx-2 grid">
+            <ul className="-mx-2 grid grid-cols-[minmax(0,1fr)]">
               {team.hubs!.slice(0, 5).map((entry) => (
                 <li key={entry.id}>
                   <Link to={hrefOf("hub", entry)} className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/3">
@@ -346,7 +359,7 @@ export function TeamRoster({ team }: { team: TeamSummary }) {
   if (!members.length) return <StatePanel icon="people" title="No one on the roster yet" description="Members show here with their roles once they join." />;
   return (
     <Panel title="Roster" meta={`${members.length} ${members.length === 1 ? "player" : "players"}`}>
-      <ul className="-mx-2 grid sm:grid-cols-2 sm:gap-x-4">
+      <ul className="-mx-2 grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[repeat(2,minmax(0,1fr))] sm:gap-x-4">
         {members.map((member) => (
           <MemberRow key={member.id || memberUserId(member)} member={member} ownerId={team.ownerId} />
         ))}
@@ -374,7 +387,7 @@ export function HubMembers({ hub }: { hub: HubSummary }) {
         <p className="text-sm text-danger">{getApiErrorMessage(query.error, "Members didn't load.")}</p>
       ) : members.length ? (
         <>
-          <ul className="-mx-2 grid sm:grid-cols-2 sm:gap-x-4">
+          <ul className="-mx-2 grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[repeat(2,minmax(0,1fr))] sm:gap-x-4">
             {members.map((member) => (
               <MemberRow key={member.id || memberUserId(member)} member={member} ownerId={hub.ownerId} roles={hubMemberRoles(member, hub.ownerId)} />
             ))}
@@ -458,6 +471,12 @@ export function TeamCompetition({ team }: { team: TeamSummary }) {
         )}
       </Panel>
       <CompetitionList title="Tournaments" items={team.tournaments} empty="No tournament runs recorded yet." />
+      <Panel title="Ladders">
+        <LadderFinishList subject={{ teamId: team.id }} empty="Ladder finishes show here once the team completes one." />
+      </Panel>
+      <Panel title="Leagues">
+        <LeagueFinishList subject={{ teamId: team.id }} empty="League finishes show here once the team completes a season." />
+      </Panel>
       <CompetitionList title="Achievements" items={team.achievements} empty="Achievements show here as the team earns them." />
       <CompetitionList title="Milestones" items={team.milestones} empty="No milestones yet." />
     </div>
@@ -471,7 +490,7 @@ export function TeamFollowers({ team }: { team: TeamSummary }) {
   if (!followers.length) return <StatePanel icon="follow" title="No followers yet" description="Players who follow the team see its posts and results in their feed." />;
   return (
     <Panel title="Followers" meta={query.data?.pages[0]?.total.toLocaleString()}>
-      <ul className="-mx-2 grid sm:grid-cols-2 sm:gap-x-4 lg:grid-cols-3">
+      <ul className="-mx-2 grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[repeat(2,minmax(0,1fr))] sm:gap-x-4 lg:grid-cols-[repeat(3,minmax(0,1fr))]">
         {followers.map((follower) => (
           <li key={follower.id}>
             <Link to={follower.username ? `/profile/${encodeURIComponent(follower.username)}` : "#"} className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/3">

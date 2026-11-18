@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
@@ -8,7 +8,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { resendConfirmationEmail, signOut } from "./api";
 import { useAuthStore } from "./authStore";
 import { AuthHeading, AuthLayout } from "./components/AuthLayout";
-import { Turnstile } from "./components/Turnstile";
+import { Turnstile, useTurnstile } from "./components/Turnstile";
 
 export function VerifyEmailPage() {
   const navigate = useNavigate();
@@ -21,12 +21,8 @@ export function VerifyEmailPage() {
   const [isResending, setIsResending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileFailed, setTurnstileFailed] = useState(false);
+  const turnstile = useTurnstile();
   const timerRef = useRef<number | null>(null);
-  const turnstileRequired = Boolean(import.meta.env.VITE_TURNSTILE_SITE_KEY);
-  // If verification can't load/errors, don't trap the user on a dead button.
-  const turnstileBlocking = turnstileRequired && !turnstileToken && !turnstileFailed;
 
   useEffect(() => {
     if (user?.emailVerified) navigate("/home", { replace: true });
@@ -56,7 +52,7 @@ export function VerifyEmailPage() {
       setError("Enter the email address used to create your account.");
       return;
     }
-    if (turnstileBlocking) {
+    if (turnstile.blocking) {
       setError("Complete the verification check before resending the email.");
       return;
     }
@@ -64,10 +60,9 @@ export function VerifyEmailPage() {
       setIsResending(true);
       setError(null);
       setMessage(null);
-      await resendConfirmationEmail(normalizedEmail, turnstileToken ?? undefined);
+      await resendConfirmationEmail(normalizedEmail, turnstile.token ?? undefined);
       sessionStorage.setItem("Gamerie_pending_email", normalizedEmail);
       setMessage("A new verification email has been sent.");
-      setTurnstileToken(null);
       setVerificationOngoing(false);
       startCountdown();
     } catch (requestError) {
@@ -80,6 +75,7 @@ export function VerifyEmailPage() {
             : getApiErrorMessage(requestError, "We couldn't resend the verification email."),
       );
     } finally {
+      turnstile.renew();
       setIsResending(false);
     }
   };
@@ -93,12 +89,6 @@ export function VerifyEmailPage() {
     navigate("/login", { replace: true });
   };
 
-  const onTurnstileVerify = useCallback((token: string) => {
-    setTurnstileToken(token);
-    setTurnstileFailed(false);
-  }, []);
-  const onTurnstileExpire = useCallback(() => setTurnstileToken(null), []);
-  const onTurnstileError = useCallback(() => setTurnstileFailed(true), []);
 
   return (
     <AuthLayout stageTitle={["One step", "from the lobby."]} stageCopy="Verify your email and your player ID is ready.">
@@ -140,12 +130,12 @@ export function VerifyEmailPage() {
             {error}
           </Notice>
         )}
-        <Turnstile onVerify={onTurnstileVerify} onExpire={onTurnstileExpire} onError={onTurnstileError} />
+        <Turnstile {...turnstile.widget} />
         <Button
           tone="outline"
           size="lg"
           onClick={() => void resend()}
-          disabled={isResending || countdown > 0 || turnstileBlocking || !email.trim()}
+          disabled={isResending || countdown > 0 || turnstile.blocking || !email.trim()}
           className="w-full"
         >
           {isResending

@@ -142,6 +142,15 @@ export function HubReport({ hub, data, actions }: { hub: HubSummary; data: HubDa
                   number(competition.hosted.tournaments + competition.hosted.ladders),
                   `${counted(competition.hosted.tournaments, "tournament")} · ${counted(competition.hosted.ladders, "ladder")} · ${counted(competition.hosted.entrants, "entrant")}`,
                 ],
+                ...(competition.engagement
+                  ? ([
+                      [
+                        "Competition views",
+                        number(competition.engagement.views),
+                        `${counted(competition.engagement.viewers, "person", "people")} · ${counted(competition.engagement.joins, "join")} this month`,
+                      ],
+                    ] as Array<[string, string, string]>)
+                  : []),
               ]}
             />
           </div>

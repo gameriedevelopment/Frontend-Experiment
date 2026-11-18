@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -14,13 +14,14 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { LadderStatusBadge } from "../components/LadderBits";
-import { useLadder, useLadderAction, useLadderAnnouncements, useLadderParticipants, useLadderRealtime, useLadderStandings } from "../hooks";
+import { LadderLoadError, LadderStatusBadge } from "../components/LadderBits";
+import { useLadder, useLadderAction, useLadderAnnouncements, useLadderManagement, useLadderParticipants, useLadderRealtime, useLadderStandings } from "../hooks";
 import type { LadderChallenge, LadderDetail, LadderParticipant } from "../types";
-import { LADDER_JOIN_LABELS, formatLadderDateRange, formatLadderMoney, ladderPlayScopeLabel } from "../utils";
+import { LADDER_JOIN_LABELS, formatLadderDateRange, formatLadderMoney, formatRematchWait, ladderPlayScopeLabel } from "../utils";
 import { LadderChallengeDialog, LadderEntryDialog, LadderResultDialog, ladderError } from "./LadderDialogs";
 import { LadderManage } from "./LadderManage";
 import { LadderMatches } from "./LadderMatches";
+import { LadderRosterPanel } from "./LadderRoster";
 
 type Tab = "overview" | "standings" | "matches" | "participants" | "rules" | "manage";
 const baseTabs: Array<{ id: Tab; label: string }> = [
@@ -53,6 +54,7 @@ function Standings({ ladder, onChallenge }: { ladder: LadderDetail; onChallenge:
     scope === "anyone" || !myGroup || (scope === "own_group" ? groupId === myGroup : groupId !== myGroup);
 
   if (query.isLoading) return <Skeleton className="h-96 rounded-card" />;
+  if (query.isError) return <LadderLoadError what="table" error={query.error} onRetry={() => void query.refetch()} />;
   if (!query.data?.length)
     return <StatePanel icon="standings" title="The table is empty" description="Standings appear once players join. Every result moves the table straight away." />;
 
@@ -133,6 +135,7 @@ function Participants({ ladder }: { ladder: LadderDetail }) {
   const query = useLadderParticipants(ladder.id);
   const rows = query.data?.data ?? [];
   if (query.isLoading) return <Skeleton className="h-64 rounded-card" />;
+  if (query.isError) return <LadderLoadError what="entrants" error={query.error} onRetry={() => void query.refetch()} />;
   if (!rows.length) return <StatePanel icon="people" title="No one has joined yet" description="Entrants appear here as they join." />;
   return (
     <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -153,7 +156,7 @@ function Rules({ ladder }: { ladder: LadderDetail }) {
   const rows: Array<[string, string]> = [
     ["Series", `Best of ${ladder.bestOf}`],
     ["Points", `Win ${ladder.points.win} · ${ladder.allowDraws ? `draw ${ladder.points.draw} · ` : ""}loss ${ladder.points.loss}`],
-    ["Rematches", `Same opponent again after ${ladder.rematchWaitDays} days`],
+    ["Rematches", ladder.rematchWaitHours === 0 ? "Same opponent again any time" : `Same opponent again after ${formatRematchWait(ladder.rematchWaitHours ?? ladder.rematchWaitDays * 24)}`],
     ["Prize eligibility", `At least ${ladder.minimumMatchesForPrizes} matches played`],
     ["Who you can play", ladder.groups.count > 0 ? ladderPlayScopeLabel(ladder.groups.playScope) : "Anyone on the ladder"],
     ["Entry", LADDER_JOIN_LABELS[ladder.joinMode]],
@@ -203,6 +206,7 @@ function Overview({ ladder, onTab }: { ladder: LadderDetail; onTab: (tab: Tab) =
             </Button>
           </section>
         )}
+        {ladder.entrantType === "team" && ladder.viewer.participant?.kind === "team" && <LadderRosterPanel ladder={ladder} />}
         {posts.length > 0 && (
           <Panel title="Latest updates">
             <ul className="grid gap-4">
@@ -262,6 +266,8 @@ export function LadderPage() {
   const query = useLadder(ladderId);
   useLadderRealtime(ladderId);
   const actions = useLadderAction(ladderId);
+  const management = useLadderManagement(ladderId);
+  const navigate = useNavigate();
   const [entry, setEntry] = useState<"join" | "accept" | null>(null);
   const [opponent, setOpponent] = useState<LadderParticipant | null>(null);
   const [reporting, setReporting] = useState<LadderChallenge | null>(null);
@@ -298,10 +304,22 @@ export function LadderPage() {
 
   const me = ladder.viewer.participant;
   const mayEnter = !ladder.viewer.isOrganizer && !ladder.viewer.isParticipant && !me && ["upcoming", "in_progress"].includes(ladder.status) && ladder.joinMode !== "private";
+  const runAgain = () =>
+    management.runAgain.mutate(undefined, {
+      onSuccess: (draft) => {
+        toast.success("New ladder drafted", "Same settings, everyone back at 0. Check the dates and publish.");
+        navigate(`/ladders/${draft.id}/edit`);
+      },
+      onError: (error) => toast.error("Couldn't start a new run", getApiErrorMessage(error, "Try again in a moment.")),
+    });
   const heroAction = ladder.viewer.isOrganizer && ladder.status === "draft" ? (
     <LinkButton to={`/ladders/${ladder.id}/edit`} icon="edit">
       Continue setup
     </LinkButton>
+  ) : ladder.viewer.isOrganizer && !ladder.official && ["completed", "archived"].includes(ladder.status) ? (
+    <Button icon="refresh" disabled={management.runAgain.isPending} onClick={runAgain}>
+      {management.runAgain.isPending ? "Starting…" : "Run again"}
+    </Button>
   ) : me?.status === "invited" ? (
     <>
       <Button tone="outline" disabled={actions.invitation.isPending} onClick={() => actions.invitation.mutate({ participantId: me.id, action: "decline" }, { onSuccess: () => toast.info("Invitation declined") })}>
@@ -361,8 +379,15 @@ export function LadderPage() {
                   {[ladder.platform, ladder.region].filter(Boolean).join(" · ")}
                 </span>
               </div>
-              <p className="type-label mt-5 text-lavender-300">{ladder.game.name}</p>
-              <h1 className={cn("type-display mt-2 break-words leading-[0.95]", titleSize(ladder.name))}>{ladder.name}</h1>
+              <div className="mt-5 flex items-end gap-4">
+                {ladder.logo && (
+                  <img src={ladder.logo} alt="" className="size-16 shrink-0 rounded-2xl object-cover ring-2 ring-ink-950 sm:size-20" />
+                )}
+                <div className="min-w-0">
+                  <p className="type-label text-lavender-300">{ladder.game.name}</p>
+                  <h1 className={cn("type-display mt-2 break-words leading-[0.95]", titleSize(ladder.name))}>{ladder.name}</h1>
+                </div>
+              </div>
               <p className="mt-3 text-sm text-mist-300">
                 {ladder.official ? "Run by Gamerie" : <>Hosted by <span className="font-semibold text-mist-50">{ladder.host.name}</span></>}
               </p>

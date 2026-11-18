@@ -14,10 +14,11 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
-import { useLadderAction, useLadderActivity, useLadderGroups, useLadderManagement, useLadderParticipants } from "../hooks";
-import type { LadderDetail, LadderParticipant } from "../types";
+import { useLadderAction, useLadderActivity, useLadderGroups, useLadderManagement, useLadderParticipants, useLadderStaff } from "../hooks";
+import type { LadderDetail, LadderParticipant, LadderPermission, LadderStaffRole } from "../types";
+import { useAuthStore } from "@/features/auth/authStore";
 
-type View = "entries" | "groups" | "updates" | "settings";
+type View = "entries" | "groups" | "updates" | "settings" | "staff";
 
 const activityLabels: Record<string, [string, IconName]> = {
   "ladder.draft_created": ["Draft created", "edit"],
@@ -90,6 +91,7 @@ function Entries({ ladder }: { ladder: LadderDetail }) {
     [players.data, team, teams.data],
   );
   const error = actions.invite.error ?? actions.reviewEntry.error ?? actions.remove.error;
+  const canRemove = (ladder.viewer.permissions ?? ["participants"]).includes("participants");
 
   return (
     <div className="grid gap-6">
@@ -143,9 +145,11 @@ function Entries({ ladder }: { ladder: LadderDetail }) {
           <ul className="grid gap-2">
             {active.data.data.map((participant) => (
               <PersonRow key={participant.id} participant={participant}>
-                <Button tone="ghost" size="sm" onClick={() => setRemoving(participant)}>
-                  Remove
-                </Button>
+                {canRemove && (
+                  <Button tone="ghost" size="sm" onClick={() => setRemoving(participant)}>
+                    Remove
+                  </Button>
+                )}
               </PersonRow>
             ))}
           </ul>
@@ -319,22 +323,141 @@ function Updates({ ladder }: { ladder: LadderDetail }) {
   );
 }
 
+const ROLE_INFO: Record<LadderStaffRole, { label: string; description: string }> = {
+  manager: { label: "Manager", description: "Reviews entries, removes entrants, changes groups and settings, posts updates" },
+  moderator: { label: "Moderator", description: "Reviews entries, sends invitations and posts updates" },
+};
+
+function Staff({ ladder }: { ladder: LadderDetail }) {
+  const me = useAuthStore((state) => state.user);
+  const owner = ladder.viewer.role === "owner" || !ladder.viewer.role;
+  const staff = useLadderStaff(ladder.id);
+  const management = useLadderManagement(ladder.id);
+  const [query, setQuery] = useState("");
+  const [target, setTarget] = useState<ComboboxOption | null>(null);
+  const [role, setRole] = useState<LadderStaffRole>("moderator");
+  const term = useDebouncedValue(query);
+  const players = useSearchResults("players", term, owner);
+  const options = useMemo<ComboboxOption[]>(() => {
+    const taken = new Set([ladder.ownerId, ...(staff.data ?? []).map((member) => member.userId)]);
+    return (players.data?.data ?? [])
+      .filter((item) => !taken.has(item.id))
+      .map((item) => ({ value: item.id, label: item.username, description: item.gamerTitle, image: item.profileImage }));
+  }, [ladder.ownerId, players.data, staff.data]);
+  const error = management.setStaff.error ?? management.removeStaff.error;
+
+  return (
+    <div className="grid gap-6">
+      {owner && (
+        <Card title="Add staff" description="Give trusted players a role so they can help run the ladder. You stay the organizer.">
+          <div className="grid gap-4">
+            <Combobox id="ladder-staff" label="Player" placeholder="Search players" query={query} onQueryChange={setQuery} options={options} loading={players.isFetching} value={target} onChange={setTarget} avatars />
+            <div className="grid gap-2 sm:grid-cols-2">
+              {(Object.keys(ROLE_INFO) as LadderStaffRole[]).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={role === value}
+                  onClick={() => setRole(value)}
+                  className={cn("rounded-2xl px-4 py-3 text-left ring-1 ring-inset transition-colors", role === value ? "bg-lavender-400/10 ring-lavender-400/60" : "bg-white/3 ring-white/8 hover:bg-white/5")}
+                >
+                  <span className="block text-sm font-semibold">{ROLE_INFO[value].label}</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-mist-400">{ROLE_INFO[value].description}</span>
+                </button>
+              ))}
+            </div>
+            <div>
+              <Button
+                size="sm"
+                icon="plus"
+                disabled={!target || management.setStaff.isPending}
+                onClick={() =>
+                  target &&
+                  management.setStaff.mutate(
+                    { userId: target.value, role },
+                    {
+                      onSuccess: () => {
+                        toast.success(`${target.label} is now a ${ROLE_INFO[role].label.toLowerCase()}`);
+                        setTarget(null);
+                        setQuery("");
+                      },
+                    },
+                  )
+                }
+              >
+                Add {ROLE_INFO[role].label.toLowerCase()}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+      {error && (
+        <p role="alert" className="text-sm text-danger">
+          {getApiErrorMessage(error, "That didn't go through.")}
+        </p>
+      )}
+      <Card title="Staff" count={staff.data?.length} description={owner ? "Change a role or take it away at any time. They're told either way." : "You help run this ladder. The organizer manages roles."}>
+        {staff.isLoading ? (
+          <Skeleton className="h-24 rounded-2xl" />
+        ) : staff.data?.length ? (
+          <ul className="grid gap-2">
+            {staff.data.map((member) => (
+              <li key={member.userId} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
+                <Avatar src={member.avatar ?? undefined} name={member.username} size="sm" className="rounded-full" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">{member.username}</span>
+                  <span className="block text-xs text-mist-500">Added {timeAgo(member.addedAt)}</span>
+                </span>
+                {owner ? (
+                  <Segmented
+                    label={`Role for ${member.username}`}
+                    value={member.role}
+                    onChange={(next) => next !== member.role && management.setStaff.mutate({ userId: member.userId, role: next }, { onSuccess: () => toast.success(`${member.username} is now a ${ROLE_INFO[next].label.toLowerCase()}`) })}
+                    options={[
+                      { value: "manager", label: "Manager" },
+                      { value: "moderator", label: "Moderator" },
+                    ]}
+                  />
+                ) : (
+                  <span className="type-label rounded-full bg-white/6 px-2.5 py-1 text-mist-200">{ROLE_INFO[member.role].label}</span>
+                )}
+                {(owner || member.userId === me?.id) && (
+                  <Button tone="ghost" size="sm" disabled={management.removeStaff.isPending} onClick={() => management.removeStaff.mutate(member.userId, { onSuccess: () => toast.info(member.userId === me?.id ? "You stepped down" : `${member.username} no longer has a role`) })}>
+                    {member.userId === me?.id ? "Step down" : "Remove"}
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-mist-400">No staff yet. You run the ladder on your own.</p>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+const VIEWS: Array<{ value: View; label: string; needs: LadderPermission }> = [
+  { value: "entries", label: "Entries", needs: "entries" },
+  { value: "groups", label: "Groups", needs: "groups" },
+  { value: "updates", label: "Updates", needs: "announce" },
+  { value: "settings", label: "Settings", needs: "settings" },
+  { value: "staff", label: "Staff", needs: "activity" },
+];
+
 export function LadderManage({ ladder }: { ladder: LadderDetail }) {
-  const [view, setView] = useState<View>("entries");
+  // Older responses carry no permissions; the organizer has them all.
+  const permissions = ladder.viewer.permissions ?? ["entries", "participants", "groups", "announce", "activity", "settings", "staff"];
+  const views = VIEWS.filter((item) => permissions.includes(item.needs));
+  const [chosen, setView] = useState<View>("entries");
+  const view = views.some((item) => item.value === chosen) ? chosen : (views[0]?.value ?? "entries");
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Segmented
-          label="Organizer tools"
-          value={view}
-          onChange={setView}
-          options={[
-            { value: "entries", label: "Entries" },
-            { value: "groups", label: "Groups" },
-            { value: "updates", label: "Updates" },
-            { value: "settings", label: "Settings" },
-          ]}
-        />
+        <Segmented label="Organizer tools" value={view} onChange={setView} options={views.map(({ value, label }) => ({ value, label }))} />
+        {ladder.viewer.role && ladder.viewer.role !== "owner" && (
+          <span className="type-label rounded-full bg-lavender-400/12 px-2.5 py-1 text-lavender-200 ring-1 ring-inset ring-lavender-400/30">You're a {ladder.viewer.role}</span>
+        )}
       </div>
       {view === "entries" ? (
         <Entries ladder={ladder} />
@@ -342,6 +465,8 @@ export function LadderManage({ ladder }: { ladder: LadderDetail }) {
         <Groups ladder={ladder} />
       ) : view === "updates" ? (
         <Updates ladder={ladder} />
+      ) : view === "staff" ? (
+        <Staff ladder={ladder} />
       ) : (
         <LadderSettings ladder={ladder} />
       )}

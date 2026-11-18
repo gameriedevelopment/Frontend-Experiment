@@ -15,6 +15,12 @@ import type {
   LadderGroup,
   LadderLeaderboardPage,
   UpdateLadderInput,
+  LadderFinish,
+  LadderHosted,
+  LadderRoster,
+  LadderRosterMember,
+  LadderStaffMember,
+  LadderStaffRole,
 } from "./types";
 
 type Envelope<T> = { data: T };
@@ -28,6 +34,7 @@ export async function getLadders(filters: LadderFilters, page = 1, limit = 12) {
         ...filters,
         search: filters.search || undefined,
         gameId: filters.gameId || undefined,
+        game: filters.game || undefined,
         platform: filters.platform || undefined,
         region: filters.region || undefined,
         entrantType: filters.entrantType || undefined,
@@ -67,6 +74,51 @@ export function uploadLadderBanner(id: string, file: File) {
     })
     .then(unwrap);
 }
+
+export function uploadLadderLogo(id: string, file: File) {
+  const body = new FormData();
+  body.append("file", file);
+  return api
+    .post<Envelope<{ logo: string }>>(`/ladders/${encodeURIComponent(id)}/logo`, body, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then(unwrap);
+}
+
+export const runLadderAgain = (id: string) =>
+  api.post<Envelope<LadderDetail>>(`/ladders/${encodeURIComponent(id)}/run-again`).then(unwrap);
+
+export const getLadderFinishes = (subject: { userId: string } | { teamId: string }) =>
+  api
+    .get<Envelope<{ items: LadderFinish[]; summary: { ladders: number; titles: number; podiums: number } }>>(
+      "/ladders/results",
+      { params: subject },
+    )
+    .then(unwrap);
+
+export const getHostedLadders = (hubId: string) =>
+  api
+    .get<Envelope<{ items: LadderHosted[]; summary: { ladders: number } }>>("/ladders/results", {
+      params: { hubId },
+    })
+    .then(unwrap);
+
+const rosterPath = (id: string, participantId: string) =>
+  `/ladders/${encodeURIComponent(id)}/participants/${encodeURIComponent(participantId)}/roster`;
+
+export const getLadderRoster = (id: string, participantId: string) =>
+  api.get<Envelope<LadderRoster>>(rosterPath(id, participantId)).then(unwrap);
+
+export const addLadderRosterMember = (
+  id: string,
+  participantId: string,
+  input: { userId: string; role: LadderRosterMember["role"] },
+) => api.post<Envelope<LadderRoster>>(rosterPath(id, participantId), input).then(unwrap);
+
+export const removeLadderRosterMember = (id: string, participantId: string, userId: string) =>
+  api
+    .delete<Envelope<LadderRoster>>(`${rosterPath(id, participantId)}/${encodeURIComponent(userId)}`)
+    .then(unwrap);
 
 export const getLadderLeaderboard = (kind: "player" | "team", game?: string, page = 1) =>
   api
@@ -237,3 +289,13 @@ export const postLadderAnnouncement = (id: string, input: { title?: string; mess
       input,
     )
     .then(unwrap);
+
+const staffPath = (id: string) => `/ladders/${encodeURIComponent(id)}/manage/staff`;
+
+export const getLadderStaff = (id: string) => api.get<Envelope<LadderStaffMember[]>>(staffPath(id)).then(unwrap);
+
+export const setLadderStaff = (id: string, userId: string, role: LadderStaffRole) =>
+  api.post<Envelope<LadderStaffMember[]>>(staffPath(id), { userId, role }).then(unwrap);
+
+export const removeLadderStaff = (id: string, userId: string) =>
+  api.delete(`${staffPath(id)}/${encodeURIComponent(userId)}`).then(unwrap);

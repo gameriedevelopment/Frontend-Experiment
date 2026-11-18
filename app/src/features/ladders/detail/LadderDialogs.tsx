@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { ChoiceChip, ChoiceGroup } from "@/components/ui/ChoiceChips";
@@ -12,6 +12,7 @@ import type { TeamSummary } from "@/features/communities/types";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import type { LadderChallenge, LadderDetail, LadderEntryInput, LadderParticipant } from "../types";
+import { formatRematchWait } from "../utils";
 
 // Ladder entries are made by the team's leader: its owner or a member titled leader.
 function canLead(team: TeamSummary, userId: string) {
@@ -20,6 +21,11 @@ function canLead(team: TeamSummary, userId: string) {
   return Boolean(team.members?.some((member) => (member.userId === userId || member.user?.id === userId) && (member.role === "owner" || member.title === "leader")));
 }
 
+/** What the entry dialog needs from a competition, so leagues can share it with ladders. */
+export type EntryTarget = Pick<LadderDetail, "name" | "entrantType" | "teamSize" | "substitutes" | "joinMode"> & {
+  viewer: { participant?: { teamId?: string | null } | null };
+} & Partial<Pick<LadderDetail, "points" | "allowDraws" | "rematchWaitDays" | "rematchWaitHours">>;
+
 export function LadderEntryDialog({
   ladder,
   mode,
@@ -27,9 +33,14 @@ export function LadderEntryDialog({
   error,
   onSubmit,
   onClose,
+  soloHint,
+  soloDetails,
 }: {
-  ladder: LadderDetail;
+  ladder: EntryTarget;
   mode: "join" | "accept";
+  /** Replaces the ladder wording for solo entries. */
+  soloHint?: string;
+  soloDetails?: ReactNode;
   pending: boolean;
   error?: string;
   onSubmit: (input: LadderEntryInput) => void;
@@ -80,7 +91,7 @@ export function LadderEntryDialog({
           ? `Enter a team you lead with ${required} starters${ladder.substitutes ? ` and up to ${ladder.substitutes} substitutes` : ""}.`
           : ladder.joinMode === "approval"
             ? "The organizer approves each entry. You'll be notified."
-            : "You can challenge anyone on the table once the season starts."
+            : (soloHint ?? "You can challenge anyone on the table once the season starts.")
       }
       icon={team ? "team" : "ladders"}
       size={team ? "lg" : "md"}
@@ -161,7 +172,9 @@ export function LadderEntryDialog({
             </>
           )}
         </div>
-      ) : (
+      ) : soloDetails ? (
+        soloDetails
+      ) : ladder.points && (
         <div className="grid gap-3 text-sm leading-relaxed text-mist-300">
           <p className="flex items-start gap-2.5">
             <Icon name="challenges" className="mt-0.5 size-4 shrink-0 text-lavender-300" />
@@ -169,7 +182,7 @@ export function LadderEntryDialog({
           </p>
           <p className="flex items-start gap-2.5">
             <Icon name="clock" className="mt-0.5 size-4 shrink-0 text-lavender-300" />
-            You can play the same opponent again after {ladder.rematchWaitDays} days.
+            {ladder.rematchWaitHours === 0 ? "You can play the same opponent again any time." : `You can play the same opponent again after ${formatRematchWait(ladder.rematchWaitHours ?? (ladder.rematchWaitDays ?? 7) * 24)}.`}
           </p>
         </div>
       )}

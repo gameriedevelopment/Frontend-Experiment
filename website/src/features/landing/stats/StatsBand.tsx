@@ -19,6 +19,11 @@ export function StatsBand() {
                 <dd className="type-display order-first text-display-md">
                   <CountUp value={stat.value} />
                 </dd>
+                <dd className="text-xs text-ink-950/55">
+                  <a href={stat.href} target="_blank" rel="noreferrer" className="underline decoration-ink-950/25 underline-offset-2 hover:text-ink-950">
+                    {stat.source}
+                  </a>
+                </dd>
               </div>
             ))}
           </dl>

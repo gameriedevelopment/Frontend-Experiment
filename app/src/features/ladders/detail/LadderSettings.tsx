@@ -8,7 +8,7 @@ import { SaveBar } from "@/features/settings/components/SettingsParts";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
 import { datesAndPrizePayload, ladderDraftFromDetail, validateLadderStep, type LadderDraftForm, type LadderFormErrors } from "../create/draft";
-import { AccessStep, CompetitionStep, LadderCoverDrop } from "../create/LadderSteps";
+import { AccessStep, CompetitionStep, LadderCoverDrop, LadderLogoDrop } from "../create/LadderSteps";
 import { useLadderManagement } from "../hooks";
 import type { LadderDetail } from "../types";
 
@@ -23,8 +23,9 @@ export function LadderSettings({ ladder }: { ladder: LadderDetail }) {
   const [form, setForm] = useState<LadderDraftForm>(initial);
   const [errors, setErrors] = useState<LadderFormErrors>({});
   const [cover, setCover] = useState<File | null>(null);
-  const saving = management.update.isPending || management.uploadBanner.isPending;
-  const dirty = Boolean(cover) || JSON.stringify(form) !== JSON.stringify(initial);
+  const [logo, setLogo] = useState<File | null>(null);
+  const saving = management.update.isPending || management.uploadBanner.isPending || management.uploadLogo.isPending;
+  const dirty = Boolean(cover || logo) || JSON.stringify(form) !== JSON.stringify(initial);
 
   if (ladder.status === "completed" || ladder.status === "archived") {
     return (
@@ -60,6 +61,10 @@ export function LadderSettings({ ladder }: { ladder: LadderDetail }) {
         await management.uploadBanner.mutateAsync(cover);
         setCover(null);
       }
+      if (logo) {
+        await management.uploadLogo.mutateAsync(logo);
+        setLogo(null);
+      }
       await management.update.mutateAsync({
         details: {
           name: form.basics.name.trim(),
@@ -91,7 +96,10 @@ export function LadderSettings({ ladder }: { ladder: LadderDetail }) {
             ))}
           </ChoiceGroup>
           <TextAreaField id="ladder-edit-description" label="Description" maxLength={2000} value={form.basics.description ?? ""} onChange={(event) => update("basics", { description: event.target.value })} />
-          <LadderCoverDrop file={cover} url={ladder.banner} onFile={setCover} />
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
+            <LadderCoverDrop file={cover} url={ladder.banner} onFile={setCover} />
+            <LadderLogoDrop file={logo} url={ladder.logo} onFile={setLogo} />
+          </div>
         </StepSection>
       </div>
       <div className="rounded-card bg-ink-900/60 p-5 ring-1 ring-inset ring-white/6 sm:p-6">
@@ -106,6 +114,7 @@ export function LadderSettings({ ladder }: { ladder: LadderDetail }) {
         onDiscard={() => {
           setForm(initial);
           setCover(null);
+          setLogo(null);
           setErrors({});
         }}
         onSave={() => void save()}

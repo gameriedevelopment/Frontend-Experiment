@@ -39,14 +39,17 @@ export function LadderCard({ ladder }: { ladder: LadderSummary }) {
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
-        <div className="min-w-0">
-          <p className="type-label text-lavender-300">{ladder.game.name}</p>
-          <h3 className="mt-2 line-clamp-2 text-[1.05rem] font-semibold leading-snug group-hover:text-lavender-100">{ladder.name}</h3>
-          <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mist-400">
-            <span>{formatLadderDateRange(ladder.startsAt, ladder.endsAt)}</span>
-            <span>{ladder.entrantType === "team" ? "Teams" : "Solo"}</span>
-            <span>by {ladder.host.name}</span>
-          </p>
+        <div className="flex min-w-0 gap-3">
+          {ladder.logo && <img src={ladder.logo} alt="" className="size-11 shrink-0 rounded-xl object-cover ring-1 ring-white/10" />}
+          <div className="min-w-0">
+            <p className="type-label text-lavender-300">{ladder.game.name}</p>
+            <h3 className="mt-2 line-clamp-2 text-[1.05rem] font-semibold leading-snug group-hover:text-lavender-100">{ladder.name}</h3>
+            <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-mist-400">
+              <span>{formatLadderDateRange(ladder.startsAt, ladder.endsAt)}</span>
+              <span>{ladder.entrantType === "team" ? "Teams" : "Solo"}</span>
+              <span>by {ladder.host.name}</span>
+            </p>
+          </div>
         </div>
         <div className="mt-auto grid gap-3 border-t border-white/6 pt-4">
           <div>

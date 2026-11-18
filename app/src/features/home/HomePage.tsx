@@ -8,6 +8,7 @@ import { useCommunityInvites, useUserTeams } from "@/features/communities/hooks"
 import { usePlayerSuggestions } from "@/features/discovery/hooks";
 import { useGameConnections } from "@/features/games/hooks";
 import { usePlayerConnections, usePlayerProfile } from "@/features/profile/hooks";
+import { CompletionMeter } from "@/features/profile/components/CompletionMeter";
 import { useProgressionGuide } from "@/features/progression/hooks";
 import { useOpenTournaments } from "@/features/tournaments/hooks";
 import { HomePanel, PanelError } from "./components/HomePanel";
@@ -19,6 +20,7 @@ import { QuickStart } from "./components/QuickStart";
 import { SetupQuest } from "./components/SetupQuest";
 import { UpNext } from "./components/UpNext";
 import { YourTeams } from "./components/YourTeams";
+import { YourCompetitions } from "./components/YourCompetitions";
 import { formatToday, formatWhen, greetingFor } from "./format";
 import { buildSetupSteps } from "./setupSteps";
 
@@ -137,6 +139,8 @@ export function HomePage() {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_23rem]">
         <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)] lg:gap-6">
           <NeedsYou className="order-2 lg:order-none" challenges={challenges} invites={invites} />
+          <YourCompetitions className="order-2 lg:order-none" />
+          {profile.data && <CompletionMeter profile={profile.data} className="order-3 lg:order-none" />}
           {setupHidden ? null : profile.isError ? (
             <HomePanel className="order-3 lg:order-none" title="Set up your player ID">
               <PanelError onRetry={() => void profile.refetch()} />

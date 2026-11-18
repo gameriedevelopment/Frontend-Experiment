@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { inputClasses } from "@/components/ui/Field";
+import { FilterMenu } from "@/components/ui/FilterMenu";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Segmented } from "@/components/ui/Segmented";
@@ -11,9 +12,11 @@ import { Tabs } from "@/components/ui/Tabs";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { GameFilter } from "@/features/games/components/GameFilter";
+import { REGIONS } from "@/features/tournaments/create/draftForm";
 import { LadderCard } from "./components/LadderCard";
 import { useLadders } from "./hooks";
-import type { LadderEntrantType, LadderFilters, LadderView } from "./types";
+import type { LadderEntrantType, LadderFilters, LadderHostType, LadderJoinMode, LadderView } from "./types";
 
 const views: Array<{ id: LadderView; label: string }> = [
   { id: "active", label: "All open" },
@@ -23,6 +26,22 @@ const views: Array<{ id: LadderView; label: string }> = [
   { id: "mine", label: "Yours" },
 ];
 
+const PLATFORMS = ["PC", "PS5", "Xbox", "Switch", "Mobile"];
+const JOIN_MODES: Array<{ value: LadderJoinMode; label: string }> = [
+  { value: "open", label: "Open" },
+  { value: "approval", label: "Approval required" },
+  { value: "hub_members", label: "Hub members only" },
+  { value: "private", label: "Private" },
+];
+const HOSTS: Array<{ value: LadderHostType; label: string }> = [
+  { value: "user", label: "Players" },
+  { value: "team", label: "Teams" },
+  { value: "hub", label: "Hubs" },
+  { value: "gamerie", label: "Gamerie" },
+];
+/** URL keys for the filters behind the Filters button. */
+const extraKeys = ["game", "platform", "region", "join", "host", "official"] as const;
+
 export function LaddersPage() {
   const [params, setParams] = useSearchParams();
   const requested = params.get("view") as LadderView | null;
@@ -30,7 +49,23 @@ export function LaddersPage() {
   const entry = (params.get("entry") as LadderEntrantType | null) ?? null;
   const [search, setSearch] = useState(params.get("q") ?? "");
   const term = useDebouncedValue(search.trim());
-  const filters = useMemo<LadderFilters>(() => ({ view, search: term || undefined, entrantType: entry ?? undefined }), [entry, term, view]);
+  const extra = Object.fromEntries(extraKeys.map((key) => [key, params.get(key) ?? ""])) as Record<(typeof extraKeys)[number], string>;
+  const extraCount = extraKeys.filter((key) => extra[key]).length;
+  const [moreOpen, setMoreOpen] = useState(extraCount > 0);
+  const filters = useMemo<LadderFilters>(
+    () => ({
+      view,
+      search: term || undefined,
+      entrantType: entry ?? undefined,
+      game: extra.game || undefined,
+      platform: extra.platform || undefined,
+      region: extra.region || undefined,
+      joinMode: (extra.join as LadderJoinMode) || undefined,
+      hostType: (extra.host as LadderHostType) || undefined,
+      official: extra.official === "yes" || undefined,
+    }),
+    [entry, extra.game, extra.host, extra.join, extra.official, extra.platform, extra.region, term, view],
+  );
   const query = useLadders(filters);
   const ladders = query.data?.pages.flatMap((page) => page.items) ?? [];
 
@@ -44,6 +79,19 @@ export function LaddersPage() {
       },
       { replace: true },
     );
+  const clear = () => {
+    setSearch("");
+    setParams(
+      (current) => {
+        const next = new URLSearchParams();
+        const kept = current.get("view");
+        if (kept) next.set("view", kept);
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
   useEffect(() => {
     setParams(
       (current) => {
@@ -83,17 +131,49 @@ export function LaddersPage() {
               className={cn(inputClasses, "h-11 pl-11 text-sm")}
             />
           </label>
-          <Segmented
-            label="Entry"
-            value={entry ?? "any"}
-            onChange={(value) => set("entry", value === "any" ? undefined : value)}
-            options={[
-              { value: "any", label: "Any" },
-              { value: "player", label: "Solo" },
-              { value: "team", label: "Teams" },
-            ]}
-          />
+          <div className="flex flex-wrap gap-2">
+            <Segmented
+              label="Entrants"
+              value={entry ?? "any"}
+              onChange={(value) => set("entry", value === "any" ? undefined : value)}
+              options={[
+                { value: "any", label: "Any" },
+                { value: "player", label: "Solo" },
+                { value: "team", label: "Teams" },
+              ]}
+            />
+            <button
+              type="button"
+              aria-expanded={moreOpen}
+              aria-controls="ladder-filters"
+              onClick={() => setMoreOpen((open) => !open)}
+              className={cn(
+                "flex h-11 shrink-0 items-center gap-2 rounded-full px-4 text-sm ring-1 ring-inset transition-colors",
+                moreOpen || extraCount ? "text-mist-50 ring-lavender-400/40" : "text-mist-300 ring-white/10 hover:text-mist-50 hover:ring-white/20",
+              )}
+            >
+              <Icon name="filters" className="size-4" />
+              Filters
+              {extraCount > 0 && <span className="grid size-5 place-items-center rounded-full bg-lavender-400 text-[0.68rem] font-bold text-ink-950">{extraCount}</span>}
+            </button>
+          </div>
         </div>
+        {moreOpen && (
+          <div id="ladder-filters" className="flex flex-wrap items-center gap-2">
+            <GameFilter value={extra.game} onChange={(value) => set("game", value || undefined)} />
+            <FilterMenu label="Entry" value={extra.join} options={JOIN_MODES} onChange={(value) => set("join", value || undefined)} />
+            <FilterMenu label="Platform" value={extra.platform} options={PLATFORMS} onChange={(value) => set("platform", value || undefined)} />
+            <FilterMenu label="Region" value={extra.region} options={REGIONS} onChange={(value) => set("region", value || undefined)} />
+            <FilterMenu label="Host" value={extra.host} options={HOSTS} onChange={(value) => set("host", value || undefined)} />
+            <FilterMenu label="Official" value={extra.official} options={[{ value: "yes", label: "Official only" }]} anyLabel="All" onChange={(value) => set("official", value || undefined)} />
+          </div>
+        )}
+        {(term || entry || extraCount > 0) && (
+          <button type="button" onClick={clear} className="flex w-fit items-center gap-1.5 text-sm font-medium text-mist-400 hover:text-lavender-200">
+            <Icon name="refresh" className="size-4" />
+            Clear filters
+          </button>
+        )}
       </div>
 
       {query.isLoading ? (

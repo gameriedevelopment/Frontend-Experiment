@@ -70,6 +70,15 @@ const LadderPage = lazy(() =>
 const CreateLadderPage = lazy(() =>
   import("@/features/ladders/create/CreateLadderPage").then((module) => ({ default: module.CreateLadderPage })),
 );
+const LeaguesPage = lazy(() =>
+  import("@/features/leagues/LeaguesPage").then((module) => ({ default: module.LeaguesPage })),
+);
+const LeaguePage = lazy(() =>
+  import("@/features/leagues/detail/LeaguePage").then((module) => ({ default: module.LeaguePage })),
+);
+const CreateLeaguePage = lazy(() =>
+  import("@/features/leagues/create/CreateLeaguePage").then((module) => ({ default: module.CreateLeaguePage })),
+);
 const ProfilePage = lazy(() =>
   import("@/features/profile/ProfilePage").then((module) => ({ default: module.ProfilePage })),
 );
@@ -294,6 +303,33 @@ export function App() {
             element={
               <Deferred>
                 <LadderPage />
+              </Deferred>
+            }
+          />
+          <Route
+            path="/leagues"
+            element={
+              <Deferred>
+                <LeaguesPage />
+              </Deferred>
+            }
+          />
+          {["/leagues/create", "/leagues/:leagueId/edit"].map((path) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <Deferred>
+                  <CreateLeaguePage />
+                </Deferred>
+              }
+            />
+          ))}
+          <Route
+            path="/leagues/:leagueId"
+            element={
+              <Deferred>
+                <LeaguePage />
               </Deferred>
             }
           />

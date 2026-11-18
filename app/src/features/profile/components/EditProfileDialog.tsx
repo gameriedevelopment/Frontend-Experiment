@@ -15,6 +15,7 @@ import { toast } from "@/lib/toast";
 import { useUpdatePlayerProfile, useUploadPlayerImage } from "../hooks";
 import type { PlayerProfile } from "../types";
 import { PROFILE_REGIONS } from "../regions";
+import { SOCIAL_PLATFORMS } from "./SocialLinks";
 
 export type EditSection = "photos" | "identity" | "personal" | "skills" | "links";
 
@@ -60,7 +61,7 @@ type Values = z.infer<typeof schema>;
 const titles = ["Player", "Streamer", "Spectator", "Coach", "Manager", "Trainer", "Analyst"] as const;
 const levels = ["Hobbyist", "Amateur", "Advanced", "Competitor", "Pro"] as const;
 const platforms = ["PC", "XBOX", "PS5", "Switch", "Mobile"] as const;
-const socialPlatforms = ["Twitch", "YouTube", "X", "Instagram", "TikTok", "Discord", "Kick", "Website"];
+const socialPlatforms = SOCIAL_PLATFORMS;
 const imageTypes = ["image/jpeg", "image/png", "image/webp"];
 
 function ImagePicker({

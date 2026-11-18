@@ -11,6 +11,7 @@ type Tab = "user" | "team";
 
 export function ConversationList({
   tab,
+  unread,
   onTab,
   conversations,
   loading,
@@ -25,6 +26,8 @@ export function ConversationList({
   loadingMore,
 }: {
   tab: Tab;
+  /** Unread messages per tab, so team chats don't hide behind the Direct view. */
+  unread?: Record<Tab, number>;
   onTab: (tab: Tab) => void;
   conversations: MessageConversation[];
   loading: boolean;
@@ -60,9 +63,15 @@ export function ConversationList({
               role="tab"
               aria-selected={tab === value}
               onClick={() => onTab(value)}
-              className={cn("h-9 rounded-full text-sm font-medium transition-colors", tab === value ? "bg-white/10 text-mist-50" : "text-mist-400 hover:text-mist-100")}
+              aria-label={unread?.[value] ? `${label}, ${unread[value]} unread` : label}
+              className={cn("flex h-9 items-center justify-center gap-2 rounded-full text-sm font-medium transition-colors", tab === value ? "bg-white/10 text-mist-50" : "text-mist-400 hover:text-mist-100")}
             >
               {label}
+              {unread?.[value] ? (
+                <span aria-hidden="true" className="grid h-5 min-w-5 place-items-center rounded-full bg-lavender-400 px-1.5 text-[0.68rem] font-bold tabular-nums text-ink-950">
+                  {unread[value] > 99 ? "99+" : unread[value]}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>

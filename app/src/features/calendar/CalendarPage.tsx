@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { FilterMenu } from "@/components/ui/FilterMenu";
@@ -146,14 +146,19 @@ export function CalendarPage() {
   const query = view === "month" ? monthQuery : agenda;
 
   // Links from elsewhere (Home's "Up next") open an event by id once it has loaded.
+  // The URL updates a render after closing, so each id opens once; otherwise closing would reopen it.
   const requestedEvent = params.get("event");
+  const linkedEvent = useRef<string | null>(null);
   useEffect(() => {
-    if (!requestedEvent || opened) return;
+    if (!requestedEvent || opened || linkedEvent.current === requestedEvent) return;
     const match = [...agendaEvents, ...monthEvents].find((event) => event.id === requestedEvent);
-    if (match) setOpened(match);
+    if (!match) return;
+    linkedEvent.current = requestedEvent;
+    setOpened(match);
   }, [agendaEvents, monthEvents, opened, requestedEvent]);
 
   const open = (event: CalendarEvent) => {
+    linkedEvent.current = event.id;
     setOpened(event);
     setParam({ event: event.id });
   };

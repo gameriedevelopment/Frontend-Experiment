@@ -10,6 +10,11 @@ import { ProfileSection } from "../ProfileSection";
 import { MarketValue } from "./MarketValue";
 import { Milestones } from "./Milestones";
 import { TournamentHistory } from "./TournamentHistory";
+import { LadderFinishList } from "@/features/ladders/components/LadderFinishes";
+import { useLadderFinishes } from "@/features/ladders/hooks";
+import { LeagueFinishList } from "@/features/leagues/components/LeagueFinishes";
+import { useLeagueFinishes } from "@/features/leagues/hooks";
+import { GpHistory } from "@/features/progression/GpHistory";
 
 function LevelRing({ level, percent }: { level: number; percent: number }) {
   const radius = 52;
@@ -151,11 +156,42 @@ function Teams({ own, profile }: { own: boolean; profile: PlayerProfile }) {
   );
 }
 
+function LadderHistory({ own, profile }: { own: boolean; profile: PlayerProfile }) {
+  const finishes = useLadderFinishes({ userId: profile.id });
+  const summary = finishes.data?.summary;
+  if (!own && !finishes.isLoading && !summary?.ladders) return null;
+  return (
+    <ProfileSection
+      title="Ladders"
+      meta={summary?.titles ? `${summary.titles} ${summary.titles === 1 ? "title" : "titles"}` : summary?.ladders ? `${summary.ladders} finished` : undefined}
+    >
+      <LadderFinishList subject={{ userId: profile.id }} empty="Finish a ladder and your place shows up here." />
+    </ProfileSection>
+  );
+}
+
+function LeagueHistory({ own, profile }: { own: boolean; profile: PlayerProfile }) {
+  const finishes = useLeagueFinishes({ userId: profile.id });
+  const summary = finishes.data?.summary;
+  if (!own && !finishes.isLoading && !summary?.seasons) return null;
+  return (
+    <ProfileSection
+      title="Leagues"
+      meta={summary?.titles ? `${summary.titles} ${summary.titles === 1 ? "title" : "titles"}` : summary?.seasons ? `${summary.seasons} ${summary.seasons === 1 ? "season" : "seasons"}` : undefined}
+    >
+      <LeagueFinishList subject={{ userId: profile.id }} empty="Finish a league season and your place shows up here." />
+    </ProfileSection>
+  );
+}
+
 export function ProfileCareer({ own, profile }: { own: boolean; profile: PlayerProfile }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <Progression profile={profile} />
+      {own && <GpHistory />}
       <TournamentHistory own={own} profile={profile} />
+      <LadderHistory own={own} profile={profile} />
+      <LeagueHistory own={own} profile={profile} />
       <MarketValue own={own} profile={profile} />
       <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
         <Teams own={own} profile={profile} />

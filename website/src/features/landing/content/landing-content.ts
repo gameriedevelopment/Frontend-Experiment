@@ -31,11 +31,32 @@ export const audiences = [
   },
 ] as const;
 
+/** Each figure carries its year and where it comes from, so it holds up when quoted. */
 export const industryStats = [
-  { value: "$70M", label: "Esports World Cup prize pool" },
-  { value: "$2M", label: "The International (Dota 2) prize pool" },
-  { value: "550M", label: "Esports viewers worldwide" },
-  { value: "$3.1B", label: "Projected esports market" },
+  {
+    value: "$75M",
+    label: "Esports World Cup 2026 prize pool",
+    source: "Esports World Cup Foundation, July 2026",
+    href: "https://www.prnewswire.com/news-releases/esports-world-cup-2026-opens-in-paris-marking-a-new-global-chapter-for-competitive-gaming-302821128.html",
+  },
+  {
+    value: "$3.9M",
+    label: "The International 2026 (Dota 2) prize pool",
+    source: "Valve, August 2026",
+    href: "https://www.dota2.com/esports/ti15/schedule/19719/41",
+  },
+  {
+    value: "640M",
+    label: "People who watched esports in 2025",
+    source: "Newzoo, reported July 2026",
+    href: "https://respawn.outlookindia.com/esports/esports-news/esports-audience-hits-6408m-as-mobile-gaming-fuels-record-growth",
+  },
+  {
+    value: "$1.9B",
+    label: "Professional esports revenue in 2025",
+    source: "Newzoo, reported July 2026",
+    href: "https://respawn.outlookindia.com/esports/esports-news/esports-audience-hits-6408m-as-mobile-gaming-fuels-record-growth",
+  },
 ];
 
 export const connectableGames = [

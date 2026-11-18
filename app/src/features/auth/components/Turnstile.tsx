@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const scriptSource = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
@@ -47,11 +47,42 @@ function loadTurnstile() {
   return window.__gamerieTurnstileScript;
 }
 
+export function useTurnstile() {
+  const required = Boolean(import.meta.env.VITE_TURNSTILE_SITE_KEY);
+  const [token, setToken] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [round, setRound] = useState(0);
+  const onVerify = useCallback((value: string) => {
+    setToken(value);
+    setFailed(false);
+  }, []);
+  const onExpire = useCallback(() => setToken(null), []);
+  const onError = useCallback(() => setFailed(true), []);
+  // Tokens are single use, so each submission needs a fresh widget.
+  const renew = useCallback(() => {
+    setToken(null);
+    setFailed(false);
+    setRound((value) => value + 1);
+  }, []);
+
+  return {
+    required,
+    token,
+    failed,
+    // If verification can't load, don't trap people on a dead button; the API still checks.
+    blocking: required && !token && !failed,
+    renew,
+    widget: { resetKey: round, onVerify, onExpire, onError },
+  };
+}
+
 export function Turnstile({
+  resetKey = 0,
   onVerify,
   onExpire,
   onError,
 }: {
+  resetKey?: number;
   onVerify: (token: string) => void;
   onExpire: () => void;
   onError?: () => void;
@@ -64,6 +95,7 @@ export function Turnstile({
   useEffect(() => {
     if (!siteKey || !elementRef.current) return;
     let cancelled = false;
+    verifiedRef.current = false;
     const element = elementRef.current;
     const handleError = () => {
       onExpire();
@@ -96,7 +128,7 @@ export function Turnstile({
       window.clearTimeout(timeout);
       if (widgetRef.current && window.turnstile) window.turnstile.remove(widgetRef.current);
     };
-  }, [onError, onExpire, onVerify, siteKey]);
+  }, [onError, onExpire, onVerify, resetKey, siteKey]);
 
   if (!siteKey) return null;
   return <div ref={elementRef} className="empty:hidden" />;

@@ -39,6 +39,15 @@ export function formatLadderMoney(amount: number, currency: string): string {
   }).format(amount);
 }
 
+/** "No wait", "12 hours", "3 days" or "1 day 6 hours". */
+export function formatRematchWait(hours: number) {
+  if (!hours) return "No wait";
+  const days = Math.floor(hours / 24);
+  const rest = hours % 24;
+  const parts = [days ? `${days} ${days === 1 ? "day" : "days"}` : "", rest ? `${rest} ${rest === 1 ? "hour" : "hours"}` : ""];
+  return parts.filter(Boolean).join(" ");
+}
+
 export function ladderPlayScopeLabel(value: "own_group" | "other_groups" | "anyone") {
   if (value === "own_group") return "Play within your group";
   if (value === "other_groups") return "Play other groups";
