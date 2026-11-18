@@ -333,6 +333,12 @@ export function AccessStep({ form, errors, update, hubHost, editing }: StepProps
           ]}
         />
         <Switch label="Limit entrants" checked={j.maxParticipants != null} onChange={(on) => update("joining", { maxParticipants: on ? 32 : null })} />
+        <Switch
+          label="Organizers can play"
+          description="You and your staff can enter as players. Disputes still go to Gamerie."
+          checked={Boolean(j.organizersCanPlay)}
+          onChange={(organizersCanPlay) => update("joining", { organizersCanPlay })}
+        />
         {j.maxParticipants != null && (
           <TextField
             id="ladder-max"

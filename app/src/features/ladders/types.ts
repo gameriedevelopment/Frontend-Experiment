@@ -24,6 +24,8 @@ export interface LadderSummary {
   participantCount: number;
   maxParticipants: number | null;
   joinMode: LadderJoinMode;
+  /** Organizers and staff may enter as players. */
+  organizersCanPlay?: boolean;
   startsAt: string | null;
   endsAt: string | null;
   prize: { total: number; currency: string; places: number } | null;
@@ -158,6 +160,7 @@ export interface LadderRulesInput {
 export interface LadderJoiningInput {
   joinMode: LadderJoinMode;
   maxParticipants?: number | null;
+  organizersCanPlay?: boolean;
 }
 
 export interface LadderDatesPrizeInput {

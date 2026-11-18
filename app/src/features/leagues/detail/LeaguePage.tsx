@@ -322,7 +322,7 @@ export function LeaguePage() {
   const entry = league.viewer.entry;
   const viewingPast = Boolean(season && league.currentSeasonId && season.id !== league.currentSeasonId);
   const full = Boolean(season?.maxParticipants && season.participantCount >= season.maxParticipants);
-  const mayEnter = !league.viewer.isOrganizer && !entry && season?.status === "registration" && league.joinMode !== "private" && !full && !viewingPast;
+  const mayEnter = (!league.viewer.isOrganizer || Boolean(league.organizersCanPlay)) && !entry && season?.status === "registration" && (league.joinMode !== "private" || league.viewer.isOrganizer) && !full && !viewingPast;
   const heroAction =
     league.viewer.isOrganizer && league.status === "draft" ? (
       <LinkButton to={`/leagues/${league.id}/edit`} icon="edit">
@@ -350,7 +350,7 @@ export function LeaguePage() {
       </span>
     ) : mayEnter ? (
       <Button icon="leagues" onClick={() => setEntryMode("join")}>
-        {league.joinMode === "approval" ? "Request to enter" : "Enter league"}
+        {league.joinMode === "approval" && !league.viewer.isOrganizer ? "Request to enter" : "Enter league"}
       </Button>
     ) : season?.status === "registration" && full && !entry ? (
       <span className="flex h-12 items-center rounded-full bg-white/5 px-5 text-sm font-semibold text-mist-300 ring-1 ring-inset ring-white/12">Season full</span>
@@ -428,6 +428,11 @@ export function LeaguePage() {
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               {heroAction}
+              {league.viewer.isOrganizer && league.status !== "draft" && (
+                <LinkButton to="?tab=manage&manage=settings" tone="outline" icon="edit">
+                  Edit details
+                </LinkButton>
+              )}
               {entry && ["active", "pending_approval"].includes(entry.status) && season?.status === "registration" && (
                 <Button tone="ghost" size="sm" onClick={() => setWithdrawing(true)}>
                   Withdraw
@@ -484,7 +489,7 @@ export function LeaguePage() {
 
       {entryMode && season && (
         <LadderEntryDialog
-          ladder={{ name: league.name, entrantType: league.entrantType, teamSize: league.teamSize, substitutes: league.substitutes, joinMode: league.joinMode, viewer: { participant: entry ? { teamId: entry.teamId } : null } }}
+          ladder={{ name: league.name, entrantType: league.entrantType, teamSize: league.teamSize, substitutes: league.substitutes, joinMode: league.viewer.isOrganizer ? "open" : league.joinMode, viewer: { participant: entry ? { teamId: entry.teamId } : null } }}
           mode={entryMode}
           soloHint={`Season ${season.number} starts ${formatMatchTime(season.startsAt)}. You'll play one match a week.`}
           soloDetails={
@@ -508,7 +513,7 @@ export function LeaguePage() {
           }}
           onSubmit={(input) => {
             const done = () => {
-              toast.success(entryMode === "accept" ? "You're in" : league.joinMode === "approval" ? "Request sent" : "You're in", `Season ${season.number} of ${league.name}`);
+              toast.success(entryMode === "accept" ? "You're in" : league.joinMode === "approval" && !league.viewer.isOrganizer ? "Request sent" : "You're in", `Season ${season.number} of ${league.name}`);
               setEntryMode(null);
             };
             if (entryMode === "accept" && entry) actions.respond.mutate({ participantId: entry.id, action: "accept", input }, { onSuccess: done });

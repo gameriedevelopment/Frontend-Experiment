@@ -13,6 +13,7 @@ import { cn } from "@/lib/cn";
 import { playerPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { useManageView } from "@/lib/useManageView";
 import { memberName, memberUserId, slugOf } from "../format";
 import {
   useCancelTeamInvite,
@@ -272,7 +273,6 @@ function Hubs({ team }: { team: TeamSummary }) {
 
 export function TeamManage({ team }: { team: TeamSummary }) {
   const owner = Boolean(team.viewerRelationship?.isOwner);
-  const [view, setView] = useState<View>("people");
   const options: Array<{ value: View; label: string }> = [
     { value: "people", label: "People" },
     { value: "roster", label: "Roster" },
@@ -280,6 +280,7 @@ export function TeamManage({ team }: { team: TeamSummary }) {
     { value: "wallet", label: "Wallet" },
     ...(owner ? [{ value: "ownership" as const, label: "Ownership" }] : []),
   ];
+  const [view, setView] = useManageView(options.map((item) => item.value), "people", { access: "people", requests: "people" });
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <Segmented label="Team tools" value={view} onChange={setView} options={options} className="relative w-fit max-w-full overflow-x-auto scrollbar-none" />

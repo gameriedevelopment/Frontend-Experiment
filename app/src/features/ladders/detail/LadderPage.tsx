@@ -312,7 +312,7 @@ export function LadderPage() {
     );
 
   const me = ladder.viewer.participant;
-  const mayEnter = !ladder.viewer.isOrganizer && !ladder.viewer.isParticipant && !me && ["upcoming", "in_progress"].includes(ladder.status) && ladder.joinMode !== "private";
+  const mayEnter = (!ladder.viewer.isOrganizer || Boolean(ladder.organizersCanPlay)) && !ladder.viewer.isParticipant && !me && ["upcoming", "in_progress"].includes(ladder.status) && (ladder.joinMode !== "private" || ladder.viewer.isOrganizer);
   const runAgain = () =>
     management.runAgain.mutate(undefined, {
       onSuccess: (draft) => {
@@ -347,7 +347,7 @@ export function LadderPage() {
     </span>
   ) : mayEnter ? (
     <Button icon="ladders" onClick={() => setEntry("join")}>
-      {ladder.joinMode === "approval" ? "Request to join" : "Join ladder"}
+      {ladder.joinMode === "approval" && !ladder.viewer.isOrganizer ? "Request to join" : "Join ladder"}
     </Button>
   ) : null;
 
@@ -412,6 +412,11 @@ export function LadderPage() {
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               {heroAction}
+              {ladder.status !== "draft" && !["completed", "archived"].includes(ladder.status) && (ladder.viewer.permissions ?? (ladder.viewer.isOrganizer ? ["settings"] : [])).includes("settings") && (
+                <LinkButton to="?tab=manage&manage=settings" tone="outline" icon="edit">
+                  Edit details
+                </LinkButton>
+              )}
               {ladder.viewer.isParticipant && me && ["upcoming", "in_progress"].includes(ladder.status) && (
                 <Button tone="ghost" size="sm" onClick={() => setWithdrawing(true)}>
                   Leave
@@ -457,7 +462,8 @@ export function LadderPage() {
 
       {entry && (
         <LadderEntryDialog
-          ladder={ladder}
+          // Organizers who play skip approval, so the dialog shouldn't promise a request.
+          ladder={ladder.viewer.isOrganizer ? { ...ladder, joinMode: "open" } : ladder}
           mode={entry}
           pending={actions.join.isPending || actions.invitation.isPending}
           error={ladderError(actions.join.error ?? actions.invitation.error, "That didn't go through.")}
@@ -466,7 +472,7 @@ export function LadderPage() {
             const done = {
               onSuccess: () => {
                 setEntry(null);
-                toast.success(ladder.joinMode === "approval" && entry === "join" ? "Request sent" : "You're on the ladder", ladder.name);
+                toast.success(ladder.joinMode === "approval" && !ladder.viewer.isOrganizer && entry === "join" ? "Request sent" : "You're on the ladder", ladder.name);
               },
             };
             if (entry === "accept" && me) actions.invitation.mutate({ participantId: me.id, action: "accept", input }, done);

@@ -8,6 +8,8 @@ import { EntrantLink } from "@/components/ui/EntrantLink";
 import { TextAreaField, TextField } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { LadderSettings } from "./LadderSettings";
+import { deleteLadder } from "../api";
+import { DeleteCompetition } from "../components/DeleteCompetition";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useSearchResults } from "@/features/discovery/hooks";
 import { cn } from "@/lib/cn";
@@ -16,6 +18,7 @@ import { entrantPath, playerPath } from "@/lib/paths";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { useManageView } from "@/lib/useManageView";
 import { useLadderAction, useLadderActivity, useLadderGroups, useLadderManagement, useLadderParticipants, useLadderStaff } from "../hooks";
 import type { LadderDetail, LadderParticipant, LadderPermission, LadderStaffRole } from "../types";
 import { useAuthStore } from "@/features/auth/authStore";
@@ -457,7 +460,7 @@ export function LadderManage({ ladder }: { ladder: LadderDetail }) {
   // Older responses carry no permissions; the organizer has them all.
   const permissions = ladder.viewer.permissions ?? ["entries", "participants", "groups", "announce", "activity", "settings", "staff"];
   const views = VIEWS.filter((item) => permissions.includes(item.needs));
-  const [chosen, setView] = useState<View>("entries");
+  const [chosen, setView] = useManageView(VIEWS.map((item) => item.value), "entries");
   const view = views.some((item) => item.value === chosen) ? chosen : (views[0]?.value ?? "entries");
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
@@ -476,7 +479,12 @@ export function LadderManage({ ladder }: { ladder: LadderDetail }) {
       ) : view === "staff" ? (
         <Staff ladder={ladder} />
       ) : (
-        <LadderSettings ladder={ladder} />
+        <>
+          <LadderSettings ladder={ladder} />
+          {(ladder.viewer.role ?? (ladder.viewer.isOrganizer ? "owner" : null)) === "owner" && (
+            <DeleteCompetition kind="ladder" name={ladder.name} onDelete={() => deleteLadder(ladder.id)} />
+          )}
+        </>
       )}
     </div>
   );

@@ -50,6 +50,8 @@ export interface LeagueSummary {
   entrantType: LeagueEntrantType;
   teamSize: number | null;
   joinMode: LeagueJoinMode;
+  /** Organizers may enter as players. */
+  organizersCanPlay?: boolean;
   season: LeagueSeasonSummary | null;
   removed: { at: string; reason: string | null } | null;
   viewer?: { isOrganizer: boolean; entryStatus: LeagueParticipantStatus | null };
@@ -371,6 +373,7 @@ export interface LeagueJoiningInput {
   joinMode: LeagueJoinMode;
   maxParticipants: number | null;
   rosterChangesPerWeek: number;
+  organizersCanPlay?: boolean;
 }
 
 export interface SaveLeagueDraftInput {
@@ -388,5 +391,6 @@ export interface UpdateLeagueInput {
   description?: string;
   region?: string;
   rulesText?: string;
+  organizersCanPlay?: boolean;
   prize?: LeaguePrize | null;
 }

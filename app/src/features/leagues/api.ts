@@ -68,6 +68,10 @@ export const publishLeague = (id: string) => api.post<Envelope<LeagueDetail>>(`$
 export const updateLeague = (id: string, input: UpdateLeagueInput) =>
   api.patch<Envelope<LeagueDetail>>(league(id), input).then(unwrap);
 
+/** Deleted outright when nothing was played; otherwise removed, keeping players' results. */
+export const deleteLeague = (id: string) =>
+  api.delete<Envelope<{ outcome: "deleted" | "removed" }>>(league(id)).then(unwrap);
+
 export function uploadLeagueImage(id: string, file: File, kind: "banner" | "logo") {
   const body = new FormData();
   body.append("file", file);

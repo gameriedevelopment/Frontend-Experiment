@@ -64,7 +64,7 @@ export function emptyLadderDraft(hostId: string): LadderDraftForm {
       allowedModes: [],
       rulesText: "",
     },
-    joining: { joinMode: "open", maxParticipants: null },
+    joining: { joinMode: "open", maxParticipants: null, organizersCanPlay: false },
     schedule: {
       startsAt: toLocalInput(starts),
       endsAt: toLocalInput(ends),
@@ -106,7 +106,7 @@ export function ladderDraftFromDetail(ladder: LadderDetail): LadderDraftForm {
       allowedModes: ladder.allowedModes,
       rulesText: ladder.rulesText,
     },
-    joining: { joinMode: ladder.joinMode, maxParticipants: ladder.maxParticipants },
+    joining: { joinMode: ladder.joinMode, maxParticipants: ladder.maxParticipants, organizersCanPlay: Boolean(ladder.organizersCanPlay) },
     schedule: {
       startsAt: ladder.startsAt ? toLocalInput(new Date(ladder.startsAt)) : "",
       endsAt: ladder.endsAt ? toLocalInput(new Date(ladder.endsAt)) : "",

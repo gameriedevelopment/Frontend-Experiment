@@ -15,6 +15,7 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { playerPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { useManageView } from "@/lib/useManageView";
 import { memberName, memberUserId, slugOf } from "../format";
 import {
   useCancelHubTeamInvite,
@@ -464,7 +465,6 @@ function Access({ hub }: { hub: HubSummary }) {
 
 export function HubManage({ hub }: { hub: HubSummary }) {
   const owner = Boolean(hub.viewerRelationship?.isOwner);
-  const [view, setView] = useState<View>("overview");
   const options: Array<{ value: View; label: string }> = [
     { value: "overview", label: "Overview" },
     { value: "people", label: "People" },
@@ -473,6 +473,7 @@ export function HubManage({ hub }: { hub: HubSummary }) {
     { value: "access", label: "Access" },
     ...(owner ? [{ value: "ownership" as const, label: "Ownership" }] : []),
   ];
+  const [view, setView] = useManageView(options.map((item) => item.value), "overview");
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <Segmented label="Hub tools" value={view} onChange={setView} options={options} className="relative w-fit max-w-full overflow-x-auto scrollbar-none" />

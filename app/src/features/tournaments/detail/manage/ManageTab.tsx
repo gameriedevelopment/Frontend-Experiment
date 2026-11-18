@@ -13,6 +13,7 @@ import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { useManageView } from "@/lib/useManageView";
 import {
   cancelTournament,
   decideStart,
@@ -477,7 +478,7 @@ function Settings({ tournament }: { tournament: HostedTournamentDetail }) {
 }
 
 export function ManageTab({ tournament, onTab }: { tournament: HostedTournamentDetail; onTab: (tab: TournamentTab, match?: string) => void }) {
-  const [section, setSection] = useState<Section>("overview");
+  const [section, setSection] = useManageView(sections.map((item) => item.value), "overview");
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <Segmented label="Organizer tools" options={sections} value={section} onChange={setSection} className="relative w-fit max-w-full overflow-x-auto scrollbar-none" />

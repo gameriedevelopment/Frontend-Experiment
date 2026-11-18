@@ -65,6 +65,10 @@ export const saveLadderDraft = (id: string, input: SaveLadderDraftInput) =>
 export const updateLadder = (id: string, input: UpdateLadderInput) =>
   api.patch<Envelope<LadderDetail>>(`/ladders/${encodeURIComponent(id)}`, input).then(unwrap);
 
+/** Deleted outright when nothing was played; otherwise removed, keeping players' results. */
+export const deleteLadder = (id: string) =>
+  api.delete<Envelope<{ outcome: "deleted" | "removed" }>>(`/ladders/${encodeURIComponent(id)}`).then(unwrap);
+
 export function uploadLadderBanner(id: string, file: File) {
   const body = new FormData();
   body.append("file", file);

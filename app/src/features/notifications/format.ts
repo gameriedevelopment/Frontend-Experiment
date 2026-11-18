@@ -1,6 +1,16 @@
 import type { IconName } from "@/components/ui/Icon";
 import type { GamerieNotification } from "./types";
 
+/** Backend links written for the older app, mapped to where the same thing lives here. */
+function appPath(link: string): string | null {
+  const url = new URL(link, "https://gamerie.local");
+  const path = url.pathname.replace(/\/+$/, "") || "/";
+  if (path === "/wallet") return null;
+  if (/^\/matches\/[^/]+$/.test(path) && !path.startsWith("/matches/log")) return "/matches";
+  if (/^\/teams\/[^/]+$/.test(path) && url.searchParams.get("tab") === "matches") url.searchParams.set("tab", "competition");
+  return `${path}${url.search}`;
+}
+
 /** Where a notification leads. Hub invites and join requests open the hub with the answer dialog. */
 export function notificationTarget(notification: GamerieNotification) {
   const data = notification.data ?? {};
@@ -13,7 +23,7 @@ export function notificationTarget(notification: GamerieNotification) {
       return `/hubs/${encodeURIComponent(hub)}?${params.toString()}`;
     }
   }
-  if (notification.link?.startsWith("/")) return notification.link;
+  if (notification.link?.startsWith("/")) return appPath(notification.link);
   if (typeof data.postId === "string") return `/post/${data.postId}`;
   if (typeof data.challengeId === "string") return `/challenges/${data.challengeId}`;
   if (typeof data.tournamentId === "string") return `/tournaments/${data.tournamentId}`;

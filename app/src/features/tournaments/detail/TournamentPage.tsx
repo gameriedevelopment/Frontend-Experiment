@@ -291,6 +291,11 @@ export function TournamentPage() {
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <HeroAction tournament={tournament} onRegister={setRegister} onTab={goTab} />
+              {tournament.viewer.isOrganizer && !["draft", "completed", "cancelled"].includes(tournament.phase) && (
+                <LinkButton to={`/tournaments/${tournament.id}/edit`} tone="outline" icon="edit" className="bg-ink-950/50 backdrop-blur">
+                  Edit details
+                </LinkButton>
+              )}
               <button
                 type="button"
                 onClick={() => void copyLink()}

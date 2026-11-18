@@ -12,6 +12,8 @@ import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Switch } from "@/components/ui/Switch";
 import { useSearchResults } from "@/features/discovery/hooks";
+import { useAuthStore } from "@/features/auth/authStore";
+import { DeleteCompetition } from "@/features/ladders/components/DeleteCompetition";
 import { LadderCoverDrop, LadderLogoDrop } from "@/features/ladders/create/LadderSteps";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
@@ -19,6 +21,8 @@ import { entrantPath } from "@/lib/paths";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
+import { useManageView } from "@/lib/useManageView";
+import { deleteLeague } from "../api";
 import { useLeagueActivity, useLeagueFixtures, useLeagueGroups, useLeagueManagement, useLeagueParticipants, useLeagueReports } from "../hooks";
 import type { LeagueDetail, LeagueFixture, LeagueParticipant, LeagueSeason } from "../types";
 import { fixtureScore, formatMatchTime } from "../utils";
@@ -568,11 +572,12 @@ function Settings({ league }: { league: LeagueDetail }) {
   const [name, setName] = useState(league.name);
   const [description, setDescription] = useState(league.description ?? "");
   const [rulesText, setRulesText] = useState(league.selectedSeason?.rulesText ?? "");
+  const [organizersCanPlay, setOrganizersCanPlay] = useState(Boolean(league.organizersCanPlay));
   const [cover, setCover] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const save = async () => {
     try {
-      await management.update.mutateAsync({ name: name.trim(), description: description.trim(), rulesText: rulesText.trim() });
+      await management.update.mutateAsync({ name: name.trim(), description: description.trim(), rulesText: rulesText.trim(), organizersCanPlay });
       if (cover) await management.uploadImage.mutateAsync({ file: cover, kind: "banner" });
       if (logo) await management.uploadImage.mutateAsync({ file: logo, kind: "logo" });
       setCover(null);
@@ -590,6 +595,12 @@ function Settings({ league }: { league: LeagueDetail }) {
           <TextField id="league-edit-name" label="Name" maxLength={100} value={name} onChange={(event) => setName(event.target.value)} />
           <TextAreaField id="league-edit-description" label="Description" maxLength={4000} value={description} onChange={(event) => setDescription(event.target.value)} />
           <TextAreaField id="league-edit-rules" label="House rules" maxLength={8000} value={rulesText} onChange={(event) => setRulesText(event.target.value)} />
+          <Switch
+            label="Organizers can play"
+            description="You and the other organizers can enter. You can't move your own matches, and disputes go to Gamerie."
+            checked={organizersCanPlay}
+            onChange={setOrganizersCanPlay}
+          />
           <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
             <LadderCoverDrop file={cover} url={league.banner} onFile={setCover} />
             <LadderLogoDrop file={logo} url={league.logo} onFile={setLogo} />
@@ -621,7 +632,8 @@ export function LeagueManage({ league, season }: { league: LeagueDetail; season:
       ] satisfies Array<{ value: View; label: string }>,
     [disputes, season.groups.count],
   );
-  const [view, setView] = useState<View>("entries");
+  const [view, setView] = useManageView(views.map((item) => item.value), "entries");
+  const me = useAuthStore((state) => state.user?.id);
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
       <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-none">
@@ -636,7 +648,12 @@ export function LeagueManage({ league, season }: { league: LeagueDetail; season:
       ) : view === "updates" ? (
         <Updates league={league} />
       ) : (
-        <Settings league={league} />
+        <>
+          <Settings league={league} />
+          {(league.ownerId === me || league.host.type === "hub") && (
+            <DeleteCompetition kind="league" name={league.name} onDelete={() => deleteLeague(league.id)} />
+          )}
+        </>
       )}
     </div>
   );

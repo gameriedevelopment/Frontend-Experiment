@@ -336,6 +336,12 @@ export function EntryStep({ form, errors, update }: StepProps) {
           ]}
         />
         <Switch label="Limit entrants" description="The schedule has to fit a full field before you can publish." checked={j.maxParticipants != null} onChange={(on) => update("joining", { maxParticipants: on ? 8 : null })} />
+        <Switch
+          label="Organizers can play"
+          description="You and the other organizers can enter. You can't move your own matches, and disputes go to Gamerie."
+          checked={Boolean(j.organizersCanPlay)}
+          onChange={(organizersCanPlay) => update("joining", { organizersCanPlay })}
+        />
         {j.maxParticipants != null && (
           <TextField
             id="league-max"

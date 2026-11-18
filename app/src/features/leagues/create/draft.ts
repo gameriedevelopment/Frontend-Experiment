@@ -54,7 +54,7 @@ export function emptyLeagueDraft(hubId: string): LeagueDraftForm {
     schedule: { startsAt: toLocalInput(starts), endsAt: toLocalInput(ends), weekStartDay: 1, matchDay: 3, matchTime: "20:00", timeZone: localTimeZone() },
     rules: { winPoints: 3, drawPoints: 1, lossPoints: 0, allowDraws: false, bestOf: 3, tiebreakers: ["head_to_head", "game_difference", "games_won"], allowedMaps: [], allowedModes: [], rulesText: "" },
     playoffs: { size: 4, format: "single_elimination" },
-    joining: { joinMode: "open", maxParticipants: 8, rosterChangesPerWeek: 1 },
+    joining: { joinMode: "open", maxParticipants: 8, rosterChangesPerWeek: 1, organizersCanPlay: false },
     prize: { enabled: false, description: "", currency: "USD", places: [0, 0, 0] },
   };
 }
@@ -101,7 +101,12 @@ export function leagueDraftFromDetail(league: LeagueDetail): LeagueDraftForm {
       rulesText: season.rulesText ?? "",
     },
     playoffs: { size: season.playoffs?.size ?? null, format: season.playoffs?.format ?? null },
-    joining: { joinMode: league.joinMode, maxParticipants: season.maxParticipants, rosterChangesPerWeek: season.rosterChangesPerWeek },
+    joining: {
+      joinMode: league.joinMode,
+      maxParticipants: season.maxParticipants,
+      rosterChangesPerWeek: season.rosterChangesPerWeek,
+      organizersCanPlay: Boolean(league.organizersCanPlay),
+    },
     prize: {
       enabled: Boolean(season.prize),
       description: season.prize?.description ?? "",
