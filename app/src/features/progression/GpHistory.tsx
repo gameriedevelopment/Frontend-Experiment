@@ -3,7 +3,6 @@ import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
-import { useGpGuide } from "./guideStore";
 import { useProgressionHistory } from "./hooks";
 
 const day = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
@@ -11,23 +10,17 @@ const day = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short",
 /** Where a player's GP came from: a split by kind of activity, then every award in order. */
 export function GpHistory() {
   const query = useProgressionHistory();
-  const openGuide = useGpGuide((state) => state.openGuide);
   const first = query.data?.pages[0];
   const entries = query.data?.pages.flatMap((page) => page.entries) ?? [];
   const top = Math.max(1, ...(first?.bySection.map((item) => item.gp) ?? [1]));
 
   return (
     <section aria-labelledby="gp-history" className="rounded-card bg-ink-900/60 p-6 ring-1 ring-inset ring-white/6 sm:p-7">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 id="gp-history" className="text-base font-semibold">
-            How you earned your GP
-          </h2>
-          <p className="mt-1 text-sm text-mist-400">Every award on your record. Only you can see this.</p>
-        </div>
-        <button type="button" onClick={() => openGuide()} className="text-sm font-medium text-lavender-300 hover:text-lavender-200">
-          How GP works
-        </button>
+      <header>
+        <h2 id="gp-history" className="text-base font-semibold">
+          How you earned your GP
+        </h2>
+        <p className="mt-1 text-sm text-mist-400">Every award on your record. Only you can see this.</p>
       </header>
 
       {query.isLoading ? (
