@@ -46,7 +46,12 @@ export function MessagesPage() {
     (created?.id === selectedId ? created : null);
   const messages = useMessages(selected?.id);
   const unread = useConversationUnread(selected?.id);
-  const ordered = useMemo(() => messages.data?.pages.flatMap((page) => page.data).reverse() ?? [], [messages.data]);
+  const ordered = useMemo(() => {
+    const seen = new Set<string>();
+    return (messages.data?.pages.flatMap((page) => page.data) ?? [])
+      .filter((message) => (seen.has(message.id) ? false : (seen.add(message.id), true)))
+      .reverse();
+  }, [messages.data]);
 
   // On wide screens the newest conversation opens by default; on phones the list comes first.
   useEffect(() => {
