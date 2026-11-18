@@ -1,10 +1,12 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { OptionCards } from "@/components/ui/OptionCards";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useSearchResults } from "@/features/discovery/hooks";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { decideEntrant, disqualifyEntrant, inviteEntrant, type EntrantDecision } from "../../api";
@@ -32,16 +34,18 @@ function Group({ title, count, children }: { title: string; count: number; child
 function Row({ entrant, children }: { entrant: TournamentParticipant; children?: ReactNode }) {
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-2xl bg-ink-900/60 px-4 py-3 ring-1 ring-inset ring-white/6">
-      <EntrantMark name={entrant.name} src={entrant.avatar} size="sm" />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold">{entrant.name}</span>
-        <span className="block truncate text-xs text-mist-500">
-          {entrantStatusLabel(entrant.status)}
-          {entrant.seed ? ` · Seed ${entrant.seed}` : ""}
-          {entrant.waitlistPosition ? ` · #${entrant.waitlistPosition}` : ""}
-          {entrant.roster.length ? ` · ${entrant.roster.length} on roster` : ""}
+      <EntrantLink to={entrantPath(entrant)} className="flex min-w-0 flex-1 items-center gap-3">
+        <EntrantMark name={entrant.name} src={entrant.avatar} size="sm" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold">{entrant.name}</span>
+          <span className="block truncate text-xs text-mist-500">
+            {entrantStatusLabel(entrant.status)}
+            {entrant.seed ? ` · Seed ${entrant.seed}` : ""}
+            {entrant.waitlistPosition ? ` · #${entrant.waitlistPosition}` : ""}
+            {entrant.roster.length ? ` · ${entrant.roster.length} on roster` : ""}
+          </span>
         </span>
-      </span>
+      </EntrantLink>
       <span className="flex shrink-0 gap-1.5">{children}</span>
     </li>
   );

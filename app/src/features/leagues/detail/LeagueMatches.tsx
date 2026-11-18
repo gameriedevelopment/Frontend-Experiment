@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import type { LeagueFixtureAction } from "../api";
 import { LeagueLoadError } from "../components/LeagueBits";
 import { useLeagueActions, useLeagueFixtures } from "../hooks";
-import type { LeagueDetail, LeagueFixture, LeagueSeason } from "../types";
+import type { LeagueDetail, LeagueFixture, LeagueFixtureSide, LeagueSeason } from "../types";
 import { READY_GRACE_MS, READY_OPENS_MS, fixtureScore, formatLeagueDate, formatMatchTime } from "../utils";
 import { DisputeDialog, ProposeTimeDialog, ResultDialog } from "./LeagueDialogs";
 
@@ -35,23 +37,22 @@ const statusCopy: Record<LeagueFixture["status"], string> = {
   void: "Void",
 };
 
-function Side({ name, avatar, team, align, winner }: { name: string; avatar: string | null; team: boolean; align: "left" | "right"; winner: boolean }) {
+function Side({ side, align, winner }: { side: LeagueFixtureSide; align: "left" | "right"; winner: boolean }) {
   return (
-    <span className={cn("flex min-w-0 items-center gap-2.5", align === "right" && "flex-row-reverse text-right")}>
-      <Avatar src={avatar ?? undefined} name={name} size="sm" tone={team ? "ink" : "brand"} className="shrink-0 rounded-full" />
-      <span className={cn("min-w-0 truncate text-sm", winner ? "font-semibold text-mist-50" : "text-mist-200")}>{name}</span>
-    </span>
+    <EntrantLink to={entrantPath(side)} className={cn("flex min-w-0 items-center gap-2.5", align === "right" && "flex-row-reverse text-right")}>
+      <Avatar src={side.avatar ?? undefined} name={side.name} size="sm" tone={side.kind === "team" ? "ink" : "brand"} className="shrink-0 rounded-full" />
+      <span className={cn("min-w-0 truncate text-sm", winner ? "font-semibold text-mist-50" : "text-mist-200")}>{side.name}</span>
+    </EntrantLink>
   );
 }
 
 export function FixtureRow({ fixture, children }: { fixture: LeagueFixture; children?: ReactNode }) {
   const score = fixtureScore(fixture);
-  const team = fixture.sideA.kind === "team";
   const mine = fixture.viewerSide !== null;
   return (
     <li className={cn("grid gap-3 rounded-2xl px-4 py-3.5 ring-1 ring-inset", mine ? "bg-lavender-400/6 ring-lavender-400/25" : "bg-white/3 ring-white/6")}>
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
-        <Side name={fixture.sideA.name} avatar={fixture.sideA.avatar} team={team} align="left" winner={fixture.winner === "a"} />
+        <Side side={fixture.sideA} align="left" winner={fixture.winner === "a"} />
         <span className="grid justify-items-center gap-0.5 text-center">
           {score ? (
             <span className="text-base font-semibold tabular-nums">{score}</span>
@@ -60,7 +61,7 @@ export function FixtureRow({ fixture, children }: { fixture: LeagueFixture; chil
           )}
           <span className={cn("type-label", fixture.status === "disputed" ? "text-danger" : fixture.status === "open" ? "text-signal" : "text-mist-500")}>{statusCopy[fixture.status]}</span>
         </span>
-        <Side name={fixture.sideB.name} avatar={fixture.sideB.avatar} team={team} align="right" winner={fixture.winner === "b"} />
+        <Side side={fixture.sideB} align="right" winner={fixture.winner === "b"} />
       </div>
       {children}
     </li>

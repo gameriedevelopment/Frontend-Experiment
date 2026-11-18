@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, LinkButton } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import type { ComboboxOption } from "@/components/ui/Combobox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { inputClasses } from "@/components/ui/Field";
@@ -11,6 +12,7 @@ import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { playerPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { memberName, memberUserId, slugOf } from "../format";
@@ -323,7 +325,9 @@ function Roles({ hub }: { hub: HubSummary }) {
                   <li key={member.id || id} className="flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
                     <Avatar src={member.user?.profileImage} name={memberName(member)} className="rounded-full" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold">{memberName(member)}</span>
+                      <EntrantLink to={playerPath(member.user?.username || id)} className="block truncate text-sm font-semibold">
+                        {memberName(member)}
+                      </EntrantLink>
                       <span className="mt-1 flex flex-wrap gap-1">
                         {hubMemberRoles(member, hub.ownerId).map((label) => (
                           <span key={label} className={cn(chip, "max-w-full truncate", label === "Hub member" && "bg-white/4 text-mist-500")}>

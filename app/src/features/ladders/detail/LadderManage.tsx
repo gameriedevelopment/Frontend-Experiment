@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { TextAreaField, TextField } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { LadderSettings } from "./LadderSettings";
@@ -11,6 +12,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useSearchResults } from "@/features/discovery/hooks";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath, playerPath } from "@/lib/paths";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
@@ -64,8 +66,10 @@ function Card({ title, count, description, children }: { title: string; count?: 
 function PersonRow({ participant, children }: { participant: LadderParticipant; children?: ReactNode }) {
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
-      <Avatar src={participant.avatar ?? undefined} name={participant.displayName} size="sm" className="rounded-full" />
-      <span className="min-w-0 flex-1 truncate text-sm font-semibold">{participant.displayName}</span>
+      <EntrantLink to={entrantPath(participant)} className="flex min-w-0 flex-1 items-center gap-3">
+        <Avatar src={participant.avatar ?? undefined} name={participant.displayName} size="sm" tone={participant.kind === "team" ? "ink" : "brand"} className="rounded-full" />
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{participant.displayName}</span>
+      </EntrantLink>
       <span className="flex gap-1.5">{children}</span>
     </li>
   );
@@ -233,8 +237,10 @@ function Groups({ ladder }: { ladder: LadderDetail }) {
       <ul className="grid gap-2">
         {(participants.data?.data ?? []).map((participant) => (
           <li key={participant.id} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
-            <Avatar src={participant.avatar ?? undefined} name={participant.displayName} size="sm" className="rounded-full" />
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{participant.displayName}</span>
+            <EntrantLink to={entrantPath(participant)} className="flex min-w-0 flex-1 items-center gap-3">
+              <Avatar src={participant.avatar ?? undefined} name={participant.displayName} size="sm" tone={participant.kind === "team" ? "ink" : "brand"} className="rounded-full" />
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold">{participant.displayName}</span>
+            </EntrantLink>
             <span className="flex flex-wrap gap-1">
               {list.map((group) => (
                 <button
@@ -403,11 +409,13 @@ function Staff({ ladder }: { ladder: LadderDetail }) {
           <ul className="grid gap-2">
             {staff.data.map((member) => (
               <li key={member.userId} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
-                <Avatar src={member.avatar ?? undefined} name={member.username} size="sm" className="rounded-full" />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold">{member.username}</span>
-                  <span className="block text-xs text-mist-500">Added {timeAgo(member.addedAt)}</span>
-                </span>
+                <EntrantLink to={playerPath(member.username || member.userId)} className="flex min-w-0 flex-1 items-center gap-3">
+                  <Avatar src={member.avatar ?? undefined} name={member.username} size="sm" className="rounded-full" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">{member.username}</span>
+                    <span className="block text-xs text-mist-500">Added {timeAgo(member.addedAt)}</span>
+                  </span>
+                </EntrantLink>
                 {owner ? (
                   <Segmented
                     label={`Role for ${member.username}`}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import type { ComboboxOption } from "@/components/ui/Combobox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { inputClasses } from "@/components/ui/Field";
@@ -9,6 +10,7 @@ import { Menu } from "@/components/ui/Menu";
 import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
+import { playerPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { memberName, memberUserId, slugOf } from "../format";
@@ -145,11 +147,13 @@ function Roster({ team }: { team: TeamSummary }) {
           const owner = id === team.ownerId;
           return (
             <li key={member.id || id} className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
-              <Avatar src={member.user?.profileImage} name={memberName(member)} className="rounded-full" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">{memberName(member)}</span>
-                <span className="block text-xs text-mist-500">{owner ? "Owner" : formatMemberRole(member.role, member.title)}</span>
-              </span>
+              <EntrantLink to={playerPath(member.user?.username || id)} className="flex min-w-0 flex-1 items-center gap-3">
+                <Avatar src={member.user?.profileImage} name={memberName(member)} className="rounded-full" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">{memberName(member)}</span>
+                  <span className="block text-xs text-mist-500">{owner ? "Owner" : formatMemberRole(member.role, member.title)}</span>
+                </span>
+              </EntrantLink>
               {!owner && (
                 <span className="flex items-center gap-1">
                   <Menu

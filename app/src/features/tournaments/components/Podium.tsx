@@ -1,5 +1,7 @@
 import { Icon } from "@/components/ui/Icon";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { cn } from "@/lib/cn";
+import { entrantPath } from "@/lib/paths";
 import type { BracketEntrant, TournamentBracket } from "../types";
 import { ordinal } from "../utils";
 import { EntrantMark } from "./EntrantMark";
@@ -28,8 +30,10 @@ export function Podium({ bracket }: { bracket: TournamentBracket }) {
               {entrant ? (
                 <>
                   {place === 1 && <Icon name="crown" weight="fill" className="size-5 text-signal" />}
-                  <EntrantMark name={entrant.name} src={entrant.avatar} size={place === 1 ? "lg" : "md"} />
-                  <span className="w-full truncate text-center text-sm font-semibold">{entrant.name}</span>
+                  <EntrantLink to={entrantPath(entrant)} className="grid w-full min-w-0 justify-items-center gap-3">
+                    <EntrantMark name={entrant.name} src={entrant.avatar} size={place === 1 ? "lg" : "md"} />
+                    <span className="w-full truncate text-center text-sm font-semibold">{entrant.name}</span>
+                  </EntrantLink>
                 </>
               ) : (
                 <span className="text-sm text-mist-500">Shared</span>

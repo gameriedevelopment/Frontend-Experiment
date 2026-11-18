@@ -1,9 +1,11 @@
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { hostPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { withdrawEntrant } from "../api";
 import { EntrantMark } from "../components/EntrantMark";
@@ -258,15 +260,15 @@ export function OverviewTab({
         </Panel>
 
         <Panel title="Organizer">
-          <div className="flex items-center gap-3">
+          <EntrantLink to={tournament.official ? null : hostPath(tournament.host)} className="flex items-center gap-3">
             <EntrantMark name={tournament.host.name ?? "Gamerie"} src={tournament.host.logo} />
-            <div className="min-w-0">
-              <p className="truncate font-semibold">{tournament.official ? "Gamerie" : tournament.host.name}</p>
-              <p className="text-sm text-mist-400">
+            <span className="min-w-0">
+              <span className="block truncate font-semibold">{tournament.official ? "Gamerie" : tournament.host.name}</span>
+              <span className="block text-sm text-mist-400">
                 {tournament.official ? "Official tournament" : tournament.host.type ? HOST_TYPE_LABELS[tournament.host.type] : "Host"}
-              </p>
-            </div>
-          </div>
+              </span>
+            </span>
+          </EntrantLink>
         </Panel>
       </aside>
     </div>

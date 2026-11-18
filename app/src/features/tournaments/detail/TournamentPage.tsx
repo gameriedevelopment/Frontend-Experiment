@@ -1,12 +1,14 @@
 import { useState, type ReactNode } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Button, LinkButton } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
 import { Tabs } from "@/components/ui/Tabs";
 import { cn, titleSize } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { hostPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { checkInEntrant } from "../api";
@@ -278,7 +280,10 @@ export function TournamentPage() {
                   "Run by Gamerie"
                 ) : (
                   <span>
-                    Hosted by <span className="font-semibold text-mist-50">{tournament.host.name}</span>
+                    Hosted by{" "}
+                    <EntrantLink to={hostPath(tournament.host)} className="font-semibold text-mist-50">
+                      {tournament.host.name}
+                    </EntrantLink>
                     {tournament.host.type && <span className="text-mist-500"> · {HOST_TYPE_LABELS[tournament.host.type]}</span>}
                   </span>
                 )}

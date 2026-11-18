@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { inputClasses } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { Segmented } from "@/components/ui/Segmented";
@@ -7,6 +8,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath, playerPath } from "@/lib/paths";
 import { EntrantMark } from "../components/EntrantMark";
 import { useTournamentBracket, useTournamentParticipants } from "../hooks";
 import type { BracketMatch, EntrantStatus, HostedTournamentDetail, TournamentParticipant } from "../types";
@@ -62,17 +64,19 @@ function ParticipantCard({
       )}
     >
       <div className="flex items-center gap-3">
-        <EntrantMark name={entrant.name} src={entrant.avatar} />
-        <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-2 truncate font-semibold">
-            {entrant.name}
-            {mine && <span className="type-label text-lavender-300">You</span>}
-          </p>
-          <p className="mt-0.5 truncate text-xs text-mist-500">
-            {entrant.seed ? `Seed ${entrant.seed}` : "Unseeded"}
-            {note ? ` · ${note}` : ""}
-          </p>
-        </div>
+        <EntrantLink to={entrantPath(entrant)} className="flex min-w-0 flex-1 items-center gap-3">
+          <EntrantMark name={entrant.name} src={entrant.avatar} />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-2 truncate font-semibold">
+              {entrant.name}
+              {mine && <span className="type-label text-lavender-300">You</span>}
+            </span>
+            <span className="mt-0.5 block truncate text-xs text-mist-500">
+              {entrant.seed ? `Seed ${entrant.seed}` : "Unseeded"}
+              {note ? ` · ${note}` : ""}
+            </span>
+          </span>
+        </EntrantLink>
         {entrant.placement ? (
           <span
             className={cn(
@@ -114,7 +118,9 @@ function ParticipantCard({
             <ul className="mt-3 grid gap-1.5 text-sm">
               {entrant.roster.map((member) => (
                 <li key={member.userId} className="flex items-center justify-between gap-3">
-                  <span className="truncate text-mist-200">{member.name}</span>
+                  <EntrantLink to={playerPath(member.userId)} className="truncate text-mist-200">
+                    {member.name}
+                  </EntrantLink>
                   <span className="text-xs text-mist-500">{member.role === "substitute" ? "Substitute" : "Starter"}</span>
                 </li>
               ))}

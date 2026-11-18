@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -9,6 +10,7 @@ import { Tag } from "@/components/ui/Tag";
 import { formatChallengeDateTime } from "@/features/challenges/lifecycle";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { LadderLoadError } from "../components/LadderBits";
 import { useLadderAction, useLadderMatches } from "../hooks";
@@ -47,9 +49,9 @@ function statusOf(match: LadderChallenge, view: Perspective): { label: string; t
   }
 }
 
-function Side({ name, outcome, mine, align }: { name: string; outcome: "won" | "lost" | null; mine: boolean; align: "start" | "end" }) {
+function Side({ name, to, outcome, mine, align }: { name: string; to: string | null; outcome: "won" | "lost" | null; mine: boolean; align: "start" | "end" }) {
   return (
-    <span className={cn("flex min-w-0 items-center gap-2.5", align === "end" && "flex-row-reverse text-right")}>
+    <EntrantLink to={to} className={cn("flex min-w-0 items-center gap-2.5", align === "end" && "flex-row-reverse text-right")}>
       <Avatar name={name} size="sm" className="rounded-full" />
       <span className="min-w-0">
         <span className={cn("block truncate text-sm font-semibold", outcome === "lost" && "text-mist-400", mine && outcome !== "lost" && "text-lavender-200")}>{name}</span>
@@ -62,7 +64,7 @@ function Side({ name, outcome, mine, align }: { name: string; outcome: "won" | "
           <span className="type-label mt-0.5 block text-mist-500">You</span>
         ) : null}
       </span>
-    </span>
+    </EntrantLink>
   );
 }
 
@@ -129,7 +131,10 @@ export function LadderMatches({ ladder, onReport }: { ladder: LadderDetail; onRe
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
                   <div className="grid min-w-0 max-w-lg flex-1 basis-80 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-5">
-                    <Side name={a} outcome={outcomeA} mine={me?.id === match.ladderChallengerParticipantId} align="end" />
+                    <Side
+                      name={a}
+                      to={entrantPath({ userId: match.challengerId, teamId: match.challengerTeamId, kind: match.challengerTeamId ? "team" : "player" })}
+                      outcome={outcomeA} mine={me?.id === match.ladderChallengerParticipantId} align="end" />
                     {match.result ? (
                       <span className="type-display min-w-14 text-center text-xl tabular-nums">
                         {match.result.p1Score ?? match.result.score.split("-")[0]}
@@ -139,7 +144,10 @@ export function LadderMatches({ ladder, onReport }: { ladder: LadderDetail; onRe
                     ) : (
                       <span className="min-w-14 text-center font-serif text-lg italic text-mist-500">vs</span>
                     )}
-                    <Side name={b} outcome={outcomeB} mine={me?.id === match.ladderChallengedParticipantId} align="start" />
+                    <Side
+                      name={b}
+                      to={entrantPath({ userId: match.challengedId, teamId: match.challengedTeamId, kind: match.challengedTeamId ? "team" : "player" })}
+                      outcome={outcomeB} mine={me?.id === match.ladderChallengedParticipantId} align="start" />
                   </div>
                   {status.actionable && (
                     <div className="flex w-full gap-2 sm:w-auto *:flex-1 sm:*:flex-none">

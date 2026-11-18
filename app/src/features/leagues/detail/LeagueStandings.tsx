@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
 import { cn } from "@/lib/cn";
+import { entrantPath } from "@/lib/paths";
 import { LeagueLoadError } from "../components/LeagueBits";
 import { useLeaguePlayoffs, useLeagueStandings } from "../hooks";
 import type { LeagueBracketMatch, LeagueDetail, LeagueSeason, LeagueStandingRow } from "../types";
@@ -47,9 +49,11 @@ function Table({ rows, meId, team, finished }: { rows: LeagueStandingRow[]; meId
                 </td>
                 <th scope="row" className="px-2 py-3 text-left font-normal">
                   <span className="flex items-center gap-2.5">
-                    <Avatar src={row.avatar ?? undefined} name={row.displayName} size="sm" tone={team ? "ink" : "brand"} className="shrink-0 rounded-full" />
-                    <span className="flex min-w-0 items-center gap-2">
+                    <EntrantLink to={entrantPath(row)} className="flex min-w-0 items-center gap-2.5">
+                      <Avatar src={row.avatar ?? undefined} name={row.displayName} size="sm" tone={team ? "ink" : "brand"} className="shrink-0 rounded-full" />
                       <span className="truncate font-semibold">{row.displayName}</span>
+                    </EntrantLink>
+                    <span className="flex min-w-0 items-center gap-2">
                       {mine && <span className="type-label shrink-0 text-lavender-300">You</span>}
                       {row.playoffSeat && !finished && (
                         <span title="In a playoff spot" className="type-label shrink-0 rounded-full bg-lavender-400/12 px-2 py-0.5 text-lavender-200 ring-1 ring-inset ring-lavender-400/30">
@@ -184,7 +188,12 @@ export function LeaguePlayoffs({ league, season }: { league: LeagueDetail; seaso
                           const mine = Boolean(slot.participantId && slot.participantId === meId);
                           return (
                             <div key={index} className={cn("flex items-center justify-between gap-2 px-3.5 py-2.5 text-sm", index > 0 && "border-t border-white/6", mine && "bg-lavender-400/8")}>
-                              <span className={cn("min-w-0 truncate", won ? "font-semibold text-mist-50" : slot.name ? "text-mist-200" : "text-mist-500")}>{slot.name ?? (slot.state === "bye" ? "Bye" : "To be decided")}</span>
+                              <EntrantLink
+                                to={slot.participantId ? entrantPath(slot) : null}
+                                className={cn("min-w-0 truncate", won ? "font-semibold text-mist-50" : slot.name ? "text-mist-200" : "text-mist-500")}
+                              >
+                                {slot.name ?? (slot.state === "bye" ? "Bye" : "To be decided")}
+                              </EntrantLink>
                               {won && <Icon name="check" weight="bold" className="size-3.5 shrink-0 text-signal" />}
                             </div>
                           );

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Menu } from "@/components/ui/Menu";
 import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCommunityDetail } from "@/features/communities/hooks";
 import { getApiErrorMessage } from "@/lib/errors";
+import { playerPath } from "@/lib/paths";
 import { toast } from "@/lib/toast";
 import { useLadderRoster } from "../hooks";
 import type { LadderDetail } from "../types";
@@ -50,8 +52,10 @@ export function LadderRosterPanel({ ladder }: { ladder: LadderDetail }) {
       <ul className="grid gap-2">
         {data.members.map((member) => (
           <li key={member.userId} className="flex items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
-            <Avatar name={member.displayName} size="sm" className="rounded-full" />
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{member.displayName}</span>
+            <EntrantLink to={playerPath(member.userId)} className="flex min-w-0 flex-1 items-center gap-3">
+              <Avatar name={member.displayName} size="sm" className="rounded-full" />
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold">{member.displayName}</span>
+            </EntrantLink>
             <span className="type-label rounded-full bg-white/6 px-2 py-0.5 text-mist-300">{member.role === "player" ? "Player" : "Substitute"}</span>
             {data.canManage && open && (member.role === "substitute" || players > (data.teamSize ?? 0) || substitutes > 0) && (
               <Button

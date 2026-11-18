@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Segmented } from "@/components/ui/Segmented";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -11,6 +12,7 @@ import { Tabs } from "@/components/ui/Tabs";
 import { HeroBanner } from "@/features/tournaments/components/HeroBanner";
 import { cn, titleSize } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath, hostPath } from "@/lib/paths";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -94,16 +96,16 @@ function Standings({ ladder, onChallenge }: { ladder: LadderDetail; onChallenge:
                     {row.place === 1 ? <Icon name="crown" weight="fill" className="size-4" /> : row.place}
                   </td>
                   <th scope="row" className="px-2 py-3 text-left font-normal">
-                    <span className="flex items-center gap-2.5">
+                    <EntrantLink to={entrantPath(row)} className="flex w-fit max-w-full items-center gap-2.5">
                       <Avatar src={row.avatar ?? undefined} name={row.displayName} size="sm" tone={row.kind === "team" ? "ink" : "brand"} className="rounded-full" />
                       <span className="min-w-0">
                         <span className="flex items-center gap-2 truncate font-semibold">
                           {row.displayName}
                           {mine && <span className="type-label text-lavender-300">You</span>}
                         </span>
-                        {row.status === "inactive" && <span className="text-xs text-mist-500">Inactive</span>}
+                        {row.status === "inactive" && <span className="block text-xs text-mist-500">Inactive</span>}
                       </span>
-                    </span>
+                    </EntrantLink>
                   </th>
                   {[row.played, row.won, row.drawn, row.lost].map((value, index) => (
                     <td key={index} className="px-3 py-3 text-right tabular-nums text-mist-300">
@@ -140,12 +142,17 @@ function Participants({ ladder }: { ladder: LadderDetail }) {
   return (
     <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
       {rows.map((row) => (
-        <li key={row.id} className={cn("flex items-center gap-3 rounded-2xl bg-ink-900/60 p-3.5 ring-1 ring-inset ring-white/6", row.id === ladder.viewer.participant?.id && "ring-lavender-400/40")}>
-          <Avatar src={row.avatar ?? undefined} name={row.displayName} tone={row.kind === "team" ? "ink" : "brand"} className="rounded-full" />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold">{row.displayName}</span>
-            <span className="block text-xs text-mist-500">{row.joinedAt ? `Joined ${timeAgo(row.joinedAt)}` : row.status.replace("_", " ")}</span>
-          </span>
+        <li key={row.id}>
+          <EntrantLink
+            to={entrantPath(row)}
+            className={cn("flex items-center gap-3 rounded-2xl bg-ink-900/60 p-3.5 ring-1 ring-inset ring-white/6 hover:bg-white/3", row.id === ladder.viewer.participant?.id && "ring-lavender-400/40")}
+          >
+            <Avatar src={row.avatar ?? undefined} name={row.displayName} tone={row.kind === "team" ? "ink" : "brand"} className="rounded-full" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold">{row.displayName}</span>
+              <span className="block text-xs text-mist-500">{row.joinedAt ? `Joined ${timeAgo(row.joinedAt)}` : row.status.replace("_", " ")}</span>
+            </span>
+          </EntrantLink>
         </li>
       ))}
     </ul>
@@ -231,8 +238,10 @@ function Overview({ ladder, onTab }: { ladder: LadderDetail; onTab: (tab: Tab) =
               {top.map((row) => (
                 <li key={row.id} className="flex items-center gap-3 text-sm">
                   <span className={cn("w-5 font-semibold tabular-nums", row.place === 1 ? "text-signal" : "text-mist-500")}>{row.place}</span>
-                  <Avatar src={row.avatar ?? undefined} name={row.displayName} size="sm" className="rounded-full" />
-                  <span className="min-w-0 flex-1 truncate font-medium">{row.displayName}</span>
+                  <EntrantLink to={entrantPath(row)} className="flex min-w-0 flex-1 items-center gap-3">
+                    <Avatar src={row.avatar ?? undefined} name={row.displayName} size="sm" tone={row.kind === "team" ? "ink" : "brand"} className="rounded-full" />
+                    <span className="min-w-0 flex-1 truncate font-medium">{row.displayName}</span>
+                  </EntrantLink>
                   <span className="tabular-nums text-mist-300">{row.points}</span>
                 </li>
               ))}
@@ -389,7 +398,16 @@ export function LadderPage() {
                 </div>
               </div>
               <p className="mt-3 text-sm text-mist-300">
-                {ladder.official ? "Run by Gamerie" : <>Hosted by <span className="font-semibold text-mist-50">{ladder.host.name}</span></>}
+                {ladder.official ? (
+                  "Run by Gamerie"
+                ) : (
+                  <>
+                    Hosted by{" "}
+                    <EntrantLink to={hostPath(ladder.host)} className="font-semibold text-mist-50">
+                      {ladder.host.name}
+                    </EntrantLink>
+                  </>
+                )}
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">

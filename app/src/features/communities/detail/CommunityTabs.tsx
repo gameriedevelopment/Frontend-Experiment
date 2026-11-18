@@ -14,6 +14,7 @@ import { HostedLadderList, LadderFinishList } from "@/features/ladders/component
 import { HostedLeagueList, LeagueFinishList } from "@/features/leagues/components/LeagueFinishes";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { playerPath } from "@/lib/paths";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { CommunityCard } from "../components/CommunityCard";
 import { countOf, hrefOf, hubTypeLabel, memberName, memberUserId, type Community } from "../format";
@@ -54,7 +55,7 @@ export function MemberRow({ member, ownerId, roles, actions }: { member: Communi
     : [member.title && member.title.toLowerCase() !== role.toLowerCase() ? member.title : null, member.user?.gamerTitle, joined ? `since ${joined}` : null];
   return (
     <li className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/3">
-      <Link to={username ? `/profile/${encodeURIComponent(username)}` : "#"} className="flex min-w-0 flex-1 items-center gap-3">
+      <Link to={playerPath(username || memberUserId(member))} className="flex min-w-0 flex-1 items-center gap-3">
         <Avatar src={member.user?.profileImage} name={memberName(member)} online={member.user?.isOnline} className="rounded-full" />
         <span className="min-w-0">
           <span className="block truncate text-sm font-semibold">{memberName(member)}</span>
@@ -148,7 +149,7 @@ function RosterGrid({ team, onSeeAll }: { team: TeamSummary; onSeeAll: () => voi
             return (
               <li key={member.id || memberUserId(member)}>
                 <Link
-                  to={username ? `/profile/${encodeURIComponent(username)}` : "#"}
+                  to={playerPath(username || memberUserId(member))}
                   className="group flex items-center gap-3 rounded-2xl bg-white/3 p-3 ring-1 ring-inset ring-white/6 transition-colors hover:bg-white/5 hover:ring-lavender-400/30"
                 >
                   <Avatar src={member.user?.profileImage} name={memberName(member)} online={member.user?.isOnline} className="rounded-full" />
@@ -493,7 +494,7 @@ export function TeamFollowers({ team }: { team: TeamSummary }) {
       <ul className="-mx-2 grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[repeat(2,minmax(0,1fr))] sm:gap-x-4 lg:grid-cols-[repeat(3,minmax(0,1fr))]">
         {followers.map((follower) => (
           <li key={follower.id}>
-            <Link to={follower.username ? `/profile/${encodeURIComponent(follower.username)}` : "#"} className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/3">
+            <Link to={playerPath(follower.username || follower.id)} className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-white/3">
               <Avatar src={follower.profileImage} name={follower.displayName || follower.username} online={follower.isOnline} className="rounded-full" />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold">{follower.displayName || follower.username}</span>

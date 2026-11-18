@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/cn";
+import { playerPath } from "@/lib/paths";
 import { getProfileCompletion } from "../profileCompletion";
 import type { PlayerProfile } from "../types";
 
@@ -31,7 +32,7 @@ export function CompletionMeter({ profile, className }: { profile: PlayerProfile
           <div className="h-full rounded-full bg-lavender-400" style={{ width: `${completion.score}%` }} />
         </div>
       </div>
-      <Link to={next.route} className="shrink-0 text-sm font-semibold text-lavender-300 hover:text-lavender-200">
+      <Link to={`${playerPath(profile.username || profile.id)}${next.route}`} className="shrink-0 text-sm font-semibold text-lavender-300 hover:text-lavender-200">
         {next.action}
       </Link>
     </aside>

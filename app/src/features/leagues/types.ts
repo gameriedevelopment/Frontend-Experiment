@@ -163,11 +163,22 @@ export interface LeagueStandings {
   groupTotals: Array<{ groupId: string | null; points: number; played: number }> | null;
 }
 
+export interface LeagueChampion {
+  id: string;
+  name: string;
+  avatar: string | null;
+  kind: LeagueEntrantType;
+  userId: string | null;
+  teamId: string | null;
+}
+
 export interface LeagueFixtureSide {
   participantId: string;
   name: string;
   avatar: string | null;
   kind: LeagueEntrantType;
+  userId: string | null;
+  teamId: string | null;
 }
 
 export interface LeagueFixture {
@@ -201,7 +212,14 @@ export interface LeagueBracketMatch {
   round: number;
   position: number;
   status: string;
-  sides: Array<{ participantId: string | null; name: string | null; state: string }>;
+  sides: Array<{
+    participantId: string | null;
+    name: string | null;
+    kind: LeagueEntrantType | null;
+    userId: string | null;
+    teamId: string | null;
+    state: string;
+  }>;
   winnerParticipantId: string | null;
   fixtureId: string | null;
   fixtureStatus: LeagueFixtureStatus | null;
@@ -223,7 +241,7 @@ export interface LeagueSeasonListItem {
   endsAt: string | null;
   completedAt: string | null;
   participantCount: number;
-  champion: { id: string; name: string; avatar: string | null } | null;
+  champion: LeagueChampion | null;
 }
 
 export interface LeagueGroup {
@@ -287,7 +305,7 @@ export interface LeagueFinish {
 
 export interface LeagueHostedSeason {
   league: LeagueResultLeague;
-  champion: { id: string; name: string; avatar: string | null } | null;
+  champion: LeagueChampion | null;
 }
 
 export interface LeagueLeaderboardEntry {

@@ -317,7 +317,7 @@ export interface LadderFinish {
 /** A ladder a hub hosted, with its champion. */
 export interface LadderHosted {
   ladder: LadderResultLadder;
-  champion: { id: string; name: string; avatar: string | null; points: number } | null;
+  champion: { id: string; name: string; avatar: string | null; points: number; userId: string | null; teamId: string | null } | null;
 }
 
 export interface LadderRosterMember {

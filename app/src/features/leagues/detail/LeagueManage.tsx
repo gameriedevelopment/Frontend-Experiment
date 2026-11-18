@@ -3,6 +3,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { Dialog } from "@/components/ui/Dialog";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { TextAreaField, TextField } from "@/components/ui/Field";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { OptionCards } from "@/components/ui/OptionCards";
@@ -14,6 +15,7 @@ import { useSearchResults } from "@/features/discovery/hooks";
 import { LadderCoverDrop, LadderLogoDrop } from "@/features/ladders/create/LadderSteps";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath } from "@/lib/paths";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
@@ -83,8 +85,10 @@ function Card({ title, count, description, children }: { title: string; count?: 
 function PersonRow({ participant, children }: { participant: LeagueParticipant; children?: ReactNode }) {
   return (
     <li className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/3 px-3.5 py-2.5 ring-1 ring-inset ring-white/6">
-      <Avatar src={participant.avatar ?? undefined} name={participant.displayName} size="sm" tone={participant.kind === "team" ? "ink" : "brand"} className="rounded-full" />
-      <span className="min-w-0 flex-1 truncate text-sm font-semibold">{participant.displayName}</span>
+      <EntrantLink to={entrantPath(participant)} className="flex min-w-0 flex-1 items-center gap-3">
+        <Avatar src={participant.avatar ?? undefined} name={participant.displayName} size="sm" tone={participant.kind === "team" ? "ink" : "brand"} className="rounded-full" />
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{participant.displayName}</span>
+      </EntrantLink>
       <span className="flex gap-1.5">{children}</span>
     </li>
   );

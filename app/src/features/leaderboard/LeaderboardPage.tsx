@@ -18,6 +18,7 @@ import { EntrantMark } from "@/features/tournaments/components/EntrantMark";
 import { useTournamentLeaderboard } from "@/features/tournaments/hooks";
 import { ordinal } from "@/features/tournaments/utils";
 import { cn } from "@/lib/cn";
+import { playerPath, teamPath } from "@/lib/paths";
 import { getApiErrorMessage } from "@/lib/errors";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useLeaderboard } from "./hooks";
@@ -149,10 +150,10 @@ function TournamentPoints({ kind, game }: { kind: "player" | "team"; game?: stri
             <tr key={row.id} className="border-t border-white/6">
               <td className={cn("px-5 py-3 font-semibold tabular-nums", row.rank === 1 ? "text-signal" : row.rank <= 3 ? "text-lavender-300" : "text-mist-400")}>{row.rank}</td>
               <th scope="row" className="px-2 py-3 text-left font-normal">
-                <span className="flex items-center gap-2.5">
+                <Link to={kind === "team" ? teamPath(row.id) : playerPath(row.name ?? row.id)} className="flex w-fit max-w-full items-center gap-2.5 transition-colors hover:text-lavender-200">
                   <EntrantMark name={row.name} src={row.avatar} size="sm" className={kind === "player" ? "rounded-full" : undefined} />
                   <span className="truncate font-semibold">{row.name ?? "Unknown"}</span>
-                </span>
+                </Link>
               </th>
               <td className="px-3 py-3 text-right font-semibold tabular-nums">{row.points}</td>
               <td className="px-3 py-3 text-right tabular-nums text-mist-300">{row.wins}</td>
@@ -206,10 +207,10 @@ function LadderPoints({ kind, game }: { kind: "player" | "team"; game?: string }
               <tr key={row.id} className="border-t border-white/6">
                 <td className={cn("px-5 py-3 font-semibold tabular-nums", row.rank === 1 ? "text-signal" : row.rank <= 3 ? "text-lavender-300" : "text-mist-400")}>{row.rank}</td>
                 <th scope="row" className="px-2 py-3 text-left font-normal">
-                  <span className="flex items-center gap-2.5">
+                  <Link to={kind === "team" ? teamPath(row.id) : playerPath(row.name ?? row.id)} className="flex w-fit max-w-full items-center gap-2.5 transition-colors hover:text-lavender-200">
                     <EntrantMark name={row.name} src={row.avatar} size="sm" className={kind === "player" ? "rounded-full" : undefined} />
                     <span className="truncate font-semibold">{row.name ?? "Unknown"}</span>
-                  </span>
+                  </Link>
                 </th>
                 <td className="px-3 py-3 text-right font-semibold tabular-nums">{row.points}</td>
                 <td className="px-3 py-3 text-right tabular-nums text-mist-300">{row.titles}</td>
@@ -264,7 +265,7 @@ function LeaguePoints({ kind, game }: { kind: "player" | "team"; game?: string }
               <tr key={row.id} className="border-t border-white/6">
                 <td className={cn("px-5 py-3 font-semibold tabular-nums", row.rank === 1 ? "text-signal" : row.rank <= 3 ? "text-lavender-300" : "text-mist-400")}>{row.rank}</td>
                 <th scope="row" className="px-2 py-3 text-left font-normal">
-                  <Link to={kind === "team" ? `/teams/${row.id}` : `/profile/${row.id}`} className="flex items-center gap-2.5 hover:text-lavender-100">
+                  <Link to={kind === "team" ? teamPath(row.id) : playerPath(row.id)} className="flex w-fit max-w-full items-center gap-2.5 transition-colors hover:text-lavender-200">
                     <EntrantMark name={row.name} src={row.avatar} size="sm" className={kind === "player" ? "rounded-full" : undefined} />
                     <span className="truncate font-semibold">{row.name ?? "Unknown"}</span>
                   </Link>

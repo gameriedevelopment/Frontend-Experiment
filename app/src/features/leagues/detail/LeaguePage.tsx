@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
@@ -11,6 +12,7 @@ import { LadderEntryDialog } from "@/features/ladders/detail/LadderDialogs";
 import { HeroBanner } from "@/features/tournaments/components/HeroBanner";
 import { cn, titleSize } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath, hostPath } from "@/lib/paths";
 import { timeAgo } from "@/lib/time";
 import { toast } from "@/lib/toast";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -70,7 +72,9 @@ function Overview({ league, season, onTab }: { league: LeagueDetail; season: Lea
             </span>
             <div className="min-w-0">
               <p className="type-label text-signal">Season {season.number} champion</p>
-              <p className="mt-1 truncate text-lg font-semibold">{champion.displayName}</p>
+              <EntrantLink to={entrantPath(champion)} className="mt-1 block truncate text-lg font-semibold">
+                {champion.displayName}
+              </EntrantLink>
               {myPlace && champion.id !== league.viewer.entry?.id && <p className="mt-0.5 text-sm text-mist-300">You finished {ordinal(myPlace)}.</p>}
             </div>
           </section>
@@ -165,10 +169,15 @@ function Participants({ league, season }: { league: LeagueDetail; season: League
       ) : query.data?.length ? (
         <ul className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {query.data.map((entrant) => (
-            <li key={entrant.id} className={cn("flex items-center gap-3 rounded-2xl px-3.5 py-3 ring-1 ring-inset", entrant.id === entry?.id ? "bg-lavender-400/6 ring-lavender-400/25" : "bg-white/3 ring-white/6")}>
-              <Avatar src={entrant.avatar ?? undefined} name={entrant.displayName} size="sm" tone={entrant.kind === "team" ? "ink" : "brand"} className="shrink-0 rounded-full" />
-              <span className="min-w-0 flex-1 truncate text-sm font-semibold">{entrant.displayName}</span>
-              {entrant.finalPlace ? <span className="type-label shrink-0 text-mist-400">{ordinal(entrant.finalPlace)}</span> : null}
+            <li key={entrant.id}>
+              <EntrantLink
+                to={entrantPath(entrant)}
+                className={cn("flex items-center gap-3 rounded-2xl px-3.5 py-3 ring-1 ring-inset", entrant.id === entry?.id ? "bg-lavender-400/6 ring-lavender-400/25" : "bg-white/3 ring-white/6 hover:bg-white/5")}
+              >
+                <Avatar src={entrant.avatar ?? undefined} name={entrant.displayName} size="sm" tone={entrant.kind === "team" ? "ink" : "brand"} className="shrink-0 rounded-full" />
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{entrant.displayName}</span>
+                {entrant.finalPlace ? <span className="type-label shrink-0 text-mist-400">{ordinal(entrant.finalPlace)}</span> : null}
+              </EntrantLink>
             </li>
           ))}
         </ul>
@@ -409,7 +418,10 @@ export function LeaguePage() {
                   "Run by Gamerie"
                 ) : (
                   <>
-                    Run by <span className="font-semibold text-mist-50">{league.host.name}</span>
+                    Run by{" "}
+                    <EntrantLink to={hostPath(league.host)} className="font-semibold text-mist-50">
+                      {league.host.name}
+                    </EntrantLink>
                   </>
                 )}
               </p>

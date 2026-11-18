@@ -1,6 +1,8 @@
 import { Avatar } from "@/components/ui/Avatar";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
+import { playerPath, teamPath } from "@/lib/paths";
 import {
   challengePhaseLabel,
   formatChallengeDateTime,
@@ -15,6 +17,7 @@ import { StatusTag } from "./StatusTag";
 
 function Contender({
   name,
+  to,
   role,
   own,
   ownLabel,
@@ -22,6 +25,7 @@ function Contender({
   align,
 }: {
   name: string;
+  to: string | null;
   role: string;
   own: boolean;
   ownLabel: string;
@@ -40,7 +44,9 @@ function Contender({
         )}
       />
       <div className="min-w-0 max-w-full">
-        <p className="type-display truncate text-lg leading-tight sm:text-[1.7rem]">{name}</p>
+        <EntrantLink to={to} className="type-display block truncate text-lg leading-tight sm:text-[1.7rem]">
+          {name}
+        </EntrantLink>
         <p className="mt-1 text-xs text-mist-400 sm:text-sm">
           {role}
           {own && <span className="text-lavender-300"> · {ownLabel}</span>}
@@ -61,6 +67,7 @@ export function VersusStage({
 }) {
   const [challenger, challenged] = sideNames(challenge);
   const [challengerId, challengedId] = sideIds(challenge);
+  const pathOf = (id: string) => (id ? (challenge.type === "team" ? teamPath(id) : playerPath(id)) : null);
   const winner = challenge.result?.winnerId;
   const score = challenge.result?.score;
   const meta = [challenge.game, challenge.format, challenge.teamSize ? `${challenge.teamSize}v${challenge.teamSize}` : null]
@@ -96,6 +103,7 @@ export function VersusStage({
       <div className="relative mt-8 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:mt-10 sm:gap-8">
         <Contender
           name={challenger}
+          to={pathOf(challengerId)}
           role={challenge.type === "team" ? "Challenging team" : "Challenger"}
           own={view.side === "challenger"}
           ownLabel={challenge.type === "team" ? "Your team" : "You"}
@@ -122,6 +130,7 @@ export function VersusStage({
         </div>
         <Contender
           name={challenged}
+          to={pathOf(challengedId)}
           role={challenge.type === "team" ? "Challenged team" : "Challenged"}
           own={view.side === "challenged"}
           ownLabel={challenge.type === "team" ? "Your team" : "You"}

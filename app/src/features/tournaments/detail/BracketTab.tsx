@@ -1,9 +1,11 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatePanel } from "@/components/ui/StatePanel";
 import { cn } from "@/lib/cn";
 import { getApiErrorMessage } from "@/lib/errors";
+import { entrantPath } from "@/lib/paths";
 import { EntrantMark } from "../components/EntrantMark";
 import { Podium } from "../components/Podium";
 import { useTournamentBracket } from "../hooks";
@@ -198,10 +200,10 @@ function Standings({ rows, entrants, myEntrantId }: { rows: StandingRow[]; entra
                   {row.tied ? "=" : ""}
                 </td>
                 <td className="px-2 py-3">
-                  <span className="flex items-center gap-2.5">
+                  <EntrantLink to={entrant ? entrantPath(entrant) : null} className="flex w-fit max-w-full items-center gap-2.5">
                     <EntrantMark name={entrant?.name} src={entrant?.avatar} size="xs" />
                     <span className="truncate font-medium">{entrant?.name ?? "Unknown"}</span>
-                  </span>
+                  </EntrantLink>
                 </td>
                 {[row.played, row.won, row.drawn, row.lost, row.gameDifference > 0 ? `+${row.gameDifference}` : row.gameDifference].map(
                   (value, index) => (

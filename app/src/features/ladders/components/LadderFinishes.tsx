@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { Avatar } from "@/components/ui/Avatar";
+import { EntrantLink } from "@/components/ui/EntrantLink";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
+import { entrantPath } from "@/lib/paths";
 import { useHostedLadders, useLadderFinishes } from "../hooks";
 import type { LadderResultLadder } from "../types";
 
@@ -99,11 +101,14 @@ export function HostedLadderList({ hubId, limit = 5 }: { hubId: string; limit?: 
             </span>
           </span>
           {item.champion && (
-            <span className="flex min-w-0 shrink-0 items-center gap-2 text-xs text-mist-300">
+            <EntrantLink
+              to={entrantPath({ ...item.champion, kind: item.ladder.entrantType })}
+              className="flex min-w-0 shrink-0 items-center gap-2 text-xs text-mist-300"
+            >
               <Icon name="crown" weight="fill" className="size-3.5 text-signal" />
               <Avatar src={item.champion.avatar ?? undefined} name={item.champion.name} size="sm" className="rounded-full" />
               <span className="max-w-28 truncate font-semibold">{item.champion.name}</span>
-            </span>
+            </EntrantLink>
           )}
         </li>
       ))}
