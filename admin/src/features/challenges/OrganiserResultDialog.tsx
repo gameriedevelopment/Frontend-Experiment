@@ -5,7 +5,7 @@ import { TextField } from "@/components/ui/Field";
 import { EntityPicker } from "@/features/people/components/EntityPicker";
 import { GamePicker } from "@/features/games/GamePicker";
 import { createOrganiserResult } from "./api";
-import { fromLocalInput, toLocalInput } from "./labels";
+import { fromLocalInput, toLocalInput } from "@/lib/time";
 
 const digits = (value: string) => value.replace(/\D/g, "").slice(0, 4);
 

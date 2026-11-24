@@ -15,7 +15,8 @@ import { getApiErrorMessage } from "@/lib/errors";
 import { toast } from "@/lib/toast";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { createChallenge } from "./api";
-import { FORMATS, fromLocalInput, toLocalInput } from "./labels";
+import { fromLocalInput, toLocalInput } from "@/lib/time";
+import { FORMATS } from "./labels";
 import { LineupPicker } from "./LineupPicker";
 import { ResultFields, type ResultDraft } from "./ResultFields";
 

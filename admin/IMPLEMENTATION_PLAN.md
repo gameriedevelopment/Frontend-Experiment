@@ -72,7 +72,11 @@ What changes from the current admin:
 | 5 | `GET /admin/challenges/summary`, `GET /admin/challenges/:id` | Status counts and one challenge. The list now holds player challenges only; competition matches stay on their competition |
 | 5 | `GET /admin/organiser-results` | Results recorded from outside events, newest first |
 | 5 | Migration `202611240001-AllowOrganiserRecordedMatches` | The source check never allowed `organiser`, so every organiser result was rejected |
-| 7 | `GET /admin/audit-logs?entity=` | Audit trail filtered to one entity |
+| 6 | `GET /admin/post-analytics?filter=` | Adds publishing, reaction and comment counts by hour or day for the selected period |
+| 6 | `GET /admin/growth/referrals/summary`, `GET /admin/growth/referrals/:id` | Referral status counts and the sign-up and payment totals for one code |
+| 6 | `GET /admin/announcements?cursor&limit` | Cursor-paginated history of posts published through the audited announcement action |
+| 7 | Existing `GET /admin/audit-logs?targetType=&targetId=` | Filters to one entity and applies pagination to the joined results |
+| 7 | Existing `/admin/operators` and `/admin/operator-invites` routes | Stable list ordering and corrected invitation expiry handling |
 
 ## Build phases
 
@@ -85,8 +89,13 @@ Each phase ships working pages end to end (backend, data layer, UI, checks) befo
 | 3. Competition | Tournaments, Ladders, Leagues (directories + control pages), Disputes desk | Done |
 | 4. Trust & safety | Reports desk, Flagged content, Restrictions (bans, creator locks, hosting) | Done |
 | 5. Catalog & matches | Games, Achievements, Challenges and organizer results | Done |
-| 6. Growth | Analytics, Referrals, Communications | Next |
-| 7. System | Administrators, Audit log, Settings, QA pass, deploy | |
+| 6. Growth | Analytics, Referrals, Communications | Done |
+| 7. System | Administrators, Audit log, Settings, full-console QA | Done |
+
+Phase 6 was checked against the mock API at 1440px and 390px. It adds no database migrations.
+The admin and API accept referral codes up to 50 characters. The player registration forms currently cap codes at 32 characters.
+
+Phase 7 passed 164 checks across 37 views against the mock API at 1440px and 390px, including loading, empty and error states where applicable. Mock checks also covered protected administrator access, invitation and access changes, audit filters and CSV export, and keyboard focus and Escape in dialogs. The frontend build and all 673 backend tests passed. Phase 7 adds no database migrations. Real invitation delivery and production behaviour still need verification when the owner deploys.
 
 ## Running it
 

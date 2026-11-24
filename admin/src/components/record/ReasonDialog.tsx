@@ -16,6 +16,7 @@ export function ReasonDialog({
   onConfirm,
   onClose,
   ready = true,
+  validate,
   minLength = 5,
   askReason = true,
   size = "md",
@@ -30,6 +31,7 @@ export function ReasonDialog({
   onClose: () => void;
   /** False while the action's own fields are incomplete. */
   ready?: boolean;
+  validate?: () => boolean;
   minLength?: number;
   /** False when the action takes no reason, so the dialog only confirms. */
   askReason?: boolean;
@@ -40,6 +42,7 @@ export function ReasonDialog({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const submit = async () => {
+    if (validate && !validate()) return;
     setPending(true);
     setError(null);
     try {

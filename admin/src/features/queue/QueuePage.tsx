@@ -22,7 +22,7 @@ export function QueuePage() {
         }
       />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <WorkQueue queue={queue.data} loading={queue.isLoading} compact />
+        <WorkQueue queue={queue.data} loading={queue.isLoading} retry={() => void queue.refetch()} compact />
         <Panel title="Target times" description="How long an item can wait before it turns red.">
           <dl className="grid gap-3">
             {LANES.map((lane) => (

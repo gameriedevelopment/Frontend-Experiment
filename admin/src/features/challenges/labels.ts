@@ -31,12 +31,3 @@ export function scores(challenge: Challenge): [number, number] | null {
   const parsed = /^(\d+)\s*[-:]\s*(\d+)$/.exec(result.score ?? "");
   return parsed ? [Number(parsed[1]), Number(parsed[2])] : null;
 }
-
-/** For a datetime-local input, in the admin's own timezone. */
-export function toLocalInput(value: string | null | undefined) {
-  if (!value) return "";
-  const date = new Date(value);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
-}
-
-export const fromLocalInput = (value: string) => (value ? new Date(value).toISOString() : "");

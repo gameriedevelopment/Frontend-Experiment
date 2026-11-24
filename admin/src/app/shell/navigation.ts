@@ -63,17 +63,17 @@ export const NAV: NavGroup[] = [
   {
     label: "Growth",
     items: [
-      { to: "/analytics", label: "Analytics", icon: "analytics", key: "a", phase: 6 },
-      { to: "/referrals", label: "Referrals", icon: "gift", phase: 6 },
-      { to: "/communications", label: "Communications", icon: "megaphone", phase: 6 },
+      { to: "/analytics", label: "Analytics", icon: "analytics", key: "a" },
+      { to: "/referrals", label: "Referrals", icon: "gift" },
+      { to: "/communications", label: "Communications", icon: "megaphone" },
     ],
   },
   {
     label: "System",
     items: [
-      { to: "/administrators", label: "Administrators", icon: "operator", superAdmin: true, phase: 7 },
-      { to: "/audit", label: "Audit log", icon: "audit", phase: 7 },
-      { to: "/settings", label: "Settings", icon: "settings", phase: 7 },
+      { to: "/administrators", label: "Administrators", icon: "operator", superAdmin: true },
+      { to: "/audit", label: "Audit log", icon: "audit" },
+      { to: "/settings", label: "Settings", icon: "settings" },
     ],
   },
 ];

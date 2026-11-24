@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 /** Label and value pairs in a tight grid, for the side of a dossier. */
 export function Facts({ items, className }: { items: Array<[label: string, value: ReactNode]>; className?: string }) {
   return (
-    <dl className={cn("grid gap-px overflow-hidden rounded-2xl bg-white/6 ring-1 ring-inset ring-white/6", className)}>
+    <dl className={cn("grid grid-cols-[minmax(0,1fr)] gap-px overflow-hidden rounded-2xl bg-white/6 ring-1 ring-inset ring-white/6", className)}>
       {items.map(([label, value]) => (
         <div key={label} className="flex items-baseline justify-between gap-4 bg-ink-900 px-4 py-3">
           <dt className="type-label shrink-0 text-[0.6rem] text-mist-500">{label}</dt>

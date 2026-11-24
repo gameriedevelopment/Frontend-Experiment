@@ -31,6 +31,13 @@ const ChallengePage = lazy(() => import("@/features/challenges/ChallengePage").t
 const GamesPage = lazy(() => import("@/features/games/GamesPage").then((module) => ({ default: module.GamesPage })));
 const GameEditorPage = lazy(() => import("@/features/games/GameEditorPage").then((module) => ({ default: module.GameEditorPage })));
 const AchievementsPage = lazy(() => import("@/features/achievements/AchievementsPage").then((module) => ({ default: module.AchievementsPage })));
+const AnalyticsPage = lazy(() => import("@/features/analytics/AnalyticsPage").then((module) => ({ default: module.AnalyticsPage })));
+const ReferralsPage = lazy(() => import("@/features/referrals/ReferralsPage").then((module) => ({ default: module.ReferralsPage })));
+const ReferralCodePage = lazy(() => import("@/features/referrals/ReferralCodePage").then((module) => ({ default: module.ReferralCodePage })));
+const CommunicationsPage = lazy(() => import("@/features/communications/CommunicationsPage").then((module) => ({ default: module.CommunicationsPage })));
+const AdministratorsPage = lazy(() => import("@/features/administrators/AdministratorsPage").then((module) => ({ default: module.AdministratorsPage })));
+const AuditPage = lazy(() => import("@/features/audit/AuditPage").then((module) => ({ default: module.AuditPage })));
+const SettingsPage = lazy(() => import("@/features/settings/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 
 const pending = NAV_ITEMS.filter((item) => item.phase);
 
@@ -66,6 +73,13 @@ export function App() {
           <Route path="games/new" element={<GameEditorPage />} />
           <Route path="games/:gameId" element={<GameEditorPage />} />
           <Route path="achievements" element={<AchievementsPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="referrals" element={<ReferralsPage />} />
+          <Route path="referrals/:referralId" element={<ReferralCodePage />} />
+          <Route path="communications" element={<CommunicationsPage />} />
+          <Route path="administrators" element={<AdministratorsPage />} />
+          <Route path="audit" element={<AuditPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           {pending.map((item) => (
             <Route key={item.to} path={`${item.to.slice(1)}/*`} element={<PendingPage />} />
           ))}

@@ -1,8 +1,9 @@
 type Cell = string | number | boolean | null | undefined;
 
 const escape = (value: Cell) => {
-  const text = value == null ? "" : String(value);
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  const raw = value == null ? "" : String(value);
+  const text = typeof value === "string" && /^[\s\uFEFF]*[=+@-]|^[\t\r\n]/.test(raw) ? `'${raw}` : raw;
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 
 /** Downloads rows as a CSV file named after the view and today's date. */

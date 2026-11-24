@@ -93,7 +93,9 @@ const columns = [
           <span className="type-label shrink-0 rounded-md bg-white/5 px-1.5 py-1 text-[0.55rem] text-mist-400 ring-1 ring-inset ring-white/8">
             {user.referredBy.type === "partner" ? "Code" : "Invite"}
           </span>
-          <span className="truncate text-xs text-mist-200">{user.referredBy.name}</span>
+          {user.referredBy.type === "partner" ? (
+            <Link to={`/referrals?search=${encodeURIComponent(user.referredBy.name)}`} className="truncate text-xs text-mist-200 hover:text-lavender-200">{user.referredBy.name}</Link>
+          ) : <span className="truncate text-xs text-mist-200">{user.referredBy.name}</span>}
         </span>
       ) : (
         <span className="text-xs text-mist-500">Direct</span>

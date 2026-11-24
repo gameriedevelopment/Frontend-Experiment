@@ -1,14 +1,20 @@
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { StatePanel } from "@/components/ui/StatePanel";
 import { Panel } from "@/components/layout/Panel";
 import { LANES, waited } from "@/features/queue/lanes";
 import type { QueueSummary } from "@/features/queue/types";
 import { cn } from "@/lib/cn";
 
 /** Each lane of decisions waiting on an admin, with how long the oldest has sat there. */
-export function WorkQueue({ queue, loading, compact = false }: { queue?: QueueSummary; loading: boolean; compact?: boolean }) {
-  const clear = queue && queue.total === 0;
+export function WorkQueue({ queue, loading, retry, compact = false }: {
+  queue?: QueueSummary;
+  loading: boolean;
+  retry: () => void;
+  compact?: boolean;
+}) {
   return (
     <Panel
       title="Needs a decision"
@@ -26,7 +32,14 @@ export function WorkQueue({ queue, loading, compact = false }: { queue?: QueueSu
             <Skeleton key={lane.key} className="h-16 rounded-2xl" />
           ))}
         </div>
-      ) : clear ? (
+      ) : !queue ? (
+        <StatePanel
+          icon="warning"
+          tone="danger"
+          title="Work queue didn't load"
+          action={<Button tone="outline" size="sm" onClick={retry}>Try again</Button>}
+        />
+      ) : queue.total === 0 ? (
         <div className="flex items-center gap-4 rounded-2xl bg-signal/6 p-5 ring-1 ring-inset ring-signal/20">
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal/14 text-signal">
             <Icon name="check" weight="bold" className="size-5" />
@@ -36,9 +49,9 @@ export function WorkQueue({ queue, loading, compact = false }: { queue?: QueueSu
       ) : (
         <ul className="grid grid-cols-[minmax(0,1fr)] gap-2">
           {LANES.map((lane) => {
-            const data = queue?.[lane.key];
-            const count = data?.count ?? 0;
-            const wait = waited(data?.oldestAt ?? null, lane.dueHours);
+            const data = queue[lane.key];
+            const count = data.count;
+            const wait = waited(data.oldestAt, lane.dueHours);
             return (
               <li key={lane.key}>
                 <Link

@@ -16,9 +16,10 @@ import { GamePicker } from "@/features/games/GamePicker";
 import { getApiErrorMessage } from "@/lib/errors";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { toast } from "@/lib/toast";
+import { fromLocalInput, toLocalInput } from "@/lib/time";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { deleteChallenge, getChallenge, updateChallenge } from "./api";
-import { FORMATS, fromLocalInput, scores, sides, STATUS, STATUS_ORDER, toLocalInput } from "./labels";
+import { FORMATS, scores, sides, STATUS, STATUS_ORDER } from "./labels";
 import { LineupPicker } from "./LineupPicker";
 import { impliedWinner, ResultFields, type ResultDraft } from "./ResultFields";
 import type { Challenge, ChallengeStatus, UpdateChallengeInput } from "./types";
@@ -32,9 +33,9 @@ export function ChallengePage() {
 
   if (challenge.isLoading)
     return (
-      <div className="grid gap-6">
-        <Skeleton className="h-10 w-96 max-w-full" />
-        <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+        <Skeleton className="h-10 w-full max-w-96" />
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-2">
           <Skeleton className="h-80 rounded-card" />
           <Skeleton className="h-80 rounded-card" />
         </div>

@@ -26,21 +26,20 @@ export function OverviewPage() {
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <PageHeader
         title="Overview"
-        refresh={[["admin", "overview"], ["admin", "competitions"]]}
+        refresh={[["admin", "overview"], ["admin", "competitions"], ["admin", "queue"]]}
         description={
           <>
             {greeting()}, {operatorName(user)}.{" "}
-            {queue.isLoading
-              ? "Checking what needs you."
-              : waiting
-                ? `${waiting} ${waiting === 1 ? "decision is" : "decisions are"} waiting on the team.`
-                : "Nothing is waiting on the team."}
+            {queue.isLoading && "Checking what needs you."}
+            {queue.data && (waiting
+              ? `${waiting} ${waiting === 1 ? "decision is" : "decisions are"} waiting on the team.`
+              : "Nothing is waiting on the team.")}
           </>
         }
       />
       <KpiBand metrics={metrics.data} loading={metrics.isLoading} />
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <WorkQueue queue={queue.data} loading={queue.isLoading} />
+        <WorkQueue queue={queue.data} loading={queue.isLoading} retry={() => void queue.refetch()} />
         <LiveNow />
       </div>
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
